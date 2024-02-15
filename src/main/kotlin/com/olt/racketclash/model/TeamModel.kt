@@ -9,7 +9,6 @@ import kotlinx.coroutines.launch
 
 class TeamModel(
     private val database: Database,
-    private val updateProjectTeams: (teamNumber: Int) -> Unit
 ) : StateScreenModel<TeamModel.Modal>(Modal()) {
 
     init {
@@ -19,7 +18,6 @@ class TeamModel(
                     isLoading = false,
                     teams = teamList
                 )
-                updateProjectTeams(teamList.size)
             }
         }
     }

@@ -13,20 +13,22 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.olt.racketclash.data.Database
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.model.RoundsModel
 
 internal typealias editGame = (id: Long, set1Left: Int, set1Right: Int, isDone: Boolean) -> Unit
 internal typealias deleteRound = (roundName: String) -> Unit
 
-class RoundsScreen : Screen {
+class RoundsScreen(private val database: Database) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberDIModelOrThrow<RoundsModel>()
+        val screenModel = rememberScreenModel { RoundsModel(database = database) }
         val model by screenModel.state.collectAsState()
 
         TournamentScaffold(

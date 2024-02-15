@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.olt.racketclash.data.Database
 
 @Composable
 fun Loading(paddingValues: PaddingValues) {
@@ -70,9 +71,9 @@ fun LazyColumnWithScroll(
 }
 
 sealed class TournamentTabs(val tab: Tab) {
-    data object Teams : TournamentTabs(tab = Tab(onClick = { TeamsScreen() },imageVector = Icons.Default.Person, text = "Teams"))
-    data object Player : TournamentTabs(tab = Tab(onClick = { PlayerScreen() },imageVector = Icons.Default.Person, text = "Player"))
-    data object Games : TournamentTabs(tab = Tab(onClick = { RoundsScreen() },imageVector = Icons.Default.List, text = "Games"))
+    data object Teams : TournamentTabs(tab = Tab(onClick = { TeamsScreen(database = Database.database!!) },imageVector = Icons.Default.Person, text = "Teams"))
+    data object Player : TournamentTabs(tab = Tab(onClick = { PlayerScreen(database = Database.database!!) },imageVector = Icons.Default.Person, text = "Player"))
+    data object Games : TournamentTabs(tab = Tab(onClick = { RoundsScreen(database = Database.database!!) },imageVector = Icons.Default.List, text = "Games"))
 }
 
 data class Tab(
@@ -89,6 +90,7 @@ fun TournamentScaffold(
     selectedTab: TournamentTabs?,
     content: @Composable (PaddingValues) -> Unit
 ) {
+
     NavigationScaffold(
         topAppBarTitle = topAppBarTitle,
         topAppBarActions = topAppBarActions,

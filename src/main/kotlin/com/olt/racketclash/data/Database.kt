@@ -22,6 +22,14 @@ class Database private constructor(driver: SqlDriver) {
         )
     )
 
+    init {
+        Database.database = this
+    }
+
+    companion object {
+        var database: Database? = null
+    }
+
     private val database = RacketClashDatabase(
         driver = driver,
         teamTableAdapter = TeamTable.Adapter(strengthAdapter = IntColumnAdapter),

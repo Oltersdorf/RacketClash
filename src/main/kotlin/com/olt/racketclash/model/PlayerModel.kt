@@ -9,8 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class PlayerModel(
-    private val database: Database,
-    private val updateProjectPlayer: (playerNumber: Int) -> Unit
+    private val database: Database
 ) : StateScreenModel<PlayerModel.Modal>(Modal()) {
 
     init {
@@ -20,7 +19,6 @@ class PlayerModel(
                     isLoading = false,
                     player = playerList
                 )
-                updateProjectPlayer(playerList.size)
             }
         }
         screenModelScope.launch(context = Dispatchers.IO) {

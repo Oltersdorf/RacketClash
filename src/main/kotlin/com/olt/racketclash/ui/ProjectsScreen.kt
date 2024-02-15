@@ -21,11 +21,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Database
 import com.olt.racketclash.data.Project
-import com.olt.racketclash.model.PlayerModel
 import com.olt.racketclash.model.ProjectModal
-import com.olt.racketclash.model.RoundsModel
-import com.olt.racketclash.model.TeamModel
-import org.kodein.di.bindProvider
 import java.nio.file.Path
 
 internal typealias addProject = (name: String, location: Path) -> Unit
@@ -131,14 +127,7 @@ private fun ProjectItem(
         onClick = {
             val database = Database(tournamentPath = project.location)
             navigator.push(
-                DINavigationScreen(
-                    startScreen = TeamsScreen(),
-                    transition = DINavigationScreen.Transition.SlideTransition
-                ) {
-                    bindProvider { TeamModel(database = database, updateProjectTeams = { updateProject(project.name, it, project.playerNumber) }) }
-                    bindProvider { PlayerModel(database = database, updateProjectPlayer = { updateProject(project.name, project.teamNumber, it) }) }
-                    bindProvider { RoundsModel(database = database) }
-                }
+                TeamsScreen(database = database)
             )
         },
         modifier = Modifier.fillMaxWidth()
