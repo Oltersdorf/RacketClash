@@ -1,0 +1,27 @@
+import kotlin.Int;
+
+CREATE TABLE IF NOT EXISTS teamTable (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    name TEXT NOT NULL,
+    strength INTEGER AS Int NOT NULL
+);
+
+selectAll:
+SELECT teamTable.id, teamTable.name, strength, COUNT(playerTable.id) AS size
+FROM teamTable
+LEFT OUTER JOIN playerTable
+ON playerTable.teamId = teamTable.id
+GROUP BY teamTable.id;
+
+add:
+INSERT INTO teamTable(name, strength)
+VALUES (:name, :strength);
+
+update:
+UPDATE teamTable
+SET name = :name, strength = :strength
+WHERE id = :id;
+
+delete:
+DELETE FROM teamTable
+WHERE id = :id;

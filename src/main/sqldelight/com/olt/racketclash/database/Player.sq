@@ -1,0 +1,39 @@
+import kotlin.Boolean;
+
+CREATE TABLE IF NOT EXISTS playerTable (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    active INTEGER AS Boolean NOT NULL DEFAULT FALSE,
+    name TEXT NOT NULL,
+    teamId INTEGER NOT NULL,
+    FOREIGN KEY (teamId) REFERENCES teamTable (id)
+);
+
+selectAll:
+SELECT playerTable.id, active, playerTable.name, teamId, teamTable.name AS teamName,
+playerLeft1Id, playerLeft2Id,
+SUM(gameTable.isDone) AS played, SUM(gameTable.isBye) AS bye,
+SUM(gameTable.set1Left) AS set1Left, SUM(gameTable.set1Right) AS set1Right
+FROM teamTable
+JOIN playerTable
+ON playerTable.teamId = teamTable.id
+LEFT OUTER JOIN gameTable
+ON gameTable.playerLeft1Id = playerTable.id OR gameTable.playerLeft2Id = playerTable.id OR gameTable.playerRight1Id = playerTable.id OR gameTable.playerRight2Id = playerTable.id
+GROUP BY playerTable.id;
+
+add:
+INSERT INTO playerTable(name, teamId)
+VALUES (:name, :teamId);
+
+update:
+UPDATE playerTable
+SET name = :name, teamId = :teamId
+WHERE id = :id;
+
+setActive:
+UPDATE playerTable
+SET active = :active
+WHERE id = :id;
+
+delete:
+DELETE FROM playerTable
+WHERE id = :id;
