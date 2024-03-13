@@ -1,9 +1,6 @@
 package com.olt.racketclash.navigation
 
-import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Database
 import com.olt.racketclash.model.ProjectModel
 import com.olt.racketclash.ui.NewProjectScreen

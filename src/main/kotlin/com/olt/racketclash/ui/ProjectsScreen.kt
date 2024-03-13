@@ -20,10 +20,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.olt.racketclash.data.Database
 import com.olt.racketclash.data.Project
 import com.olt.racketclash.model.ProjectModel
-import com.olt.racketclash.navigation.RootNavigator
 import com.olt.racketclash.navigation.Screens
 import java.nio.file.Path
 
