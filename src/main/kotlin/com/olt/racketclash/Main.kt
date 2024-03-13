@@ -3,12 +3,13 @@ package com.olt.racketclash
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.transitions.SlideTransition
+import com.olt.racketclash.navigation.RootNavigator
 import com.olt.racketclash.theme.DarkColors
-import com.olt.racketclash.ui.ProjectsScreen
+import com.olt.racketclash.ui.RacketClashNavigator
 
 fun main() {
+    val rootNavigator = RootNavigator()
+
     application {
         Window(
             title = "Racket Clash",
@@ -17,9 +18,7 @@ fun main() {
             MaterialTheme(
                 colorScheme = DarkColors
             ) {
-                Navigator(screen = ProjectsScreen()) { navigator ->
-                    SlideTransition(navigator)
-                }
+                RacketClashNavigator(rootNavigator = rootNavigator)
             }
         }
     }

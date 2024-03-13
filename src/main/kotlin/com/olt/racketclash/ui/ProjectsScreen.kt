@@ -18,21 +18,23 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Database
 import com.olt.racketclash.data.Project
-import com.olt.racketclash.model.ProjectModal
+import com.olt.racketclash.model.ProjectModel
+import com.olt.racketclash.navigation.RootNavigator
+import com.olt.racketclash.navigation.Screens
 import java.nio.file.Path
 
 internal typealias addProject = (name: String, location: Path) -> Unit
 internal typealias deleteProject = (name: String) -> Unit
-internal typealias updateProject = (projectName: String, teamNumber: Int, playerNumber: Int) -> Unit
 
-class ProjectsScreen : Screen {
+class ProjectsScreen(private val modal: ProjectModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel<ProjectModal>(factory = { ProjectModal() })
+        val screenModel = rememberScreenModel<ProjectModel>(factory = { modal })
         val modal by screenModel.state.collectAsState()
 
         Surface(
@@ -50,7 +52,7 @@ class ProjectsScreen : Screen {
                     projects = modal.projects,
                     addProject = screenModel::addProject,
                     deleteProject = screenModel::deleteProject,
-                    updateProject = screenModel::updateProject
+                    navigateTo = screenModel::navigateTo
                 )
             }
         }
@@ -62,7 +64,7 @@ private fun ProjectSelect(
     projects: List<Project>,
     addProject: addProject,
     deleteProject: deleteProject,
-    updateProject: updateProject
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     Scaffold(
         modifier = Modifier
@@ -70,7 +72,7 @@ private fun ProjectSelect(
             .clip(RoundedCornerShape(10.dp))
             .requiredWidthIn(min = 500.dp)
             .fillMaxWidth(0.5f),
-        topBar = { ProjectSelectHeader(addProject = addProject, projectNames = projects.map { it.name }) }
+        topBar = { ProjectSelectHeader(addProject = addProject, projectNames = projects.map { it.name }, navigateTo = navigateTo) }
     ) { paddingValues ->
         Surface(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
@@ -85,7 +87,7 @@ private fun ProjectSelect(
                     ProjectItem(
                         project = it,
                         deleteProject = deleteProject,
-                        updateProject = updateProject
+                        navigateTo = navigateTo
                     )
                 }
             }
@@ -97,14 +99,15 @@ private fun ProjectSelect(
 @Composable
 private fun ProjectSelectHeader(
     projectNames: List<String>,
-    addProject: addProject
+    addProject: addProject,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     val navigator = LocalNavigator.currentOrThrow
 
     TopAppBar(
         title = { Text("Select Project") },
         actions = {
-            IconButton(onClick = { navigator.push(item = NewProjectScreen(addProject = addProject, projectNames = projectNames)) }) {
+            IconButton(onClick = { navigateTo(Screens.NewProject(projectNames, addProject), navigator) }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
             }
         },
@@ -119,16 +122,13 @@ private fun ProjectSelectHeader(
 private fun ProjectItem(
     project: Project,
     deleteProject: deleteProject,
-    updateProject: updateProject
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     val navigator = LocalNavigator.currentOrThrow
 
     Card(
         onClick = {
-            val database = Database(tournamentPath = project.location)
-            navigator.push(
-                TeamsScreen(database = database)
-            )
+            navigateTo(Screens.OpenProject(projectLocation = project.location), navigator)
         },
         modifier = Modifier.fillMaxWidth()
     ) {

@@ -1,8 +1,10 @@
 package com.olt.racketclash.model
 
-import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.data.Project
+import com.olt.racketclash.navigation.NavigableStateScreenModel
+import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -16,7 +18,9 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
 
-class ProjectModal : StateScreenModel<ProjectModal.Modal>(Modal()) {
+class ProjectModel(
+    navigateToScreen: (Screens, Navigator) -> Unit
+) : NavigableStateScreenModel<ProjectModel.Model>(navigateToScreen, Model()) {
 
     private val racketClashPath = Path(System.getProperty("user.home"), ".racketClash")
     private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
@@ -28,7 +32,7 @@ class ProjectModal : StateScreenModel<ProjectModal.Modal>(Modal()) {
         }
     }
 
-    data class Modal(
+    data class Model(
         val projects: List<Project> = emptyList()
     )
 
@@ -43,7 +47,7 @@ class ProjectModal : StateScreenModel<ProjectModal.Modal>(Modal()) {
 
            writeProjects(projects = newProjects)
 
-            mutableState.value = Modal(projects = newProjects)
+            mutableState.value = Model(projects = newProjects)
         }
     }
 
@@ -55,24 +59,7 @@ class ProjectModal : StateScreenModel<ProjectModal.Modal>(Modal()) {
                 val newProjects = mutableState.value.projects.toMutableList()
                 newProjects.remove(project)
                 writeProjects(newProjects.toList())
-                mutableState.value = Modal(projects = newProjects)
-            }
-        }
-    }
-
-    fun updateProject(name: String, teamNumber: Int, playerNumber: Int) {
-        screenModelScope.launch(context = Dispatchers.IO) {
-            val project = mutableState.value.projects.find { it.name == name }
-
-            if (project != null) {
-                val newProjects = mutableState.value.projects.toMutableList()
-                val projectIndex = newProjects.indexOf(project)
-                newProjects[projectIndex] = project.copy(
-                    teamNumber = teamNumber,
-                    playerNumber = playerNumber
-                )
-                writeProjects(newProjects.toList())
-                mutableState.value = Modal(projects = newProjects)
+                mutableState.value = Model(projects = newProjects)
             }
         }
     }
@@ -83,7 +70,7 @@ class ProjectModal : StateScreenModel<ProjectModal.Modal>(Modal()) {
         if (projectsFile.exists()) {
             val jsonString = projectsFile.readText()
             val projects = Json.decodeFromString<List<Project>>(jsonString)
-            mutableState.value = Modal(projects = projects)
+            mutableState.value = Model(projects = projects)
         }
     }
 
