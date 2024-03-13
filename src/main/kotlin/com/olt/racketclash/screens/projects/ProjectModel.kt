@@ -1,4 +1,4 @@
-package com.olt.racketclash.model
+package com.olt.racketclash.screens.projects
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator

@@ -1,4 +1,4 @@
-package com.olt.racketclash.model
+package com.olt.racketclash.screens.rounds
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope

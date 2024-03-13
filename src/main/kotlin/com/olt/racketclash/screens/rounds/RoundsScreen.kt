@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui
+package com.olt.racketclash.screens.rounds
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -19,7 +19,9 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Database
 import com.olt.racketclash.data.Game
-import com.olt.racketclash.model.RoundsModel
+import com.olt.racketclash.screens.editRound.EditRoundScreen
+import com.olt.racketclash.ui.TournamentScaffold
+import com.olt.racketclash.ui.TournamentTabs
 
 internal typealias editGame = (id: Long, set1Left: Int, set1Right: Int, isDone: Boolean) -> Unit
 internal typealias deleteRound = (roundName: String) -> Unit
@@ -36,7 +38,7 @@ class RoundsScreen(private val database: Database) : Screen {
             topAppBarActions = {
                 val navigator = LocalNavigator.currentOrThrow
 
-                IconButton(onClick = { navigator.push(EditRoundsScreen()) }) {
+                IconButton(onClick = { navigator.push(EditRoundScreen()) }) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add"

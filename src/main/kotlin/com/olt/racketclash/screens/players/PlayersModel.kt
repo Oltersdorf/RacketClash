@@ -1,4 +1,4 @@
-package com.olt.racketclash.model
+package com.olt.racketclash.screens.players
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
@@ -8,16 +8,16 @@ import com.olt.racketclash.data.Team
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class PlayerModel(
+class PlayersModel(
     private val database: Database
-) : StateScreenModel<PlayerModel.Modal>(Modal()) {
+) : StateScreenModel<PlayersModel.Modal>(Modal()) {
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
             database.player().collect { playerList ->
                 mutableState.value = mutableState.value.copy(
                     isLoading = false,
-                    player = playerList
+                    players = playerList
                 )
             }
         }
@@ -32,7 +32,7 @@ class PlayerModel(
 
     data class Modal(
         val isLoading: Boolean = true,
-        val player: List<Player> = emptyList(),
+        val players: List<Player> = emptyList(),
         val teams: List<Team> = emptyList()
     )
 

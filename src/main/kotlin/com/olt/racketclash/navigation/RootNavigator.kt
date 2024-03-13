@@ -2,10 +2,10 @@ package com.olt.racketclash.navigation
 
 import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.data.Database
-import com.olt.racketclash.model.ProjectModel
-import com.olt.racketclash.ui.NewProjectScreen
-import com.olt.racketclash.ui.ProjectsScreen
-import com.olt.racketclash.ui.TeamsScreen
+import com.olt.racketclash.screens.projects.ProjectModel
+import com.olt.racketclash.screens.newProject.NewProjectScreen
+import com.olt.racketclash.screens.projects.ProjectsScreen
+import com.olt.racketclash.screens.teams.TeamsScreen
 import java.nio.file.Path
 
 class RootNavigator {

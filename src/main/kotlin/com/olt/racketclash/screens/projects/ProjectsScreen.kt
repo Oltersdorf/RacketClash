@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui
+package com.olt.racketclash.screens.projects
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
@@ -21,18 +21,18 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Project
-import com.olt.racketclash.model.ProjectModel
 import com.olt.racketclash.navigation.Screens
+import com.olt.racketclash.ui.LazyColumnWithScroll
 import java.nio.file.Path
 
 internal typealias addProject = (name: String, location: Path) -> Unit
 internal typealias deleteProject = (name: String) -> Unit
 
-class ProjectsScreen(private val modal: ProjectModel) : Screen {
+class ProjectsScreen(private val model: ProjectModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel<ProjectModel>(factory = { modal })
+        val screenModel = rememberScreenModel<ProjectModel>(factory = { model })
         val modal by screenModel.state.collectAsState()
 
         Surface(

@@ -1,9 +1,11 @@
-package com.olt.racketclash.ui
+package com.olt.racketclash.screens.teams
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -18,59 +20,57 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Database
-import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.Team
-import com.olt.racketclash.model.PlayerModel
+import com.olt.racketclash.screens.editTeam.EditTeamScreen
+import com.olt.racketclash.ui.*
 
-internal typealias updatePlayer = (id: Long?, name: String, teamId: Long) -> Unit
-internal typealias updateActive = (id: Long, active: Boolean) -> Unit
+internal typealias updateTeam = (id: Long?, name: String, strength: Int) -> Unit
 
-class PlayerScreen(private val database: Database) : Screen {
+class TeamsScreen(private val database: Database) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel { PlayerModel(database = database) }
+        val screenModel = rememberScreenModel { TeamsModel(database = database) }
         val modal by screenModel.state.collectAsState()
 
         TournamentScaffold(
-            topAppBarTitle = "Player",
+            topAppBarTitle = "Teams",
             topAppBarActions = {
                 val navigator = LocalNavigator.currentOrThrow
 
-                IconButton(onClick = { navigator.push(EditPlayerScreen(player = null, teams = modal.teams, updatePlayer = screenModel::updatePlayer)) }) {
+                IconButton(onClick = { navigator.push(EditTeamScreen(team = null, updateTeam = screenModel::updateTeam)) }) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add"
                     )
                 }
             },
-            selectedTab = TournamentTabs.Player
+            selectedTab = TournamentTabs.Teams,
         ) {
-            PlayerView(paddingValues = it, modal = modal, updatePlayer = screenModel::updatePlayer, updateActive = screenModel::updateActive)
+            TeamView(paddingValues = it, modal = modal, updateTeam = screenModel::updateTeam, deleteTeam = screenModel::deleteTeam)
         }
     }
 }
 
 @Composable
-private fun PlayerView(
+private fun TeamView(
     paddingValues: PaddingValues,
-    modal: PlayerModel.Modal,
-    updatePlayer: updatePlayer,
-    updateActive: updateActive
+    modal: TeamsModel.Modal,
+    updateTeam: (id: Long?, name: String, strength: Int) -> Unit,
+    deleteTeam: (id: Long) -> Unit
 ) {
     if (modal.isLoading)
         Loading(paddingValues = paddingValues)
     else
-        PlayerList(paddingValues = paddingValues, player = modal.player, teams = modal.teams, updatePlayer = updatePlayer, updateActive = updateActive)
+        TeamList(paddingValues = paddingValues, teams = modal.teams, updateTeam = updateTeam, deleteTeam = deleteTeam)
 }
 
 @Composable
-private fun PlayerList(
+private fun TeamList(
     paddingValues: PaddingValues,
-    player: List<Player>,
     teams: List<Team>,
-    updatePlayer: updatePlayer,
-    updateActive: updateActive
+    updateTeam: (id: Long?, name: String, strength: Int) -> Unit,
+    deleteTeam: (id: Long) -> Unit
 ) {
     LazyColumnWithScroll(
         modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp),
@@ -82,35 +82,15 @@ private fun PlayerList(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Active",
-                        modifier = Modifier.weight(1.0f)
-                    )
-                    Text(
                         text = "Name",
                         modifier = Modifier.weight(5.0f)
                     )
                     Text(
-                        text = "Team",
-                        modifier = Modifier.weight(2.0f)
-                    )
-                    Text(
-                        text = "played",
+                        text = "Difficulty",
                         modifier = Modifier.weight(1.0f)
                     )
                     Text(
-                        text = "bye",
-                        modifier = Modifier.weight(1.0f)
-                    )
-                    Text(
-                        text = "Games",
-                        modifier = Modifier.weight(1.0f)
-                    )
-                    Text(
-                        text = "Sets",
-                        modifier = Modifier.weight(1.0f)
-                    )
-                    Text(
-                        text = "Points",
+                        text = "Player",
                         modifier = Modifier.weight(1.0f)
                     )
                     Text(
@@ -118,55 +98,50 @@ private fun PlayerList(
                         modifier = Modifier.weight(0.5f),
                         textAlign = TextAlign.Center
                     )
+                    Text(
+                        text = "Delete",
+                        modifier = Modifier.weight(0.5f),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
     ) {
-        items(items = player) {player ->
+        items(items = teams) {
             val navigator = LocalNavigator.currentOrThrow
 
             Row(
+                modifier = Modifier.clickable {},
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Checkbox(
-                    checked = player.active,
-                    onCheckedChange = { updateActive(player.id, it) },
-                    modifier = Modifier.weight(1.0f)
-                )
                 Text(
-                    text = player.name,
+                    text = it.name,
                     modifier = Modifier.weight(5.0f)
                 )
                 Text(
-                    text = player.teamName,
-                    modifier = Modifier.weight(2.0f)
-                )
-                Text(
-                    text = player.played.toString(),
+                    text = "${it.strength}",
                     modifier = Modifier.weight(1.0f)
                 )
                 Text(
-                    text = player.bye.toString(),
-                    modifier = Modifier.weight(1.0f)
-                )
-                Text(
-                    text = "${player.games.first} : ${player.games.second}",
-                    modifier = Modifier.weight(1.0f)
-                )
-                Text(
-                    text = "${player.sets.first} : ${player.sets.second}",
-                    modifier = Modifier.weight(1.0f)
-                )
-                Text(
-                    text = "${player.points.first} : ${player.points.second}",
+                    text = "${it.size}",
                     modifier = Modifier.weight(1.0f)
                 )
                 IconButton(
                     modifier = Modifier.weight(0.5f),
-                    onClick = { navigator.push(EditPlayerScreen(player = player, teams = teams, updatePlayer = updatePlayer)) }
+                    onClick = { navigator.push(EditTeamScreen(team = it, updateTeam = updateTeam)) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit"
+                    )
+                }
+                IconButton(
+                    modifier = Modifier.weight(0.5f),
+                    onClick = { deleteTeam(it.id) },
+                    enabled = it.size == 0
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
                         contentDescription = "Edit"
                     )
                 }

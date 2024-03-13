@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui
+package com.olt.racketclash.screens.editPlayer
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -11,6 +11,9 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.Team
+import com.olt.racketclash.screens.players.updatePlayer
+import com.olt.racketclash.ui.TournamentScaffold
+import com.olt.racketclash.ui.TournamentTabs
 
 class EditPlayerScreen(
     private val player: Player?,

@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui
+package com.olt.racketclash.screens.newProject
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

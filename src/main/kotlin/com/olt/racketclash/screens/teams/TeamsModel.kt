@@ -1,4 +1,4 @@
-package com.olt.racketclash.model
+package com.olt.racketclash.screens.teams
 
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
@@ -7,9 +7,9 @@ import com.olt.racketclash.data.Team
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class TeamModel(
+class TeamsModel(
     private val database: Database,
-) : StateScreenModel<TeamModel.Modal>(Modal()) {
+) : StateScreenModel<TeamsModel.Modal>(Modal()) {
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
