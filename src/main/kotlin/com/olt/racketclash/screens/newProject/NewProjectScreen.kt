@@ -8,21 +8,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
-import java.nio.file.Path
-import kotlin.io.path.Path
-import kotlin.io.path.absolutePathString
+import com.olt.racketclash.navigation.Screens
 
-class NewProjectScreen(
-    private val projectNames: List<String>,
-    private val addProject: (name: String, location: Path) -> Unit
-) : Screen {
+class NewProjectScreen(private val model: NewProjectModel) : Screen {
 
     @Composable
     override fun Content() {
+        val screenModel = rememberScreenModel<NewProjectModel>(factory = { model })
+        val model by screenModel.state.collectAsState()
+
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -40,17 +39,12 @@ class NewProjectScreen(
 
                 Spacer(modifier = Modifier.weight(1.0f))
 
-                var projectName by remember { mutableStateOf("") }
-                var location by remember { mutableStateOf(Path(System.getProperty("user.home"))) }
-
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = projectName,
-                    onValueChange = {
-                        projectName = it
-                    },
+                    value = model.projectName,
+                    onValueChange = { screenModel.changeProjectName(newName = it) },
                     label = { Text("Name") },
-                    isError = projectName.isBlank() || projectNames.contains(projectName)
+                    isError = !model.canCreate
                 )
 
                 Row(
@@ -61,15 +55,14 @@ class NewProjectScreen(
                     var showDirPicker by remember { mutableStateOf(false) }
 
                     Text(text = "Location:", fontWeight = FontWeight.Bold)
-                    Text(text = location.absolutePathString(), modifier = Modifier.weight(1.0f))
+                    Text(text = model.location, modifier = Modifier.weight(1.0f))
                     Button(onClick = { showDirPicker = true }) {
                         Text("Change")
                     }
 
                     DirectoryPicker(show = showDirPicker, initialDirectory = System.getProperty("user.home")) { path ->
                         showDirPicker = false
-                        if (path != null)
-                            location = Path(path)
+                        screenModel.changeLocation(newLocation = path)
                     }
                 }
 
@@ -79,15 +72,15 @@ class NewProjectScreen(
                     val navigator = LocalNavigator.currentOrThrow
 
                     Spacer(modifier = Modifier.weight(1.0f))
-                    Button(onClick = { navigator.pop() }) {
+                    Button(onClick = { screenModel.navigateTo(screen = Screens.Projects, navigator = navigator) }) {
                         Text("Cancel")
                     }
                     Button(
                         onClick = {
-                            addProject(projectName, location)
-                            navigator.pop()
+                            screenModel.addProject()
+                            screenModel.navigateTo(screen = Screens.Projects, navigator = navigator)
                         },
-                        enabled = projectName.isNotBlank() && !projectNames.contains(projectName)
+                        enabled = model.canCreate
                     ) {
                         Text("Create")
                     }

@@ -23,16 +23,14 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Project
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.LazyColumnWithScroll
-import java.nio.file.Path
 
-internal typealias addProject = (name: String, location: Path) -> Unit
 internal typealias deleteProject = (name: String) -> Unit
 
-class ProjectsScreen(private val model: ProjectModel) : Screen {
+class ProjectsScreen(private val model: ProjectsModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel<ProjectModel>(factory = { model })
+        val screenModel = rememberScreenModel<ProjectsModel>(factory = { model })
         val modal by screenModel.state.collectAsState()
 
         Surface(
@@ -48,7 +46,6 @@ class ProjectsScreen(private val model: ProjectModel) : Screen {
                 )
                 ProjectSelect(
                     projects = modal.projects,
-                    addProject = screenModel::addProject,
                     deleteProject = screenModel::deleteProject,
                     navigateTo = screenModel::navigateTo
                 )
@@ -60,7 +57,6 @@ class ProjectsScreen(private val model: ProjectModel) : Screen {
 @Composable
 private fun ProjectSelect(
     projects: List<Project>,
-    addProject: addProject,
     deleteProject: deleteProject,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
@@ -70,7 +66,7 @@ private fun ProjectSelect(
             .clip(RoundedCornerShape(10.dp))
             .requiredWidthIn(min = 500.dp)
             .fillMaxWidth(0.5f),
-        topBar = { ProjectSelectHeader(addProject = addProject, projectNames = projects.map { it.name }, navigateTo = navigateTo) }
+        topBar = { ProjectSelectHeader(navigateTo = navigateTo) }
     ) { paddingValues ->
         Surface(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
@@ -96,8 +92,6 @@ private fun ProjectSelect(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProjectSelectHeader(
-    projectNames: List<String>,
-    addProject: addProject,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
     val navigator = LocalNavigator.currentOrThrow
@@ -105,7 +99,7 @@ private fun ProjectSelectHeader(
     TopAppBar(
         title = { Text("Select Project") },
         actions = {
-            IconButton(onClick = { navigateTo(Screens.NewProject(projectNames, addProject), navigator) }) {
+            IconButton(onClick = { navigateTo(Screens.NewProject, navigator) }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
             }
         },
