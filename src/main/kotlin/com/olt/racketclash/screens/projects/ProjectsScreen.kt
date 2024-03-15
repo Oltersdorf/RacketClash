@@ -30,8 +30,8 @@ class ProjectsScreen(private val model: ProjectsModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel<ProjectsModel>(factory = { model })
-        val modal by screenModel.state.collectAsState()
+        val screenModel = rememberScreenModel { model }
+        val stateModel by screenModel.state.collectAsState()
 
         Surface(
             modifier = Modifier.fillMaxSize()
@@ -45,7 +45,7 @@ class ProjectsScreen(private val model: ProjectsModel) : Screen {
                     modifier = Modifier.padding(top = 50.dp, bottom = 50.dp)
                 )
                 ProjectSelect(
-                    projects = modal.projects,
+                    projects = stateModel.projects,
                     deleteProject = screenModel::deleteProject,
                     navigateTo = screenModel::navigateTo
                 )

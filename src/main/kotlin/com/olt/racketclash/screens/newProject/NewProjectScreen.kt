@@ -19,8 +19,8 @@ class NewProjectScreen(private val model: NewProjectModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel<NewProjectModel>(factory = { model })
-        val model by screenModel.state.collectAsState()
+        val screenModel = rememberScreenModel { model }
+        val stateModel by screenModel.state.collectAsState()
 
         Surface(
             modifier = Modifier.fillMaxSize()
@@ -41,10 +41,10 @@ class NewProjectScreen(private val model: NewProjectModel) : Screen {
 
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = model.projectName,
+                    value = stateModel.projectName,
                     onValueChange = { screenModel.changeProjectName(newName = it) },
                     label = { Text("Name") },
-                    isError = !model.canCreate
+                    isError = !stateModel.canCreate
                 )
 
                 Row(
@@ -55,7 +55,7 @@ class NewProjectScreen(private val model: NewProjectModel) : Screen {
                     var showDirPicker by remember { mutableStateOf(false) }
 
                     Text(text = "Location:", fontWeight = FontWeight.Bold)
-                    Text(text = model.location, modifier = Modifier.weight(1.0f))
+                    Text(text = stateModel.location, modifier = Modifier.weight(1.0f))
                     Button(onClick = { showDirPicker = true }) {
                         Text("Change")
                     }
@@ -72,15 +72,15 @@ class NewProjectScreen(private val model: NewProjectModel) : Screen {
                     val navigator = LocalNavigator.currentOrThrow
 
                     Spacer(modifier = Modifier.weight(1.0f))
-                    Button(onClick = { screenModel.navigateTo(screen = Screens.Projects, navigator = navigator) }) {
+                    Button(onClick = { screenModel.navigateTo(screen = Screens.Pop, navigator = navigator) }) {
                         Text("Cancel")
                     }
                     Button(
                         onClick = {
                             screenModel.addProject()
-                            screenModel.navigateTo(screen = Screens.Projects, navigator = navigator)
+                            screenModel.navigateTo(screen = Screens.Pop, navigator = navigator)
                         },
-                        enabled = model.canCreate
+                        enabled = stateModel.canCreate
                     ) {
                         Text("Create")
                     }

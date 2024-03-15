@@ -1,10 +1,13 @@
 package com.olt.racketclash.navigation
 
-import com.olt.racketclash.data.Database
+import com.olt.racketclash.data.Team
 
 sealed class Screens {
+    data object Pop : Screens()
     data object Projects : Screens()
     data object NewProject : Screens()
     data class OpenProject(val projectLocation: String, val projectName: String) : Screens()
-    data class Teams(val database: Database) : Screens()
+    data object Teams : Screens()
+
+    data class EditTeam(val team: Team?) : Screens()
 }

@@ -9,21 +9,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Team
-import com.olt.racketclash.screens.teams.updateTeam
+import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
 
-class EditTeamScreen(
-    private val team: Team?,
-    private val updateTeam: updateTeam
-) : Screen {
+class EditTeamScreen(private val model: EditTeamModel) : Screen {
 
     @Composable
     override fun Content() {
+        val screenModel = rememberScreenModel { model }
+        val stateModel by screenModel.state.collectAsState()
+
         TournamentScaffold(
             topAppBarTitle = "Edit Team",
             hasBackPress = true,
@@ -31,8 +33,9 @@ class EditTeamScreen(
         ) {
             EditTeamView(
                 paddingValues = it,
-                team = team,
-                updateTeam = updateTeam
+                team = stateModel.team,
+                updateTeam = screenModel::updateTeam,
+                navigateTo = screenModel::navigateTo
             )
         }
     }
@@ -42,7 +45,8 @@ class EditTeamScreen(
 private fun EditTeamView(
     paddingValues: PaddingValues,
     team: Team?,
-    updateTeam: updateTeam
+    updateTeam: (Long?, String, Int) -> Unit,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize().padding(paddingValues = paddingValues)
@@ -79,13 +83,13 @@ private fun EditTeamView(
                 val navigator = LocalNavigator.currentOrThrow
 
                 Spacer(modifier = Modifier.weight(1.0f))
-                Button(onClick = { navigator.pop() }) {
+                Button(onClick = { navigateTo(Screens.Pop, navigator) }) {
                     Text("Cancel")
                 }
                 Button(
                     onClick = {
                         updateTeam(team?.id, teamName, teamStrength.toInt())
-                        navigator.pop()
+                        navigateTo(Screens.Pop, navigator)
                     },
                     enabled = teamName.isNotBlank() && teamStrength.isNotEmpty()
                 ) {

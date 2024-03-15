@@ -3,10 +3,14 @@ package com.olt.racketclash.navigation
 import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.data.Database
 import com.olt.racketclash.data.FileHandler
+import com.olt.racketclash.data.Team
+import com.olt.racketclash.screens.editTeam.EditTeamModel
+import com.olt.racketclash.screens.editTeam.EditTeamScreen
 import com.olt.racketclash.screens.newProject.NewProjectModel
 import com.olt.racketclash.screens.projects.ProjectsModel
 import com.olt.racketclash.screens.newProject.NewProjectScreen
 import com.olt.racketclash.screens.projects.ProjectsScreen
+import com.olt.racketclash.screens.teams.TeamsModel
 import com.olt.racketclash.screens.teams.TeamsScreen
 
 class RootNavigator {
@@ -18,10 +22,12 @@ class RootNavigator {
 
     private fun navigateTo(screens: Screens, navigator: Navigator) {
         when (screens) {
+            Screens.Pop -> navigator.pop()
             Screens.Projects -> navigateToProjects(navigator = navigator)
             Screens.NewProject -> navigateToNewProject(navigator = navigator)
             is Screens.OpenProject -> openProject(navigator = navigator, location = screens.projectLocation, projectName = screens.projectName)
-            is Screens.Teams -> navigateToTeams(navigator = navigator)
+            Screens.Teams -> navigateToTeams(navigator = navigator)
+            is Screens.EditTeam -> navigateToEditTeam(navigator = navigator, team = screens.team)
         }
     }
 
@@ -40,6 +46,10 @@ class RootNavigator {
     }
 
     private fun navigateToTeams(navigator: Navigator) {
-        navigator.replaceAll(TeamsScreen(database = database!!))
+        navigator.replaceAll(TeamsScreen(TeamsModel(navigateToScreen = ::navigateTo, database = database!!)))
+    }
+
+    private fun navigateToEditTeam(navigator: Navigator, team: Team?) {
+        navigator.push(item = EditTeamScreen(EditTeamModel(navigateToScreen = ::navigateTo, database = database!!, team = team)))
     }
 }

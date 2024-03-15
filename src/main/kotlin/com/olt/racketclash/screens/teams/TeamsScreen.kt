@@ -18,27 +18,25 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.olt.racketclash.data.Database
 import com.olt.racketclash.data.Team
-import com.olt.racketclash.screens.editTeam.EditTeamScreen
+import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
 
-internal typealias updateTeam = (id: Long?, name: String, strength: Int) -> Unit
-
-class TeamsScreen(private val database: Database) : Screen {
+class TeamsScreen(private val model: TeamsModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel { TeamsModel(database = database) }
-        val modal by screenModel.state.collectAsState()
+        val screenModel = rememberScreenModel { model }
+        val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(
             topAppBarTitle = "Teams",
             topAppBarActions = {
                 val navigator = LocalNavigator.currentOrThrow
 
-                IconButton(onClick = { navigator.push(EditTeamScreen(team = null, updateTeam = screenModel::updateTeam)) }) {
+                IconButton(onClick = { screenModel.navigateTo(screen = Screens.EditTeam(team = null), navigator = navigator) }) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add"
@@ -47,7 +45,7 @@ class TeamsScreen(private val database: Database) : Screen {
             },
             selectedTab = TournamentTabs.Teams,
         ) {
-            TeamView(paddingValues = it, modal = modal, updateTeam = screenModel::updateTeam, deleteTeam = screenModel::deleteTeam)
+            TeamView(paddingValues = it, modal = stateModel, deleteTeam = screenModel::deleteTeam, navigateTo = screenModel::navigateTo)
         }
     }
 }
@@ -56,21 +54,21 @@ class TeamsScreen(private val database: Database) : Screen {
 private fun TeamView(
     paddingValues: PaddingValues,
     modal: TeamsModel.Modal,
-    updateTeam: (id: Long?, name: String, strength: Int) -> Unit,
-    deleteTeam: (id: Long) -> Unit
+    deleteTeam: (id: Long) -> Unit,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     if (modal.isLoading)
         Loading(paddingValues = paddingValues)
     else
-        TeamList(paddingValues = paddingValues, teams = modal.teams, updateTeam = updateTeam, deleteTeam = deleteTeam)
+        TeamList(paddingValues = paddingValues, teams = modal.teams, deleteTeam = deleteTeam, navigateTo = navigateTo)
 }
 
 @Composable
 private fun TeamList(
     paddingValues: PaddingValues,
     teams: List<Team>,
-    updateTeam: (id: Long?, name: String, strength: Int) -> Unit,
-    deleteTeam: (id: Long) -> Unit
+    deleteTeam: (id: Long) -> Unit,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     LazyColumnWithScroll(
         modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp),
@@ -128,7 +126,7 @@ private fun TeamList(
                 )
                 IconButton(
                     modifier = Modifier.weight(0.5f),
-                    onClick = { navigator.push(EditTeamScreen(team = it, updateTeam = updateTeam)) }
+                    onClick = { navigateTo(Screens.EditTeam(team = it), navigator) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
