@@ -35,7 +35,7 @@ class PlayersModel(
 
     fun deletePlayer(id: Long) {
         screenModelScope.launch(context = Dispatchers.IO) {
-
+            database.deletePlayer(id = id)
         }
     }
 }
