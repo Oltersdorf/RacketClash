@@ -8,6 +8,7 @@ import com.olt.racketclash.data.Team
 import com.olt.racketclash.screens.editPlayer.EditPlayerModel
 import com.olt.racketclash.screens.editPlayer.EditPlayerScreen
 import com.olt.racketclash.screens.editRound.EditRoundModel
+import com.olt.racketclash.screens.editRound.EditRoundScreen
 import com.olt.racketclash.screens.editTeam.EditTeamModel
 import com.olt.racketclash.screens.editTeam.EditTeamScreen
 import com.olt.racketclash.screens.newProject.NewProjectModel
@@ -63,7 +64,7 @@ class RootNavigator {
             Screens.Players -> navigateToPlayers(navigator = navigator)
             is Screens.EditPlayer -> navigateToEditPlayer(navigator = navigator, player = screens.player)
             Screens.Rounds -> navigateToRounds(navigator = navigator)
-            Screens.EditRound -> {}
+            Screens.EditRound -> navigateToEditRound(navigator = navigator)
         }
     }
 
@@ -99,5 +100,9 @@ class RootNavigator {
 
     private fun navigateToRounds(navigator: Navigator) {
         navigator.replaceAll(RoundsScreen(::roundsModelBuilder))
+    }
+
+    private fun navigateToEditRound(navigator: Navigator) {
+        navigator.push(item = EditRoundScreen(::editRoundModelBuilder))
     }
 }
