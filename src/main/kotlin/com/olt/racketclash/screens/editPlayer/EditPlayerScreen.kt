@@ -6,29 +6,36 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.Team
-import com.olt.racketclash.screens.players.updatePlayer
+import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
 
-class EditPlayerScreen(
-    private val player: Player?,
-    private val teams: List<Team>,
-    private val updatePlayer: updatePlayer
-) : Screen {
+class EditPlayerScreen(private val model: EditPlayerModel) : Screen {
 
     @Composable
     override fun Content() {
+        val screenModel = rememberScreenModel { model }
+        val stateModel by screenModel.state.collectAsState()
+
         TournamentScaffold(
             topAppBarTitle = "Edit Player",
             hasBackPress = true,
             selectedTab = TournamentTabs.Player
         ) {
-            EditPlayerView(paddingValues = it, player = player, teams = teams, updatePlayer = updatePlayer)
+            EditPlayerView(
+                paddingValues = it,
+                player = stateModel.player,
+                teams = stateModel.teams,
+                updatePlayer = screenModel::updatePlayer,
+                navigateTo = screenModel::navigateTo
+            )
         }
     }
 }
@@ -39,7 +46,8 @@ private fun EditPlayerView(
     paddingValues: PaddingValues,
     player: Player?,
     teams: List<Team>,
-    updatePlayer: updatePlayer
+    updatePlayer: (Long?, String, Long) -> Unit,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize().padding(paddingValues = paddingValues)
@@ -99,13 +107,13 @@ private fun EditPlayerView(
                 val navigator = LocalNavigator.currentOrThrow
 
                 Spacer(modifier = Modifier.weight(1.0f))
-                Button(onClick = { navigator.pop() }) {
+                Button(onClick = { navigateTo(Screens.Pop, navigator) }) {
                     Text("Cancel")
                 }
                 Button(
                     onClick = {
                         updatePlayer(player?.id, playerName, selectedTeam.id)
-                        navigator.pop()
+                        navigateTo(Screens.Pop, navigator)
                     },
                     enabled = playerName.isNotBlank() && selectedTeam.id != -1L
                 ) {

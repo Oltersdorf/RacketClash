@@ -10,7 +10,6 @@ import com.olt.racketclash.database.RacketClashDatabase
 import com.olt.racketclash.database.TeamTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.map
 import java.io.File
 import java.util.*

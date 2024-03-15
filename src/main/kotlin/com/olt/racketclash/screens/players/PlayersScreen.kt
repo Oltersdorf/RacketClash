@@ -16,29 +16,27 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.olt.racketclash.data.Database
 import com.olt.racketclash.data.Player
-import com.olt.racketclash.data.Team
-import com.olt.racketclash.screens.editPlayer.EditPlayerScreen
+import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
 
-internal typealias updatePlayer = (id: Long?, name: String, teamId: Long) -> Unit
 internal typealias updateActive = (id: Long, active: Boolean) -> Unit
 
-class PlayersScreen(private val database: Database) : Screen {
+class PlayersScreen(private val model: PlayersModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel { PlayersModel(database = database) }
-        val modal by screenModel.state.collectAsState()
+        val screenModel = rememberScreenModel { model }
+        val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(
             topAppBarTitle = "Player",
             topAppBarActions = {
                 val navigator = LocalNavigator.currentOrThrow
 
-                IconButton(onClick = { navigator.push(EditPlayerScreen(player = null, teams = modal.teams, updatePlayer = screenModel::updatePlayer)) }) {
+                IconButton(onClick = { screenModel.navigateTo(Screens.EditPlayer(player = null), navigator) }) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add"
@@ -47,7 +45,7 @@ class PlayersScreen(private val database: Database) : Screen {
             },
             selectedTab = TournamentTabs.Player
         ) {
-            PlayerView(paddingValues = it, modal = modal, updatePlayer = screenModel::updatePlayer, updateActive = screenModel::updateActive)
+            PlayerView(paddingValues = it, model = stateModel, updateActive = screenModel::updateActive, navigateTo = screenModel::navigateTo)
         }
     }
 }
@@ -55,23 +53,22 @@ class PlayersScreen(private val database: Database) : Screen {
 @Composable
 private fun PlayerView(
     paddingValues: PaddingValues,
-    modal: PlayersModel.Modal,
-    updatePlayer: updatePlayer,
-    updateActive: updateActive
+    model: PlayersModel.Modal,
+    updateActive: updateActive,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
-    if (modal.isLoading)
+    if (model.isLoading)
         Loading(paddingValues = paddingValues)
     else
-        PlayerList(paddingValues = paddingValues, player = modal.players, teams = modal.teams, updatePlayer = updatePlayer, updateActive = updateActive)
+        PlayerList(paddingValues = paddingValues, player = model.players, updateActive = updateActive, navigateTo = navigateTo)
 }
 
 @Composable
 private fun PlayerList(
     paddingValues: PaddingValues,
     player: List<Player>,
-    teams: List<Team>,
-    updatePlayer: updatePlayer,
-    updateActive: updateActive
+    updateActive: updateActive,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     LazyColumnWithScroll(
         modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp),
@@ -164,7 +161,7 @@ private fun PlayerList(
                 )
                 IconButton(
                     modifier = Modifier.weight(0.5f),
-                    onClick = { navigator.push(EditPlayerScreen(player = player, teams = teams, updatePlayer = updatePlayer)) }
+                    onClick = { navigateTo(Screens.EditPlayer(player = player), navigator) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
