@@ -32,14 +32,6 @@ class Database private constructor(
         projectName = projectName
     )
 
-    init {
-        Database.database = this
-    }
-
-    companion object {
-        var database: Database? = null
-    }
-
     private val database = RacketClashDatabase(
         driver = driver,
         teamTableAdapter = TeamTable.Adapter(strengthAdapter = IntColumnAdapter),
