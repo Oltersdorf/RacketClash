@@ -22,7 +22,7 @@ class EditPlayerModel(
                 updateState { model ->
                     model.copy(
                         teams = teamsList,
-                        selectedTeam = teamsList.find { it.id == mutableState.value.player?.id } ?: noTeamSelected
+                        selectedTeam = teamsList.find { it.id == model.player?.teamId } ?: noTeamSelected
                     )
                 }
             }
