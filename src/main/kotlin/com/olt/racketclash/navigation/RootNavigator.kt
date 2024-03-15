@@ -7,6 +7,7 @@ import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.Team
 import com.olt.racketclash.screens.editPlayer.EditPlayerModel
 import com.olt.racketclash.screens.editPlayer.EditPlayerScreen
+import com.olt.racketclash.screens.editRound.EditRoundModel
 import com.olt.racketclash.screens.editTeam.EditTeamModel
 import com.olt.racketclash.screens.editTeam.EditTeamScreen
 import com.olt.racketclash.screens.newProject.NewProjectModel
@@ -25,7 +26,31 @@ class RootNavigator {
     private var database: Database? = null
 
     fun defaultScreen() : ProjectsScreen =
-        ProjectsScreen(ProjectsModel(navigateToScreen = ::navigateTo, fileHandler = fileHandler))
+        ProjectsScreen(::projectsModelBuilder)
+
+    private fun projectsModelBuilder(): ProjectsModel =
+        ProjectsModel(navigateToScreen = ::navigateTo, fileHandler = fileHandler)
+
+    private fun newProjectModelBuilder(): NewProjectModel =
+        NewProjectModel(navigateToScreen = ::navigateTo, fileHandler = fileHandler)
+
+    private fun teamsModelBuilder(): TeamsModel =
+        TeamsModel(navigateToScreen = ::navigateTo, database = database!!)
+
+    private fun editTeamModelBuilder(team: Team?): EditTeamModel =
+        EditTeamModel(navigateToScreen = ::navigateTo, database = database!!, team = team)
+
+    private fun playersModelBuilder(): PlayersModel =
+        PlayersModel(navigateToScreen = ::navigateTo, database = database!!)
+
+    private fun editPlayerModelBuilder(player: Player?): EditPlayerModel =
+        EditPlayerModel(navigateToScreen = ::navigateTo, database = database!!, player = player)
+
+    private fun roundsModelBuilder(): RoundsModel =
+        RoundsModel(navigateToScreen = ::navigateTo, database = database!!)
+
+    private fun editRoundModelBuilder(): EditRoundModel =
+        EditRoundModel(navigateToScreen = ::navigateTo, database = database!!)
 
     private fun navigateTo(screens: Screens, navigator: Navigator) {
         when (screens) {
@@ -37,18 +62,18 @@ class RootNavigator {
             is Screens.EditTeam -> navigateToEditTeam(navigator = navigator, team = screens.team)
             Screens.Players -> navigateToPlayers(navigator = navigator)
             is Screens.EditPlayer -> navigateToEditPlayer(navigator = navigator, player = screens.player)
-            Screens.Games -> navigateToRounds(navigator = navigator)
+            Screens.Rounds -> navigateToRounds(navigator = navigator)
             Screens.EditRound -> {}
         }
     }
 
     private fun navigateToProjects(navigator: Navigator) {
         database = null
-        navigator.replaceAll(ProjectsScreen(ProjectsModel(navigateToScreen = ::navigateTo, fileHandler = fileHandler)))
+        navigator.replaceAll(ProjectsScreen(::projectsModelBuilder))
     }
 
     private fun navigateToNewProject(navigator: Navigator) {
-        navigator.push(NewProjectScreen(NewProjectModel(navigateToScreen = ::navigateTo, fileHandler = fileHandler)))
+        navigator.push(NewProjectScreen(::newProjectModelBuilder))
     }
 
     private fun openProject(navigator: Navigator, location: String, projectName: String) {
@@ -57,22 +82,22 @@ class RootNavigator {
     }
 
     private fun navigateToTeams(navigator: Navigator) {
-        navigator.replaceAll(TeamsScreen(TeamsModel(navigateToScreen = ::navigateTo, database = database!!)))
+        navigator.replaceAll(TeamsScreen(::teamsModelBuilder))
     }
 
     private fun navigateToEditTeam(navigator: Navigator, team: Team?) {
-        navigator.push(item = EditTeamScreen(EditTeamModel(navigateToScreen = ::navigateTo, database = database!!, team = team)))
+        navigator.push(item = EditTeamScreen { editTeamModelBuilder(team = team) })
     }
 
     private fun navigateToPlayers(navigator: Navigator) {
-        navigator.replaceAll(PlayersScreen(PlayersModel(navigateToScreen = ::navigateTo, database = database!!)))
+        navigator.replaceAll(PlayersScreen(::playersModelBuilder))
     }
 
     private fun navigateToEditPlayer(navigator: Navigator, player: Player?) {
-        navigator.push(item = EditPlayerScreen(EditPlayerModel(navigateToScreen = ::navigateTo, database = database!!, player = player)))
+        navigator.push(item = EditPlayerScreen { editPlayerModelBuilder(player = player) })
     }
 
     private fun navigateToRounds(navigator: Navigator) {
-        navigator.replaceAll(RoundsScreen(RoundsModel(navigateToScreen = ::navigateTo, database = database!!)))
+        navigator.replaceAll(RoundsScreen(::roundsModelBuilder))
     }
 }

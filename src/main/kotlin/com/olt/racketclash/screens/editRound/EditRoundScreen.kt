@@ -16,11 +16,11 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
 
-class EditRoundScreen(private val model: EditRoundModel) : Screen {
+class EditRoundScreen(private val modelBuilder: () -> EditRoundModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel { model }
+        val screenModel = rememberScreenModel { modelBuilder() }
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(

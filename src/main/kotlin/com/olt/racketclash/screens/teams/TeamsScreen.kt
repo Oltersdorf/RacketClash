@@ -24,11 +24,11 @@ import com.olt.racketclash.data.Team
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
 
-class TeamsScreen(private val model: TeamsModel) : Screen {
+class TeamsScreen(private val modelBuilder: () -> TeamsModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel { model }
+        val screenModel = rememberScreenModel { modelBuilder() }
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(

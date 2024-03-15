@@ -17,11 +17,11 @@ import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
 
-class EditPlayerScreen(private val model: EditPlayerModel) : Screen {
+class EditPlayerScreen(private val modelBuilder: () -> EditPlayerModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel { model }
+        val screenModel = rememberScreenModel { modelBuilder() }
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(

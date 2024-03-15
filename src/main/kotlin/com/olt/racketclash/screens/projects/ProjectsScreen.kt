@@ -26,11 +26,11 @@ import com.olt.racketclash.ui.LazyColumnWithScroll
 
 internal typealias deleteProject = (name: String) -> Unit
 
-class ProjectsScreen(private val model: ProjectsModel) : Screen {
+class ProjectsScreen(private val modelBuilder: () -> ProjectsModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel { model }
+        val screenModel = rememberScreenModel { modelBuilder() }
         val stateModel by screenModel.state.collectAsState()
 
         Surface(

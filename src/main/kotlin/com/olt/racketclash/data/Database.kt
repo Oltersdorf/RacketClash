@@ -7,6 +7,7 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.olt.racketclash.database.GameTable
 import com.olt.racketclash.database.RacketClashDatabase
+import com.olt.racketclash.database.RacketClashDatabase.Companion.Schema
 import com.olt.racketclash.database.TeamTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -37,6 +38,10 @@ class Database private constructor(
         teamTableAdapter = TeamTable.Adapter(strengthAdapter = IntColumnAdapter),
         gameTableAdapter = GameTable.Adapter(set1RightAdapter = IntColumnAdapter, set1LeftAdapter = IntColumnAdapter)
     )
+
+    init {
+        Schema.create(driver)
+    }
 
     fun teams(): Flow<List<Team>> =
         database

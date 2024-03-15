@@ -25,11 +25,11 @@ import com.olt.racketclash.ui.TournamentTabs
 internal typealias editGame = (id: Long, set1Left: Int, set1Right: Int, isDone: Boolean) -> Unit
 internal typealias deleteRound = (roundName: String) -> Unit
 
-class RoundsScreen(private val model: RoundsModel) : Screen {
+class RoundsScreen(private val modelBuilder: () -> RoundsModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel { model }
+        val screenModel = rememberScreenModel { modelBuilder() }
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(

@@ -24,11 +24,11 @@ import com.olt.racketclash.ui.*
 
 internal typealias updateActive = (id: Long, active: Boolean) -> Unit
 
-class PlayersScreen(private val model: PlayersModel) : Screen {
+class PlayersScreen(private val modelBuilder: () -> PlayersModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel { model }
+        val screenModel = rememberScreenModel { modelBuilder() }
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(

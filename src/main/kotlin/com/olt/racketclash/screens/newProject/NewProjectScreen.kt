@@ -15,11 +15,11 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
 import com.olt.racketclash.navigation.Screens
 
-class NewProjectScreen(private val model: NewProjectModel) : Screen {
+class NewProjectScreen(private val modelBuilder: () -> NewProjectModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel { model }
+        val screenModel = rememberScreenModel { modelBuilder() }
         val stateModel by screenModel.state.collectAsState()
 
         Surface(
