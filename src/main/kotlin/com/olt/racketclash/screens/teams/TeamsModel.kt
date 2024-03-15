@@ -17,10 +17,7 @@ class TeamsModel(
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
             database.teams().collect { teamList ->
-                mutableState.value = Modal(
-                    isLoading = false,
-                    teams = teamList
-                )
+                updateState { Modal(isLoading = false, teams = teamList) }
             }
         }
     }

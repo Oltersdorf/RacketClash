@@ -18,16 +18,14 @@ class RoundsModel(
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
             database.games().collect { gameList ->
-                mutableState.value = mutableState.value.copy(
-                    games = gameList.groupBy { it.roundNumber }.toSortedMap()
-                )
+                updateState { model ->
+                    model.copy(games = gameList.groupBy { it.roundNumber }.toSortedMap())
+                }
             }
         }
         screenModelScope.launch(context = Dispatchers.IO) {
             database.player().collect { playerList ->
-                mutableState.value = mutableState.value.copy(
-                    player = playerList
-                )
+                updateState { it.copy(player = playerList) }
             }
         }
     }

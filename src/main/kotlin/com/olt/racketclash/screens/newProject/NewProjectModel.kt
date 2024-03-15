@@ -16,7 +16,7 @@ class NewProjectModel(
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
             fileHandler.projects().collect { projects ->
-                mutableState.value = Model(projectNames = projects.map { it.name })
+                updateState { Model(projectNames = projects.map { it.name }) }
                 changeProjectName(newName = mutableState.value.projectName)
             }
         }
@@ -38,16 +38,16 @@ class NewProjectModel(
     fun changeProjectName(newName: String) {
         screenModelScope.launch(context = Dispatchers.Default) {
             if (mutableState.value.projectNames.contains(newName) || newName.isBlank())
-                mutableState.value = mutableState.value.copy(canCreate = false, projectName = newName)
+                updateState { it.copy(canCreate = false, projectName = newName) }
             else
-                mutableState.value = mutableState.value.copy(canCreate = true, projectName = newName)
+                updateState { it.copy(canCreate = true, projectName = newName) }
         }
     }
 
     fun changeLocation(newLocation: String?) {
         screenModelScope.launch(context = Dispatchers.Default) {
             if (newLocation != null)
-                mutableState.value = mutableState.value.copy(location = newLocation)
+                updateState { it.copy(location = newLocation) }
         }
     }
 }

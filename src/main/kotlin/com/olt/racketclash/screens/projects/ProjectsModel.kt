@@ -16,8 +16,8 @@ class ProjectsModel(
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
-            fileHandler.projects().collect {
-                mutableState.value = Model(projects = it)
+            fileHandler.projects().collect { projects ->
+                updateState { Model(projects = projects) }
             }
         }
     }
