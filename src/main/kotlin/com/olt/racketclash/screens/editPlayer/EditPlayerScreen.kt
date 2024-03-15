@@ -27,7 +27,8 @@ class EditPlayerScreen(private val model: EditPlayerModel) : Screen {
         TournamentScaffold(
             topAppBarTitle = "Edit Player",
             hasBackPress = true,
-            selectedTab = TournamentTabs.Player
+            selectedTab = TournamentTabs.Players,
+            navigateTo = screenModel::navigateTo
         ) {
             EditPlayerView(
                 paddingValues = it,

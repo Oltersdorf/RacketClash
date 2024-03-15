@@ -12,4 +12,5 @@ sealed class Screens {
     data class EditTeam(val team: Team?) : Screens()
     data object Players : Screens()
     data class EditPlayer(val player: Player?) : Screens()
+    data object Games : Screens()
 }

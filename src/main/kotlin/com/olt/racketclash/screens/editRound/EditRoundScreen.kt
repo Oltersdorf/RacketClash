@@ -22,7 +22,8 @@ class EditRoundScreen : Screen {
         TournamentScaffold(
             topAppBarTitle = "Edit Round",
             hasBackPress = true,
-            selectedTab = TournamentTabs.Games
+            selectedTab = TournamentTabs.Games,
+            navigateTo = screenModel::navigateTo
         ) {
             EditRoundView(paddingValues = it)
         }

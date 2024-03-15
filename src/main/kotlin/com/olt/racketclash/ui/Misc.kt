@@ -21,13 +21,12 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Database
-import com.olt.racketclash.screens.players.PlayersScreen
+import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.screens.rounds.RoundsScreen
-import com.olt.racketclash.screens.teams.TeamsScreen
 
 @Composable
 fun Loading(paddingValues: PaddingValues) {
@@ -74,13 +73,13 @@ fun LazyColumnWithScroll(
 }
 
 sealed class TournamentTabs(val tab: Tab) {
-    data object Teams : TournamentTabs(tab = Tab(onClick = { TeamsScreen(database = Database.database!!) },imageVector = Icons.Default.Person, text = "Teams"))
-    data object Player : TournamentTabs(tab = Tab(onClick = { PlayersScreen(database = Database.database!!) },imageVector = Icons.Default.Person, text = "Player"))
-    data object Games : TournamentTabs(tab = Tab(onClick = { RoundsScreen(database = Database.database!!) },imageVector = Icons.Default.List, text = "Games"))
+    data object Teams : TournamentTabs(tab = Tab(target = Screens.Teams, imageVector = Icons.Default.Person, text = "Teams"))
+    data object Players : TournamentTabs(tab = Tab(target = Screens.Players, imageVector = Icons.Default.Person, text = "Player"))
+    data object Games : TournamentTabs(tab = Tab(target = Screens.Games ,imageVector = Icons.Default.List, text = "Games"))
 }
 
 data class Tab(
-    val onClick: () -> Screen,
+    val target: Screens,
     val imageVector: ImageVector,
     val text: String
 )
@@ -91,6 +90,7 @@ fun TournamentScaffold(
     topAppBarActions: @Composable (RowScope.() -> Unit) = {},
     hasBackPress: Boolean = false,
     selectedTab: TournamentTabs?,
+    navigateTo: (Screens, Navigator) -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
 
@@ -98,20 +98,22 @@ fun TournamentScaffold(
         topAppBarTitle = topAppBarTitle,
         topAppBarActions = topAppBarActions,
         hasBackPress = hasBackPress,
-        tabs = listOf(TournamentTabs.Teams.tab, TournamentTabs.Player.tab, TournamentTabs.Games.tab),
+        tabs = listOf(TournamentTabs.Teams.tab, TournamentTabs.Players.tab, TournamentTabs.Games.tab),
         selectedTab = selectedTab?.tab,
+        navigateTo = navigateTo,
         content = content
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigationScaffold(
+private fun NavigationScaffold(
     topAppBarTitle: String,
     topAppBarActions: @Composable (RowScope.() -> Unit) = {},
     hasBackPress: Boolean = false,
     tabs: List<Tab>,
     selectedTab: Tab?,
+    navigateTo: (Screens, Navigator) -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
@@ -142,7 +144,8 @@ fun NavigationScaffold(
                     tabs.forEach {
                         NavigationScaffoldButton(
                             tab = it,
-                            selected = it == selectedTab
+                            selected = it == selectedTab,
+                            navigateTo = navigateTo
                         )
                     }
                 }
@@ -155,12 +158,13 @@ fun NavigationScaffold(
 @Composable
 private fun RowScope.NavigationScaffoldButton(
     tab: Tab,
-    selected: Boolean
+    selected: Boolean,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     val navigator = LocalNavigator.currentOrThrow
 
     Button(
-        onClick = { navigator.replaceAll(tab.onClick()) },
+        onClick = { navigateTo(tab.target, navigator) },
         enabled = !selected,
         modifier = Modifier.weight(1.0f),
         shape = RectangleShape

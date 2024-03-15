@@ -35,6 +35,7 @@ class RootNavigator {
             is Screens.EditTeam -> navigateToEditTeam(navigator = navigator, team = screens.team)
             Screens.Players -> navigateToPlayers(navigator = navigator)
             is Screens.EditPlayer -> navigateToEditPlayer(navigator = navigator, player = screens.player)
+            Screens.Games -> {}
         }
     }
 

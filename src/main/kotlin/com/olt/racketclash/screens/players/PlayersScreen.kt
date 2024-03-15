@@ -43,7 +43,8 @@ class PlayersScreen(private val model: PlayersModel) : Screen {
                     )
                 }
             },
-            selectedTab = TournamentTabs.Player
+            selectedTab = TournamentTabs.Players,
+            navigateTo = screenModel::navigateTo
         ) {
             PlayerView(paddingValues = it, model = stateModel, updateActive = screenModel::updateActive, navigateTo = screenModel::navigateTo)
         }

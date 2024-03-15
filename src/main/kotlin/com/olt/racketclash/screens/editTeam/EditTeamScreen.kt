@@ -29,7 +29,8 @@ class EditTeamScreen(private val model: EditTeamModel) : Screen {
         TournamentScaffold(
             topAppBarTitle = "Edit Team",
             hasBackPress = true,
-            selectedTab = TournamentTabs.Teams
+            selectedTab = TournamentTabs.Teams,
+            navigateTo = screenModel::navigateTo
         ) {
             EditTeamView(
                 paddingValues = it,

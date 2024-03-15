@@ -45,7 +45,8 @@ class RoundsScreen(private val database: Database) : Screen {
                     )
                 }
             },
-            selectedTab = TournamentTabs.Games
+            selectedTab = TournamentTabs.Games,
+            navigateTo = screenModel::navigateTo
         ) {
             GamesView(paddingValues = it, games = model.games, editGame = screenModel::updateGame, deleteRound = screenModel::deleteRound)
         }

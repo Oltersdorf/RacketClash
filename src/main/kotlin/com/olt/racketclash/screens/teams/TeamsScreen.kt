@@ -44,6 +44,7 @@ class TeamsScreen(private val model: TeamsModel) : Screen {
                 }
             },
             selectedTab = TournamentTabs.Teams,
+            navigateTo = screenModel::navigateTo
         ) {
             TeamView(paddingValues = it, modal = stateModel, deleteTeam = screenModel::deleteTeam, navigateTo = screenModel::navigateTo)
         }
