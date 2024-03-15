@@ -34,7 +34,9 @@ class EditPlayerScreen(private val modelBuilder: () -> EditPlayerModel) : Screen
                 paddingValues = it,
                 player = stateModel.player,
                 teams = stateModel.teams,
+                selectedTeam = stateModel.selectedTeam,
                 updatePlayer = screenModel::updatePlayer,
+                selectTeam = screenModel::selectTeam,
                 navigateTo = screenModel::navigateTo
             )
         }
@@ -47,7 +49,9 @@ private fun EditPlayerView(
     paddingValues: PaddingValues,
     player: Player?,
     teams: List<Team>,
+    selectedTeam: Team,
     updatePlayer: (Long?, String, Long) -> Unit,
+    selectTeam: (Long) -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
     Surface(
@@ -69,7 +73,6 @@ private fun EditPlayerView(
             )
 
             var expanded by remember { mutableStateOf(false) }
-            var selectedTeam by remember { mutableStateOf(teams.find { it.id == player?.id } ?: Team(name = "<No Team Selected>", id = -1L, strength = 0, size = 0)) }
 
             ExposedDropdownMenuBox(
                 modifier = Modifier.padding(top = 50.dp, bottom = 50.dp),
@@ -94,7 +97,7 @@ private fun EditPlayerView(
                         DropdownMenuItem(
                             text = { Text(text = it.name) },
                             onClick = {
-                                selectedTeam = it
+                                selectTeam(it.id)
                                 expanded = false
                             },
                             contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding

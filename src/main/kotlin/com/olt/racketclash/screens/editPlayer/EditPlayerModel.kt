@@ -20,15 +20,22 @@ class EditPlayerModel(
         screenModelScope.launch(context = Dispatchers.IO) {
             database.teams().collect { teamsList ->
                 mutableState.value = mutableState.value.copy(
-                    teams = teamsList
+                    teams = teamsList,
+                    selectedTeam = teamsList.find { it.id == mutableState.value.player?.id } ?: noTeamSelected
                 )
             }
         }
     }
 
+    companion object {
+        val noTeamSelected: Team
+            get() = Team(name = "<No Team Selected>", id = -1L, strength = 0, size = 0)
+    }
+
     data class Model(
         val player: Player?,
-        val teams: List<Team> = emptyList()
+        val teams: List<Team> = emptyList(),
+        val selectedTeam: Team = noTeamSelected
     )
 
     fun updatePlayer(id: Long?, name: String, teamId: Long) {
@@ -37,6 +44,12 @@ class EditPlayerModel(
                 database.addPlayer(name = name, teamId = teamId)
             else
                 database.updatePlayer(id = id, name = name, teamId = teamId)
+        }
+    }
+
+    fun selectTeam(id: Long) {
+        screenModelScope.launch(context = Dispatchers.Default) {
+            mutableState.value = mutableState.value.copy(selectedTeam = mutableState.value.teams.find { it.id == id } ?: noTeamSelected)
         }
     }
 }
