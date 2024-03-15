@@ -13,4 +13,5 @@ sealed class Screens {
     data object Players : Screens()
     data class EditPlayer(val player: Player?) : Screens()
     data object Games : Screens()
+    data object EditRound : Screens()
 }

@@ -9,16 +9,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
 
-class EditRoundScreen : Screen {
+class EditRoundScreen(private val model: EditRoundModel) : Screen {
 
     @Composable
     override fun Content() {
+        val screenModel = rememberScreenModel { model }
+        val stateModel by screenModel.state.collectAsState()
+
         TournamentScaffold(
             topAppBarTitle = "Edit Round",
             hasBackPress = true,

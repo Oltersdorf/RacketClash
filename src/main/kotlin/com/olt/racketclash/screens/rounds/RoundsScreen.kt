@@ -17,8 +17,8 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.olt.racketclash.data.Database
 import com.olt.racketclash.data.Game
+import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.screens.editRound.EditRoundScreen
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
@@ -26,19 +26,19 @@ import com.olt.racketclash.ui.TournamentTabs
 internal typealias editGame = (id: Long, set1Left: Int, set1Right: Int, isDone: Boolean) -> Unit
 internal typealias deleteRound = (roundName: String) -> Unit
 
-class RoundsScreen(private val database: Database) : Screen {
+class RoundsScreen(private val model: RoundsModel) : Screen {
 
     @Composable
     override fun Content() {
-        val screenModel = rememberScreenModel { RoundsModel(database = database) }
-        val model by screenModel.state.collectAsState()
+        val screenModel = rememberScreenModel { model }
+        val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(
             topAppBarTitle = "Games",
             topAppBarActions = {
                 val navigator = LocalNavigator.currentOrThrow
 
-                IconButton(onClick = { navigator.push(EditRoundScreen()) }) {
+                IconButton(onClick = { screenModel.navigateTo(screen = Screens.EditRound, navigator = navigator) }) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add"
@@ -48,7 +48,7 @@ class RoundsScreen(private val database: Database) : Screen {
             selectedTab = TournamentTabs.Games,
             navigateTo = screenModel::navigateTo
         ) {
-            GamesView(paddingValues = it, games = model.games, editGame = screenModel::updateGame, deleteRound = screenModel::deleteRound)
+            GamesView(paddingValues = it, games = stateModel.games, editGame = screenModel::updateGame, deleteRound = screenModel::deleteRound)
         }
     }
 }
