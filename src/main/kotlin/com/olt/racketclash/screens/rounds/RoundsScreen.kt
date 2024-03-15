@@ -19,7 +19,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.navigation.Screens
-import com.olt.racketclash.screens.editRound.EditRoundScreen
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
 

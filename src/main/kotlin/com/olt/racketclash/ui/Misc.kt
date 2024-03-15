@@ -24,9 +24,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.olt.racketclash.data.Database
 import com.olt.racketclash.navigation.Screens
-import com.olt.racketclash.screens.rounds.RoundsScreen
 
 @Composable
 fun Loading(paddingValues: PaddingValues) {
