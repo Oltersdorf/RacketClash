@@ -20,7 +20,7 @@ class RootNavigator {
         when (screens) {
             Screens.Projects -> navigateToProjects(navigator = navigator)
             Screens.NewProject -> navigateToNewProject(navigator = navigator)
-            is Screens.OpenProject -> openProject(navigator = navigator, location = screens.projectLocation)
+            is Screens.OpenProject -> openProject(navigator = navigator, location = screens.projectLocation, projectName = screens.projectName)
             is Screens.Teams -> navigateToTeams(navigator = navigator)
         }
     }
@@ -34,8 +34,8 @@ class RootNavigator {
         navigator.push(NewProjectScreen(NewProjectModel(navigateToScreen = ::navigateTo, fileHandler = fileHandler)))
     }
 
-    private fun openProject(navigator: Navigator, location: String) {
-        database = Database(tournamentPath = location)
+    private fun openProject(navigator: Navigator, location: String, projectName: String) {
+        database = Database(tournamentPath = location, fileHandler = fileHandler, projectName = projectName)
         navigateToTeams(navigator = navigator)
     }
 

@@ -10,16 +10,27 @@ import com.olt.racketclash.database.RacketClashDatabase
 import com.olt.racketclash.database.TeamTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.map
 import java.io.File
 import java.util.*
 
-class Database private constructor(driver: SqlDriver) {
-    constructor(tournamentPath: String) : this(
+class Database private constructor(
+    driver: SqlDriver,
+    private val fileHandler: FileHandler,
+    private val projectName: String
+) {
+    constructor(
+        tournamentPath: String,
+        fileHandler: FileHandler,
+        projectName: String
+    ) : this(
         driver = JdbcSqliteDriver(
             url = "jdbc:sqlite:${File(tournamentPath, "Database.db").absolutePath}",
             properties = Properties().apply { put("foreign_keys", "true") }
-        )
+        ),
+        fileHandler = fileHandler,
+        projectName = projectName
     )
 
     init {
@@ -48,16 +59,18 @@ class Database private constructor(driver: SqlDriver) {
                 }.sortedBy { team -> team.strength }
             }
 
-    fun addTeam(name: String, strength: Int) {
+    suspend fun addTeam(name: String, strength: Int) {
         database.teamQueries.add(name = name, strength = strength)
+        fileHandler.updateTeamCountForProject(projectName = projectName, teamNumber = database.teamQueries.selectAll().executeAsList().size)
     }
 
     fun updateTeam(id: Long, name: String, strength: Int) {
         database.teamQueries.update(id = id, name = name, strength = strength)
     }
 
-    fun deleteTeam(id: Long) {
+    suspend fun deleteTeam(id: Long) {
         database.teamQueries.delete(id = id)
+        fileHandler.updateTeamCountForProject(projectName = projectName, teamNumber = database.teamQueries.selectAll().executeAsList().size)
     }
 
     fun player() : Flow<List<Player>> =
@@ -96,8 +109,9 @@ class Database private constructor(driver: SqlDriver) {
                 }.sortedWith(comparator = compareBy({ it.games.first }, { it.games.second }, { it.sets.first }, { it.sets.second }, { it.points.first }, { it.points.second }))
             }
 
-    fun addPlayer(name: String, teamId: Long) {
+    suspend fun addPlayer(name: String, teamId: Long) {
         database.playerQueries.add(name = name, teamId = teamId)
+        fileHandler.updatePlayerCountForProject(projectName = projectName, playerNumber = database.playerQueries.selectAll().executeAsList().size)
     }
 
     fun updatePlayer(id: Long, name: String, teamId: Long) {
@@ -108,8 +122,9 @@ class Database private constructor(driver: SqlDriver) {
         database.playerQueries.setActive(id = id, active = active)
     }
 
-    fun deletePlayer(id: Long) {
+    suspend fun deletePlayer(id: Long) {
         database.playerQueries.delete(id = id)
+        fileHandler.updatePlayerCountForProject(projectName = projectName, playerNumber = database.playerQueries.selectAll().executeAsList().size)
     }
 
     fun games() : Flow<List<Game>> =

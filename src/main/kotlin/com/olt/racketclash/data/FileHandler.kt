@@ -18,7 +18,7 @@ class FileHandler {
     private val racketClashPath: Path = Path(System.getProperty("user.home"), ".racketClash")
     private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
 
-    private val projectsChannel = MutableSharedFlow<List<Project>>(replay = 1)
+    private val projectsChannel = MutableStateFlow<List<Project>>(emptyList())
 
     companion object {
         val defaultProjectLocation: String = Path(System.getProperty("user.home")).absolutePathString()
@@ -31,14 +31,16 @@ class FileHandler {
         }
     }
 
-    fun projects() : SharedFlow<List<Project>> = projectsChannel.asSharedFlow()
+    fun projects() : StateFlow<List<Project>> = projectsChannel.asStateFlow()
+
+    private fun currentTime(): String = LocalDateTime.now().format(dateTimeFormatter)
 
     suspend fun addProject(name: String, location: String) {
         val projectPath = Path(location, name)
         projectPath.createDirectories()
         val newProjects = listOf(
-            Project(name = name, lastModified = LocalDateTime.now().format(dateTimeFormatter), location = projectPath.absolutePathString()),
-            *projectsChannel.last().toTypedArray()
+            Project(name = name, lastModified = currentTime(), location = projectPath.absolutePathString()),
+            *projectsChannel.value.toTypedArray()
         ).sortedBy { it.lastModified }
 
         writeProjects(projects = newProjects)
@@ -47,10 +49,10 @@ class FileHandler {
     }
 
     suspend fun deleteProject(name: String) {
-        val project = projectsChannel.last().find { it.name == name }
+        val project = projectsChannel.value.find { it.name == name }
 
         if (project != null) {
-            val newProjects = projectsChannel.last().toMutableList()
+            val newProjects = projectsChannel.value.toMutableList()
             newProjects.remove(project)
             writeProjects(newProjects.toList())
             projectsChannel.emit(newProjects)
@@ -65,6 +67,20 @@ class FileHandler {
             val projects: List<Project> = Json.decodeFromString<List<Project>>(jsonString)
             projectsChannel.emit(projects)
         }
+    }
+
+    suspend fun updatePlayerCountForProject(projectName: String, playerNumber: Int) {
+        val projects = projectsChannel.value.toMutableList()
+        projects.replaceAll { if (it.name == projectName) it.copy(playerNumber = playerNumber, lastModified = currentTime()) else it }
+        writeProjects(projects)
+        projectsChannel.emit(projects)
+    }
+
+    suspend fun updateTeamCountForProject(projectName: String, teamNumber: Int) {
+        val projects = projectsChannel.value.toMutableList()
+        projects.replaceAll { if (it.name == projectName) it.copy(teamNumber = teamNumber, lastModified = currentTime()) else it }
+        writeProjects(projects)
+        projectsChannel.emit(projects)
     }
 
     private fun writeProjects(projects: List<Project>) {
