@@ -1,4 +1,4 @@
-package com.olt.racketclash.screens.rounds
+package com.olt.racketclash.screens.games
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -25,7 +25,7 @@ import com.olt.racketclash.ui.TournamentTabs
 internal typealias editGame = (id: Long, set1Left: Int, set1Right: Int, isDone: Boolean) -> Unit
 internal typealias deleteRound = (roundName: String) -> Unit
 
-class RoundsScreen(private val modelBuilder: () -> RoundsModel) : Screen {
+class GamesScreen(private val modelBuilder: () -> GamesModel) : Screen {
 
     @Composable
     override fun Content() {

@@ -1,4 +1,4 @@
-package com.olt.racketclash.screens.rounds
+package com.olt.racketclash.screens.games
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
@@ -10,10 +10,10 @@ import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class RoundsModel(
+class GamesModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
     private val database: Database
-) : NavigableStateScreenModel<RoundsModel.Modal>(navigateToScreen, Modal()) {
+) : NavigableStateScreenModel<GamesModel.Modal>(navigateToScreen, Modal()) {
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {

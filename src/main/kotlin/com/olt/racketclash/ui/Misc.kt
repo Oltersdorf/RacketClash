@@ -73,7 +73,7 @@ fun LazyColumnWithScroll(
 sealed class TournamentTabs(val tab: Tab) {
     data object Teams : TournamentTabs(tab = Tab(target = Screens.Teams, imageVector = Icons.Default.Person, text = "Teams"))
     data object Players : TournamentTabs(tab = Tab(target = Screens.Players, imageVector = Icons.Default.Person, text = "Player"))
-    data object Games : TournamentTabs(tab = Tab(target = Screens.Rounds ,imageVector = Icons.Default.List, text = "Games"))
+    data object Games : TournamentTabs(tab = Tab(target = Screens.Games ,imageVector = Icons.Default.List, text = "Games"))
 }
 
 data class Tab(

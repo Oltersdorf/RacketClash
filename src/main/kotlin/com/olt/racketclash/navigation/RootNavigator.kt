@@ -17,8 +17,8 @@ import com.olt.racketclash.screens.newProject.NewProjectScreen
 import com.olt.racketclash.screens.players.PlayersModel
 import com.olt.racketclash.screens.players.PlayersScreen
 import com.olt.racketclash.screens.projects.ProjectsScreen
-import com.olt.racketclash.screens.rounds.RoundsModel
-import com.olt.racketclash.screens.rounds.RoundsScreen
+import com.olt.racketclash.screens.games.GamesModel
+import com.olt.racketclash.screens.games.GamesScreen
 import com.olt.racketclash.screens.teams.TeamsModel
 import com.olt.racketclash.screens.teams.TeamsScreen
 
@@ -47,8 +47,8 @@ class RootNavigator {
     private fun editPlayerModelBuilder(player: Player?): EditPlayerModel =
         EditPlayerModel(navigateToScreen = ::navigateTo, database = database!!, player = player)
 
-    private fun roundsModelBuilder(): RoundsModel =
-        RoundsModel(navigateToScreen = ::navigateTo, database = database!!)
+    private fun gamesModelBuilder(): GamesModel =
+        GamesModel(navigateToScreen = ::navigateTo, database = database!!)
 
     private fun editRoundModelBuilder(): EditRoundModel =
         EditRoundModel(navigateToScreen = ::navigateTo, database = database!!)
@@ -63,7 +63,7 @@ class RootNavigator {
             is Screens.EditTeam -> navigateToEditTeam(navigator = navigator, team = screens.team)
             Screens.Players -> navigateToPlayers(navigator = navigator)
             is Screens.EditPlayer -> navigateToEditPlayer(navigator = navigator, player = screens.player)
-            Screens.Rounds -> navigateToRounds(navigator = navigator)
+            Screens.Games -> navigateToGames(navigator = navigator)
             Screens.EditRound -> navigateToEditRound(navigator = navigator)
         }
     }
@@ -98,8 +98,8 @@ class RootNavigator {
         navigator.push(item = EditPlayerScreen { editPlayerModelBuilder(player = player) })
     }
 
-    private fun navigateToRounds(navigator: Navigator) {
-        navigator.replaceAll(RoundsScreen(::roundsModelBuilder))
+    private fun navigateToGames(navigator: Navigator) {
+        navigator.replaceAll(GamesScreen(::gamesModelBuilder))
     }
 
     private fun navigateToEditRound(navigator: Navigator) {
