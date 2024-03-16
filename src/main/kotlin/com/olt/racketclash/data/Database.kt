@@ -8,6 +8,7 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.olt.racketclash.database.GameTable
 import com.olt.racketclash.database.RacketClashDatabase
 import com.olt.racketclash.database.RacketClashDatabase.Companion.Schema
+import com.olt.racketclash.database.RoundTable
 import com.olt.racketclash.database.TeamTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -36,7 +37,14 @@ class Database private constructor(
     private val database = RacketClashDatabase(
         driver = driver,
         teamTableAdapter = TeamTable.Adapter(strengthAdapter = IntColumnAdapter),
-        gameTableAdapter = GameTable.Adapter(set1RightAdapter = IntColumnAdapter, set1LeftAdapter = IntColumnAdapter)
+        gameTableAdapter = GameTable.Adapter(
+            set1LeftAdapter = IntColumnAdapter, set1RightAdapter = IntColumnAdapter,
+            set2LeftAdapter = IntColumnAdapter, set2RightAdapter = IntColumnAdapter,
+            set3LeftAdapter = IntColumnAdapter, set3RightAdapter = IntColumnAdapter,
+            set4LeftAdapter = IntColumnAdapter, set4RightAdapter = IntColumnAdapter,
+            set5LeftAdapter = IntColumnAdapter, set5RightAdapter = IntColumnAdapter
+        ),
+        roundTableAdapter = RoundTable.Adapter(orderNumberAdapter = IntColumnAdapter)
     )
 
     init {
@@ -123,6 +131,26 @@ class Database private constructor(
         fileHandler.updatePlayerCountForProject(projectName = projectName, playerNumber = database.playerQueries.selectAll().executeAsList().size)
     }
 
+    fun rounds() : Flow<List<Round>> =
+        database
+            .roundQueries
+            .selectAll()
+            .asFlow()
+            .mapToList(context = Dispatchers.IO)
+            .map { list ->
+                list.map {
+                    Round(
+                        id = it.id,
+                        name = it.name,
+                        order = it.orderNumber
+                    )
+                }
+            }
+
+    fun addRound(name: String) {
+        database.roundQueries.add(name = name)
+    }
+
     fun games() : Flow<List<Game>> =
         database
             .gameQueries
@@ -133,8 +161,7 @@ class Database private constructor(
                 list.map { selectAll ->
                     Game(
                         id = selectAll.id,
-                        roundName = selectAll.roundName,
-                        roundNumber = selectAll.roundNumber.toInt(),
+                        roundId = selectAll.roundId,
                         isDone = selectAll.isDone,
                         isBye = selectAll.isBye,
                         playerLeft1Id = selectAll.playerLeft1Id,
@@ -146,20 +173,66 @@ class Database private constructor(
                         playerRight2Id = selectAll.playerRight2Id,
                         playerRight2Name = selectAll.playerRight2Name,
                         set1Left = selectAll.set1Left,
-                        set1Right = selectAll.set1Right
+                        set1Right = selectAll.set1Right,
+                        set2Left = selectAll.set2Left,
+                        set2Right = selectAll.set2Right,
+                        set3Left = selectAll.set3Left,
+                        set3Right = selectAll.set3Right,
+                        set4Left = selectAll.set4Left,
+                        set4Right = selectAll.set4Right,
+                        set5Left = selectAll.set5Left,
+                        set5Right = selectAll.set5Right
                     )
                 }
             }
 
-    fun addGame(roundName: String, playerLeft1Id: Long?, playerLeft2Id: Long?, playerRight1Id: Long?, playerRight2Id: Long?, isBye: Boolean) {
-        database.gameQueries.add(roundName = roundName, playerLeft1Id = playerLeft1Id, playerLeft2Id = playerLeft2Id, playerRight1Id = playerRight1Id, playerRight2Id = playerRight2Id, isBye = isBye, roundNumber = 1)
+    fun addGame(
+        roundId: Long,
+        playerLeft1Id: Long?,
+        playerLeft2Id: Long?,
+        playerRight1Id: Long?,
+        playerRight2Id: Long?
+    ) {
+        database.gameQueries.add(
+            roundId = roundId,
+            playerLeft1Id = playerLeft1Id,
+            playerLeft2Id = playerLeft2Id,
+            playerRight1Id = playerRight1Id,
+            playerRight2Id = playerRight2Id
+        )
     }
 
-    fun updateGame(id: Long, set1Left: Int, set1Right: Int, isDone: Boolean) {
-        database.gameQueries.update(id = id, set1Left = set1Left, set1Right = set1Right, isDone = isDone)
+    fun updateGame(
+        id: Long,
+        set1Left: Int,
+        set1Right: Int,
+        set2Left: Int,
+        set2Right: Int,
+        set3Left: Int,
+        set3Right: Int,
+        set4Left: Int,
+        set4Right: Int,
+        set5Left: Int,
+        set5Right: Int,
+        isDone: Boolean
+    ) {
+        database.gameQueries.update(
+            id = id,
+            set1Left = set1Left,
+            set1Right = set1Right,
+            set2Left = set2Left,
+            set2Right = set2Right,
+            set3Left = set3Left,
+            set3Right = set3Right,
+            set4Left = set4Left,
+            set4Right = set4Right,
+            set5Left = set5Left,
+            set5Right = set5Right,
+            isDone = isDone
+        )
     }
 
-    fun deleteRound(roundName: String) {
-        database.gameQueries.delete(roundName = roundName)
+    fun deleteGame(id: Long) {
+        database.gameQueries.delete(id = id)
     }
 }

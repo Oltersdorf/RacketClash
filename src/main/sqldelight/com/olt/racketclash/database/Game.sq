@@ -3,8 +3,7 @@ import kotlin.Int;
 
 CREATE TABLE IF NOT EXISTS gameTable (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    roundName TEXT NOT NULL,
-    roundNumber INTEGER NOT NULL,
+    roundId INTEGER NOT NULL,
     isDone INTEGER AS Boolean NOT NULL DEFAULT FALSE,
     isBye INTEGER AS Boolean NOT NULL DEFAULT FALSE,
     playerLeft1Id INTEGER DEFAULT NULL,
@@ -13,6 +12,15 @@ CREATE TABLE IF NOT EXISTS gameTable (
     playerRight2Id INTEGER DEFAULT NULL,
     set1Left INTEGER AS Int NOT NULL DEFAULT 0,
     set1Right INTEGER AS Int NOT NULL DEFAULT 0,
+    set2Left INTEGER AS Int NOT NULL DEFAULT 0,
+    set2Right INTEGER AS Int NOT NULL DEFAULT 0,
+    set3Left INTEGER AS Int NOT NULL DEFAULT 0,
+    set3Right INTEGER AS Int NOT NULL DEFAULT 0,
+    set4Left INTEGER AS Int NOT NULL DEFAULT 0,
+    set4Right INTEGER AS Int NOT NULL DEFAULT 0,
+    set5Left INTEGER AS Int NOT NULL DEFAULT 0,
+    set5Right INTEGER AS Int NOT NULL DEFAULT 0,
+    FOREIGN KEY (roundId) REFERENCES roundTable (id),
     FOREIGN KEY (playerLeft1Id) REFERENCES playerTable (id),
     FOREIGN KEY (playerLeft2Id) REFERENCES playerTable (id),
     FOREIGN KEY (playerRight1Id) REFERENCES playerTable (id),
@@ -20,12 +28,16 @@ CREATE TABLE IF NOT EXISTS gameTable (
 );
 
 selectAll:
-SELECT gameTable.id, roundName, roundNumber, isDone, isBye,
+SELECT gameTable.id, roundId, isDone, isBye,
 playerLeft1Id, p1L.name AS playerLeft1Name,
 playerLeft2Id, p2L.name AS playerLeft2Name,
 playerRight1Id, p1R.name AS playerRight1Name,
 playerRight2Id, p2R.name AS playerRight2Name,
-set1Left, set1Right
+set1Left, set1Right,
+set2Left, set2Right,
+set3Left, set3Right,
+set4Left, set4Right,
+set5Left, set5Right
 FROM gameTable
 LEFT JOIN playerTable AS p1L ON p1L.id = gameTable.playerLeft1Id
 LEFT JOIN playerTable AS p2L ON p2L.id = gameTable.playerLeft2Id
@@ -34,14 +46,19 @@ LEFT JOIN playerTable AS p2R ON p2R.id = gameTable.playerRight2Id
 GROUP BY gameTable.id;
 
 add:
-INSERT INTO gameTable(roundName, roundNumber, playerLeft1Id, playerLeft2Id, playerRight1Id, playerRight2Id, isBye)
-VALUES (:roundName, :roundNumber, :playerLeft1Id, :playerLeft2Id, :playerRight1Id, :playerRight2Id, :isBye);
+INSERT INTO gameTable(roundId, playerLeft1Id, playerLeft2Id, playerRight1Id, playerRight2Id)
+VALUES (:roundId, :playerLeft1Id, :playerLeft2Id, :playerRight1Id, :playerRight2Id);
 
 update:
 UPDATE gameTable
-SET set1Left = :set1Left, set1Right = :set1Right, isDone = :isDone
+SET set1Left = :set1Left, set1Right = :set1Right,
+set2Left = :set2Left, set2Right = :set2Right,
+set3Left = :set3Left, set3Right = :set3Right,
+set4Left = :set4Left, set4Right = :set4Right,
+set5Left = :set5Left, set5Right = :set5Right,
+isDone = :isDone
 WHERE id = :id;
 
 delete:
 DELETE FROM gameTable
-WHERE roundName = :roundName;
+WHERE id = :id;

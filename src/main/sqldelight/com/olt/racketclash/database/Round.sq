@@ -1,0 +1,14 @@
+import kotlin.Int;
+
+CREATE TABLE IF NOT EXISTS roundTable (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    name TEXT NOT NULL,
+    orderNumber INTEGER AS Int UNIQUE NOT NULL
+);
+
+selectAll:
+SELECT * FROM roundTable;
+
+add:
+INSERT INTO roundTable(name, orderNumber)
+VALUES (:name, (SELECT COALESCE(MAX(orderNumber), 0) FROM roundTable) + 1);

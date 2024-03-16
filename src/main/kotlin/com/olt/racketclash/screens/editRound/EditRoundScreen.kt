@@ -29,13 +29,16 @@ class EditRoundScreen(private val modelBuilder: () -> EditRoundModel) : Screen {
             selectedTab = TournamentTabs.Games,
             navigateTo = screenModel::navigateTo
         ) {
-            EditRoundView(paddingValues = it)
+            EditRoundView(paddingValues = it, addRound = screenModel::addRound)
         }
     }
 }
 
 @Composable
-private fun EditRoundView(paddingValues: PaddingValues) {
+private fun EditRoundView(
+    paddingValues: PaddingValues,
+    addRound: (String) -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxSize().padding(paddingValues = paddingValues)
     ) {
@@ -61,7 +64,10 @@ private fun EditRoundView(paddingValues: PaddingValues) {
                 Button(onClick = { navigator.pop() }) {
                     Text("Cancel")
                 }
-                Button(onClick = { navigator.pop() }) {
+                Button(onClick = {
+                    addRound(name)
+                    navigator.pop()
+                }) {
                     Text("Save")
                 }
             }

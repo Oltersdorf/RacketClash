@@ -18,12 +18,12 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Game
+import com.olt.racketclash.data.Round
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
 
-internal typealias editGame = (id: Long, set1Left: Int, set1Right: Int, isDone: Boolean) -> Unit
-internal typealias deleteRound = (roundName: String) -> Unit
+internal typealias editGame = (Long, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Boolean) -> Unit
 
 class GamesScreen(private val modelBuilder: () -> GamesModel) : Screen {
 
@@ -47,7 +47,7 @@ class GamesScreen(private val modelBuilder: () -> GamesModel) : Screen {
             selectedTab = TournamentTabs.Games,
             navigateTo = screenModel::navigateTo
         ) {
-            GamesView(paddingValues = it, games = stateModel.games, editGame = screenModel::updateGame, deleteRound = screenModel::deleteRound)
+            GamesView(paddingValues = it, rounds = stateModel.rounds, editGame = screenModel::updateGame)
         }
     }
 }
@@ -55,15 +55,14 @@ class GamesScreen(private val modelBuilder: () -> GamesModel) : Screen {
 @Composable
 private fun GamesView(
     paddingValues: PaddingValues,
-    games: Map<Int, List<Game>>,
-    editGame: editGame,
-    deleteRound: deleteRound
+    rounds: Map<Round, List<Game>>,
+    editGame: editGame
 ) {
     Column(
         modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp)
     ) {
         Header()
-        Graph(games = games, editGame = editGame, deleteRound = deleteRound)
+        Graph(rounds = rounds, editGame = editGame)
     }
 }
 
@@ -128,9 +127,8 @@ private fun Header() {
 
 @Composable
 private fun Graph(
-    games: Map<Int, List<Game>>,
-    editGame: editGame,
-    deleteRound: deleteRound
+    rounds: Map<Round, List<Game>>,
+    editGame: editGame
 ) {
     val horizontalScrollState = rememberLazyListState()
     val verticalScrollState = rememberScrollState()
@@ -141,8 +139,8 @@ private fun Graph(
             modifier = Modifier.verticalScroll(verticalScrollState).padding(20.dp),
             state = horizontalScrollState
         ) {
-            items(items = games.values.toList()) {
-                Round(games = it, editGame = editGame, deleteRound = deleteRound)
+            items(items = rounds.keys.toList()) {
+                Round(name = it.name, games = rounds[it], editGame = editGame)
             }
         }
 
@@ -162,9 +160,9 @@ private fun Graph(
 
 @Composable
 private fun Round(
-    games: List<Game>,
-    editGame: editGame,
-    deleteRound: deleteRound
+    name: String,
+    games: List<Game>?,
+    editGame: editGame
 ) {
     Box(
         modifier = Modifier
@@ -178,10 +176,10 @@ private fun Round(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = games.first().roundName)
+                Text(text = name)
                 Spacer(modifier = Modifier.weight(1.0f))
                 IconButton(
-                    onClick = { deleteRound(games.first().roundName) }
+                    onClick = {  }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -189,8 +187,8 @@ private fun Round(
                     )
                 }
             }
-            repeat(times = games.size - 1) {
-                RoundItem(game = games[it], editGame = editGame)
+            games?.forEach {
+                RoundItem(game = it, editGame = editGame)
             }
         }
     }
@@ -258,7 +256,7 @@ private fun RoundItem(
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
                 IconButton(
-                    onClick = { editGame(game.id, pointsLeft.toInt(), pointsRight.toInt(), true) },
+                    onClick = { editGame(game.id, pointsLeft.toInt(), pointsRight.toInt(), 0, 0, 0, 0, 0, 0, 0, 0, true) },
                     enabled = !game.isDone
                 ) {
                     Icon(
@@ -267,7 +265,7 @@ private fun RoundItem(
                     )
                 }
                 IconButton(
-                    onClick = { editGame(game.id, pointsLeft.toInt(), pointsRight.toInt(), false) },
+                    onClick = { editGame(game.id, pointsLeft.toInt(), pointsRight.toInt(), 0, 0, 0, 0, 0, 0, 0, 0, false) },
                     enabled = game.isDone
                 ) {
                     Icon(
