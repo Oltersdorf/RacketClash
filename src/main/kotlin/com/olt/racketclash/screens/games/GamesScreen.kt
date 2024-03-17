@@ -14,8 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Round
@@ -47,7 +49,7 @@ class GamesScreen(private val modelBuilder: () -> GamesModel) : Screen {
             selectedTab = TournamentTabs.Games,
             navigateTo = screenModel::navigateTo
         ) {
-            GamesView(paddingValues = it, rounds = stateModel.rounds, editGame = screenModel::updateGame)
+            GamesView(paddingValues = it, rounds = stateModel.rounds, editGame = screenModel::updateGame, navigateTo = screenModel::navigateTo)
         }
     }
 }
@@ -56,13 +58,14 @@ class GamesScreen(private val modelBuilder: () -> GamesModel) : Screen {
 private fun GamesView(
     paddingValues: PaddingValues,
     rounds: Map<Round, List<Game>>,
-    editGame: editGame
+    editGame: editGame,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     Column(
         modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp)
     ) {
         Header()
-        Graph(rounds = rounds, editGame = editGame)
+        Graph(rounds = rounds, editGame = editGame, navigateTo = navigateTo)
     }
 }
 
@@ -128,7 +131,8 @@ private fun Header() {
 @Composable
 private fun Graph(
     rounds: Map<Round, List<Game>>,
-    editGame: editGame
+    editGame: editGame,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     val horizontalScrollState = rememberLazyListState()
     val verticalScrollState = rememberScrollState()
@@ -140,7 +144,7 @@ private fun Graph(
             state = horizontalScrollState
         ) {
             items(items = rounds.keys.toList()) {
-                Round(name = it.name, games = rounds[it], editGame = editGame)
+                Round(name = it.name, games = rounds[it] ?: emptyList(), editGame = editGame, navigateTo = navigateTo)
             }
         }
 
@@ -161,35 +165,42 @@ private fun Graph(
 @Composable
 private fun Round(
     name: String,
-    games: List<Game>?,
-    editGame: editGame
+    games: List<Game>,
+    editGame: editGame,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     Box(
         modifier = Modifier
             .border(width = 4.dp, color = MaterialTheme.colorScheme.primaryContainer)
             .background(color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
+            .width(400.dp)
     ) {
         Column(
             modifier = Modifier.padding(6.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp),
         ) {
             Row(
+                modifier = Modifier.background(color = MaterialTheme.colorScheme.primaryContainer),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = name)
+                Text(modifier = Modifier.padding(start = 6.dp), text = name)
                 Spacer(modifier = Modifier.weight(1.0f))
+                val navigator = LocalNavigator.currentOrThrow
                 IconButton(
-                    onClick = {  }
+                    onClick = { navigateTo(Screens.EditRound, navigator) }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete"
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit"
                     )
                 }
             }
-            games?.forEach {
-                RoundItem(game = it, editGame = editGame)
-            }
+            if (games.isEmpty())
+                Text(modifier = Modifier.padding(start = 6.dp), text = "No games available")
+            else
+                games.forEach {
+                    RoundItem(game = it, editGame = editGame)
+                }
         }
     }
 }
