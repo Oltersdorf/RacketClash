@@ -143,7 +143,7 @@ private fun Graph(
             state = horizontalScrollState
         ) {
             items(items = rounds.keys.toList()) {
-                Round(name = it.name, games = rounds[it] ?: emptyList(), editGame = editGame, navigateTo = navigateTo)
+                Round(round = it, games = rounds[it] ?: emptyList(), editGame = editGame, navigateTo = navigateTo)
             }
         }
 
@@ -163,7 +163,7 @@ private fun Graph(
 
 @Composable
 private fun Round(
-    name: String,
+    round: Round,
     games: List<Game>,
     editGame: editGame,
     navigateTo: (Screens, Navigator) -> Unit
@@ -182,11 +182,11 @@ private fun Round(
                 modifier = Modifier.background(color = MaterialTheme.colorScheme.primaryContainer),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(modifier = Modifier.padding(start = 6.dp), text = name)
+                Text(modifier = Modifier.padding(start = 6.dp), text = round.name)
                 Spacer(modifier = Modifier.weight(1.0f))
                 val navigator = LocalNavigator.currentOrThrow
                 IconButton(
-                    onClick = { navigateTo(Screens.EditRound, navigator) }
+                    onClick = { navigateTo(Screens.EditRound(round = round), navigator) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,

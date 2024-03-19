@@ -1,6 +1,7 @@
 package com.olt.racketclash.navigation
 
 import com.olt.racketclash.data.Player
+import com.olt.racketclash.data.Round
 import com.olt.racketclash.data.Team
 
 sealed class Screens {
@@ -14,5 +15,5 @@ sealed class Screens {
     data class EditPlayer(val player: Player?) : Screens()
     data object Games : Screens()
     data object NewRound : Screens()
-    data object EditRound : Screens()
+    data class EditRound(val round: Round) : Screens()
 }
