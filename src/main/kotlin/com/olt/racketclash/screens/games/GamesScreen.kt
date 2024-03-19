@@ -186,7 +186,7 @@ private fun Round(
                 Spacer(modifier = Modifier.weight(1.0f))
                 val navigator = LocalNavigator.currentOrThrow
                 IconButton(
-                    onClick = { navigateTo(Screens.NewRound, navigator) }
+                    onClick = { navigateTo(Screens.EditRound, navigator) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
