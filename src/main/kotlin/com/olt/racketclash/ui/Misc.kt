@@ -16,16 +16,6 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.navigation.Screens
 
-@Composable
-fun Loading(paddingValues: PaddingValues) {
-    Box(
-        modifier = Modifier.padding(paddingValues = paddingValues).fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
 sealed class TournamentTabs(val tab: Tab) {
     data object Teams : TournamentTabs(tab = Tab(target = Screens.Teams, imageVector = Icons.Default.Person, text = "Teams"))
     data object Players : TournamentTabs(tab = Tab(target = Screens.Players, imageVector = Icons.Default.Person, text = "Player"))
