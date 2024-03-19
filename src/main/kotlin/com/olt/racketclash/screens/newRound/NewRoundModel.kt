@@ -1,4 +1,4 @@
-package com.olt.racketclash.screens.editRound
+package com.olt.racketclash.screens.newRound
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
@@ -8,10 +8,10 @@ import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class EditRoundModel(
+class NewRoundModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
     private val database: Database
-) : NavigableStateScreenModel<EditRoundModel.Model>(navigateToScreen, Model()) {
+) : NavigableStateScreenModel<NewRoundModel.Model>(navigateToScreen, Model()) {
 
     data class Model(
         val replaceMe: String = ""

@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
-import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -39,7 +38,7 @@ class GamesScreen(private val modelBuilder: () -> GamesModel) : Screen {
             topAppBarActions = {
                 val navigator = LocalNavigator.currentOrThrow
 
-                IconButton(onClick = { screenModel.navigateTo(screen = Screens.EditRound, navigator = navigator) }) {
+                IconButton(onClick = { screenModel.navigateTo(screen = Screens.NewRound, navigator = navigator) }) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add"
@@ -187,7 +186,7 @@ private fun Round(
                 Spacer(modifier = Modifier.weight(1.0f))
                 val navigator = LocalNavigator.currentOrThrow
                 IconButton(
-                    onClick = { navigateTo(Screens.EditRound, navigator) }
+                    onClick = { navigateTo(Screens.NewRound, navigator) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,

@@ -7,8 +7,8 @@ import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.Team
 import com.olt.racketclash.screens.editPlayer.EditPlayerModel
 import com.olt.racketclash.screens.editPlayer.EditPlayerScreen
-import com.olt.racketclash.screens.editRound.EditRoundModel
-import com.olt.racketclash.screens.editRound.EditRoundScreen
+import com.olt.racketclash.screens.newRound.NewRoundModel
+import com.olt.racketclash.screens.newRound.NewRoundScreen
 import com.olt.racketclash.screens.editTeam.EditTeamModel
 import com.olt.racketclash.screens.editTeam.EditTeamScreen
 import com.olt.racketclash.screens.newProject.NewProjectModel
@@ -50,8 +50,8 @@ class RootNavigator {
     private fun gamesModelBuilder(): GamesModel =
         GamesModel(navigateToScreen = ::navigateTo, database = database!!)
 
-    private fun editRoundModelBuilder(): EditRoundModel =
-        EditRoundModel(navigateToScreen = ::navigateTo, database = database!!)
+    private fun newRoundModelBuilder(): NewRoundModel =
+        NewRoundModel(navigateToScreen = ::navigateTo, database = database!!)
 
     private fun navigateTo(screens: Screens, navigator: Navigator) {
         when (screens) {
@@ -64,7 +64,7 @@ class RootNavigator {
             Screens.Players -> navigateToPlayers(navigator = navigator)
             is Screens.EditPlayer -> navigateToEditPlayer(navigator = navigator, player = screens.player)
             Screens.Games -> navigateToGames(navigator = navigator)
-            Screens.EditRound -> navigateToEditRound(navigator = navigator)
+            Screens.NewRound -> navigateToNewRound(navigator = navigator)
         }
     }
 
@@ -102,7 +102,7 @@ class RootNavigator {
         navigator.replaceAll(GamesScreen(::gamesModelBuilder))
     }
 
-    private fun navigateToEditRound(navigator: Navigator) {
-        navigator.push(item = EditRoundScreen(::editRoundModelBuilder))
+    private fun navigateToNewRound(navigator: Navigator) {
+        navigator.push(item = NewRoundScreen(::newRoundModelBuilder))
     }
 }

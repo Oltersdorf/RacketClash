@@ -1,4 +1,4 @@
-package com.olt.racketclash.screens.editRound
+package com.olt.racketclash.screens.newRound
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -19,7 +19,7 @@ import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
 
-class EditRoundScreen(private val modelBuilder: () -> EditRoundModel) : Screen {
+class NewRoundScreen(private val modelBuilder: () -> NewRoundModel) : Screen {
 
     @Composable
     override fun Content() {
@@ -32,7 +32,7 @@ class EditRoundScreen(private val modelBuilder: () -> EditRoundModel) : Screen {
             selectedTab = TournamentTabs.Games,
             navigateTo = screenModel::navigateTo
         ) {
-            EditRoundView(paddingValues = it, addRound = screenModel::addRound, navigateTo = screenModel::navigateTo)
+            NewRoundView(paddingValues = it, addRound = screenModel::addRound, navigateTo = screenModel::navigateTo)
         }
     }
 }
@@ -44,7 +44,7 @@ private sealed class RoundType(val name: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EditRoundView(
+private fun NewRoundView(
     paddingValues: PaddingValues,
     addRound: (String) -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
