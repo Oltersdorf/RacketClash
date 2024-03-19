@@ -27,7 +27,7 @@ class NewRoundScreen(private val modelBuilder: () -> NewRoundModel) : Screen {
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(
-            topAppBarTitle = "Edit Round",
+            topAppBarTitle = "New Round",
             hasBackPress = true,
             selectedTab = TournamentTabs.Games,
             navigateTo = screenModel::navigateTo
