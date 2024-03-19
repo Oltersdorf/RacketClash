@@ -1,7 +1,6 @@
 package com.olt.racketclash.screens.projects
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -22,7 +21,8 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Project
 import com.olt.racketclash.navigation.Screens
-import com.olt.racketclash.ui.LazyColumnWithScroll
+import com.olt.racketclash.ui.LazyTableColumn
+import com.olt.racketclash.ui.LazyTableWithScroll
 
 internal typealias deleteProject = (name: String) -> Unit
 
@@ -72,19 +72,21 @@ private fun ProjectSelect(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
             tonalElevation = 1.dp
         ) {
-            LazyColumnWithScroll(
+            LazyTableWithScroll(
+                items = projects,
+                showHeader = false,
                 modifier = Modifier.padding(5.dp),
-                itemsSpacedBy = 10.dp
-
-            ) {
-                items(items = projects) {
-                    ProjectItem(
-                        project = it,
-                        deleteProject = deleteProject,
-                        navigateTo = navigateTo
-                    )
-                }
-            }
+                itemsSpacedBy = 10.dp,
+                columns = listOf(
+                    LazyTableColumn { item, _ ->
+                        ProjectItem(
+                            project = item,
+                            deleteProject = deleteProject,
+                            navigateTo = navigateTo
+                        )
+                    }
+                ),
+            )
         }
     }
 }

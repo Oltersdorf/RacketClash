@@ -2,7 +2,6 @@ package com.olt.racketclash.screens.teams
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -71,73 +70,64 @@ private fun TeamList(
     deleteTeam: (id: Long) -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
-    LazyColumnWithScroll(
-        modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp),
-        header = {
-            Surface(
-                tonalElevation = 1.dp
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Name",
-                        modifier = Modifier.weight(5.0f)
-                    )
-                    Text(
-                        text = "Difficulty",
-                        modifier = Modifier.weight(1.0f)
-                    )
-                    Text(
-                        text = "Player",
-                        modifier = Modifier.weight(1.0f)
-                    )
-                    Text(
-                        text = "Edit",
-                        modifier = Modifier.weight(0.5f),
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = "Delete",
-                        modifier = Modifier.weight(0.5f),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-    ) {
-        items(items = teams) {
-            val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalNavigator.currentOrThrow
 
-            Row(
-                modifier = Modifier.clickable {},
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+    LazyTableWithScroll(
+        items = teams,
+        modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp),
+        onClick = { navigateTo(Screens.EditTeam(it), navigator) },
+        columns = listOf(
+            LazyTableColumn(
+                name = "Name",
+                weight = 5.0f
+            ) { item, weight ->
                 Text(
-                    text = it.name,
-                    modifier = Modifier.weight(5.0f)
+                    text = item.name,
+                    modifier = Modifier.weight(weight)
                 )
+            },
+            LazyTableColumn(
+                name = "Difficulty",
+                weight = 1.0f
+            ) {item, weight ->
                 Text(
-                    text = "${it.strength}",
-                    modifier = Modifier.weight(1.0f)
+                    text = "${item.strength}",
+                    modifier = Modifier.weight(weight)
                 )
+            },
+            LazyTableColumn(
+                name = "Player",
+                weight = 1.0f
+            ) {item, weight ->
                 Text(
-                    text = "${it.size}",
-                    modifier = Modifier.weight(1.0f)
+                    text = "${item.size}",
+                    modifier = Modifier.weight(weight)
                 )
+            },
+            LazyTableColumn(
+                name = "Edit",
+                weight = 0.5f,
+                textAlign = TextAlign.Center
+            ) { item, weight ->
                 IconButton(
-                    modifier = Modifier.weight(0.5f),
-                    onClick = { navigateTo(Screens.EditTeam(team = it), navigator) }
+                    modifier = Modifier.weight(weight),
+                    onClick = { navigateTo(Screens.EditTeam(team = item), navigator) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Edit"
                     )
                 }
+            },
+            LazyTableColumn(
+                name = "Delete",
+                weight = 0.5f,
+                textAlign = TextAlign.Center
+            ) { item, weight ->
                 IconButton(
-                    modifier = Modifier.weight(0.5f),
-                    onClick = { deleteTeam(it.id) },
-                    enabled = it.size == 0
+                    modifier = Modifier.weight(weight),
+                    onClick = { deleteTeam(item.id) },
+                    enabled = item.size == 0
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -145,6 +135,6 @@ private fun TeamList(
                     )
                 }
             }
-        }
-    }
+        )
+    )
 }

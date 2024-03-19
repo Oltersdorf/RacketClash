@@ -1,7 +1,6 @@
 package com.olt.racketclash.screens.players
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
@@ -71,98 +70,94 @@ private fun PlayerList(
     updateActive: updateActive,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
-    LazyColumnWithScroll(
-        modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp),
-        header = {
-            Surface(
-                tonalElevation = 1.dp
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Active",
-                        modifier = Modifier.weight(1.0f)
-                    )
-                    Text(
-                        text = "Name",
-                        modifier = Modifier.weight(5.0f)
-                    )
-                    Text(
-                        text = "Team",
-                        modifier = Modifier.weight(2.0f)
-                    )
-                    Text(
-                        text = "played",
-                        modifier = Modifier.weight(1.0f)
-                    )
-                    Text(
-                        text = "bye",
-                        modifier = Modifier.weight(1.0f)
-                    )
-                    Text(
-                        text = "Games",
-                        modifier = Modifier.weight(1.0f)
-                    )
-                    Text(
-                        text = "Sets",
-                        modifier = Modifier.weight(1.0f)
-                    )
-                    Text(
-                        text = "Points",
-                        modifier = Modifier.weight(1.0f)
-                    )
-                    Text(
-                        text = "Edit",
-                        modifier = Modifier.weight(0.5f),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-    ) {
-        items(items = player) {player ->
-            val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalNavigator.currentOrThrow
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+    LazyTableWithScroll(
+        items = player,
+        modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp),
+        onClick = { navigateTo(Screens.EditPlayer(it), navigator) },
+        columns = listOf(
+            LazyTableColumn(
+                name = "Active",
+                weight = 1.0f
+            ) {item, weight ->
                 Checkbox(
-                    checked = player.active,
-                    onCheckedChange = { updateActive(player.id, it) },
-                    modifier = Modifier.weight(1.0f)
+                    checked = item.active,
+                    onCheckedChange = { checked -> updateActive(item.id, checked) },
+                    modifier = Modifier.weight(weight)
                 )
+            },
+            LazyTableColumn(
+                name = "Name",
+                weight = 5.0f
+            ) {item, weight ->
                 Text(
-                    text = player.name,
-                    modifier = Modifier.weight(5.0f)
+                    text = item.name,
+                    modifier = Modifier.weight(weight)
                 )
+            },
+            LazyTableColumn(
+                name = "Team",
+                weight = 2.0f
+            ) { item, weight ->
                 Text(
-                    text = player.teamName,
-                    modifier = Modifier.weight(2.0f)
+                    text = item.teamName,
+                    modifier = Modifier.weight(weight)
                 )
+            },
+            LazyTableColumn(
+                name = "played",
+                weight = 1.0f
+            ) { item, weight ->
                 Text(
-                    text = player.played.toString(),
-                    modifier = Modifier.weight(1.0f)
+                    text = item.played.toString(),
+                    modifier = Modifier.weight(weight)
                 )
+            },
+            LazyTableColumn(
+                name = "bye",
+                weight = 1.0f
+            ) { item, weight ->
                 Text(
-                    text = player.bye.toString(),
-                    modifier = Modifier.weight(1.0f)
+                    text = item.bye.toString(),
+                    modifier = Modifier.weight(weight)
                 )
+            },
+            LazyTableColumn(
+                name = "Games",
+                weight = 1.0f
+            ) { item, weight ->
                 Text(
-                    text = "${player.games.first} : ${player.games.second}",
-                    modifier = Modifier.weight(1.0f)
+                    text = "${item.games.first} : ${item.games.second}",
+                    modifier = Modifier.weight(weight)
                 )
+            },
+            LazyTableColumn(
+                name = "Sets",
+                weight = 1.0f
+            ) { item, weight ->
                 Text(
-                    text = "${player.sets.first} : ${player.sets.second}",
-                    modifier = Modifier.weight(1.0f)
+                    text = "${item.sets.first} : ${item.sets.second}",
+                    modifier = Modifier.weight(weight)
                 )
+            },
+            LazyTableColumn(
+                name = "Points",
+                weight = 1.0f
+            ) { item, weight ->
                 Text(
-                    text = "${player.points.first} : ${player.points.second}",
-                    modifier = Modifier.weight(1.0f)
+                    text = "${item.points.first} : ${item.points.second}",
+                    modifier = Modifier.weight(weight)
                 )
+            },
+            LazyTableColumn(
+                name = "Edit",
+                weight = 0.5f,
+                textAlign = TextAlign.Center
+            ) { item, weight ->
                 IconButton(
-                    modifier = Modifier.weight(0.5f),
-                    onClick = { navigateTo(Screens.EditPlayer(player = player), navigator) }
+                    modifier = Modifier.weight(weight),
+                    onClick = { navigateTo(Screens.EditPlayer(player = item), navigator) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
@@ -170,6 +165,6 @@ private fun PlayerList(
                     )
                 }
             }
-        }
-    }
+        )
+    )
 }

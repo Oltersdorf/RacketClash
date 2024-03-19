@@ -1,14 +1,6 @@
 package com.olt.racketclash.ui
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalScrollbarStyle
-import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.List
@@ -19,8 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -33,40 +23,6 @@ fun Loading(paddingValues: PaddingValues) {
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun LazyColumnWithScroll(
-    modifier: Modifier = Modifier,
-    itemsSpacedBy: Dp = 0.dp,
-    header: @Composable (LazyItemScope.() -> Unit)? = null,
-    content: LazyListScope.() -> Unit
-) {
-    Box(
-        modifier = modifier
-    ) {
-        val scrollState = rememberLazyListState()
-        val canScroll = scrollState.canScrollBackward || scrollState.canScrollForward
-
-        LazyColumn(
-            modifier = Modifier.padding(end = if (canScroll) 14.dp else 0.dp),
-            verticalArrangement = Arrangement.spacedBy(itemsSpacedBy),
-            state = scrollState
-        ) {
-            if (header != null) {
-                stickyHeader(content = header)
-            }
-
-            content()
-        }
-
-        VerticalScrollbar(
-            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-            adapter = rememberScrollbarAdapter(scrollState = scrollState),
-            style = LocalScrollbarStyle.current.copy(hoverColor = MaterialTheme.colorScheme.secondary, unhoverColor = MaterialTheme.colorScheme.secondary)
-        )
     }
 }
 

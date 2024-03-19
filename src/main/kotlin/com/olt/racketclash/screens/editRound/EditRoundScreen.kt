@@ -2,7 +2,6 @@ package com.olt.racketclash.screens.editRound
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -11,10 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
-import com.olt.racketclash.ui.LazyColumnWithScroll
+import com.olt.racketclash.ui.LazyTableColumn
+import com.olt.racketclash.ui.LazyTableWithScroll
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
 
@@ -72,37 +73,23 @@ private fun EditRoundView(
                 }
             }
 
-            LazyColumnWithScroll(
-                header = {
-                    Surface(tonalElevation = 1.dp) {
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                text = "Left",
-                                modifier = Modifier.weight(5.0f)
-                            )
-                            Text(
-                                text = "Results",
-                                modifier = Modifier.weight(1.0f)
-                            )
-                            Text(
-                                text = "Right",
-                                modifier = Modifier.weight(5.0f)
-                            )
-                            Text(
-                                text = "Delete",
-                                modifier = Modifier.weight(1.0f)
-                            )
+            LazyTableWithScroll(
+                items = model.games,
+                columns = listOf(
+                    LazyTableColumn(
+                        name = "Left",
+                        weight = 5.0f
+                    ) { item, weight ->
+                        Column(modifier = Modifier.weight(weight)) {
+                            Text(item.playerLeft1Name ?: "")
+                            Text(item.playerLeft2Name ?: "")
                         }
-                    }
-                }
-            ) {
-                items(items = model.games) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(modifier = Modifier.weight(5.0f)) {
-                            Text(it.playerLeft1Name ?: "")
-                            Text(it.playerLeft2Name ?: "")
-                        }
-                        Column(modifier = Modifier.weight(1.0f)) {
+                    },
+                    LazyTableColumn(
+                        name = "Results",
+                        weight = 1.0f
+                    ) { item, weight ->
+                        Column(modifier = Modifier.weight(weight)) {
                             BasicTextField(
                                 value = "0:0",
                                 onValueChange = {},
@@ -129,12 +116,23 @@ private fun EditRoundView(
                                 modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
                             )
                         }
-                        Column(modifier = Modifier.weight(5.0f)) {
-                            Text(it.playerRight1Name ?: "")
-                            Text(it.playerRight2Name ?: "")
+                    },
+                    LazyTableColumn(
+                        name = "Right",
+                        weight = 5.0f
+                    ) { item, weight ->
+                        Column(modifier = Modifier.weight(weight)) {
+                            Text(item.playerRight1Name ?: "")
+                            Text(item.playerRight2Name ?: "")
                         }
+                    },
+                    LazyTableColumn(
+                        name = "Delete",
+                        weight = 1.0f,
+                        textAlign = TextAlign.Center
+                    ) { item, weight ->
                         IconButton(
-                            modifier = Modifier.weight(1.0f),
+                            modifier = Modifier.weight(weight),
                             onClick = {  }
                         ) {
                             Icon(
@@ -143,8 +141,8 @@ private fun EditRoundView(
                             )
                         }
                     }
-                }
-            }
+                )
+            )
         }
     }
 }
