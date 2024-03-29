@@ -76,94 +76,55 @@ private fun PlayerList(
         modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp),
         onClick = { navigateTo(Screens.EditPlayer(it), navigator) },
         columns = listOf(
-            LazyTableColumn(
+            LazyTableColumn.Checkbox(
                 name = "Active",
-                weight = 1.0f
-            ) {item, weight ->
-                Checkbox(
-                    checked = item.active,
-                    onCheckedChange = { checked -> updateActive(item.id, checked) },
-                    modifier = Modifier.weight(weight)
-                )
-            },
-            LazyTableColumn(
+                weight = 1.0f,
+                checked = { it.active },
+                onCheckChanged = { item, checked -> updateActive(item.id, checked) }
+            ),
+            LazyTableColumn.Text(
                 name = "Name",
-                weight = 5.0f
-            ) {item, weight ->
-                Text(
-                    text = item.name,
-                    modifier = Modifier.weight(weight)
-                )
-            },
-            LazyTableColumn(
+                weight = 5.0f,
+                text = { it.name }
+            ),
+            LazyTableColumn.Text(
                 name = "Team",
-                weight = 2.0f
-            ) { item, weight ->
-                Text(
-                    text = item.teamName,
-                    modifier = Modifier.weight(weight)
-                )
-            },
-            LazyTableColumn(
+                weight = 2.0f,
+                text = { it.teamName }
+            ),
+            LazyTableColumn.Text(
                 name = "played",
-                weight = 1.0f
-            ) { item, weight ->
-                Text(
-                    text = item.played.toString(),
-                    modifier = Modifier.weight(weight)
-                )
-            },
-            LazyTableColumn(
+                weight = 1.0f,
+                text = { it.played.toString() }
+            ),
+            LazyTableColumn.Text(
                 name = "bye",
-                weight = 1.0f
-            ) { item, weight ->
-                Text(
-                    text = item.bye.toString(),
-                    modifier = Modifier.weight(weight)
-                )
-            },
-            LazyTableColumn(
+                weight = 1.0f,
+                text = { it.bye.toString() }
+            ),
+            LazyTableColumn.Text(
                 name = "Games",
-                weight = 1.0f
-            ) { item, weight ->
-                Text(
-                    text = "${item.games.first} : ${item.games.second}",
-                    modifier = Modifier.weight(weight)
-                )
-            },
-            LazyTableColumn(
+                weight = 1.0f,
+                text = { "${it.games.first} : ${it.games.second}" }
+            ),
+            LazyTableColumn.Text(
                 name = "Sets",
-                weight = 1.0f
-            ) { item, weight ->
-                Text(
-                    text = "${item.sets.first} : ${item.sets.second}",
-                    modifier = Modifier.weight(weight)
-                )
-            },
-            LazyTableColumn(
+                weight = 1.0f,
+                text = { "${it.sets.first} : ${it.sets.second}" }
+            ),
+            LazyTableColumn.Text(
                 name = "Points",
-                weight = 1.0f
-            ) { item, weight ->
-                Text(
-                    text = "${item.points.first} : ${item.points.second}",
-                    modifier = Modifier.weight(weight)
-                )
-            },
-            LazyTableColumn(
+                weight = 1.0f,
+                text = { "${it.points.first} : ${it.points.second}" }
+            ),
+            LazyTableColumn.IconButton(
                 name = "Edit",
                 weight = 0.5f,
-                textAlign = TextAlign.Center
-            ) { item, weight ->
-                IconButton(
-                    modifier = Modifier.weight(weight),
-                    onClick = { navigateTo(Screens.EditPlayer(player = item), navigator) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit"
-                    )
-                }
-            }
+                headerTextAlign = TextAlign.Center,
+                onClick = { navigateTo(Screens.EditPlayer(player = it), navigator) },
+                imageVector = Icons.Default.Edit,
+                contentDescription = "Edit"
+            )
         )
     )
 }

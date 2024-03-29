@@ -78,7 +78,7 @@ private fun ProjectSelect(
                 modifier = Modifier.padding(5.dp),
                 itemsSpacedBy = 10.dp,
                 columns = listOf(
-                    LazyTableColumn { item, _ ->
+                    LazyTableColumn.Builder { item, _ ->
                         ProjectItem(
                             project = item,
                             deleteProject = deleteProject,

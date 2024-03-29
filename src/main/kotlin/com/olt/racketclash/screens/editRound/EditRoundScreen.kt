@@ -76,7 +76,7 @@ private fun EditRoundView(
             LazyTableWithScroll(
                 items = model.games,
                 columns = listOf(
-                    LazyTableColumn(
+                    LazyTableColumn.Builder(
                         name = "Left",
                         weight = 5.0f
                     ) { item, weight ->
@@ -85,7 +85,7 @@ private fun EditRoundView(
                             Text(item.playerLeft2Name ?: "")
                         }
                     },
-                    LazyTableColumn(
+                    LazyTableColumn.Builder(
                         name = "Results",
                         weight = 1.0f
                     ) { item, weight ->
@@ -117,7 +117,7 @@ private fun EditRoundView(
                             )
                         }
                     },
-                    LazyTableColumn(
+                    LazyTableColumn.Builder(
                         name = "Right",
                         weight = 5.0f
                     ) { item, weight ->
@@ -126,21 +126,14 @@ private fun EditRoundView(
                             Text(item.playerRight2Name ?: "")
                         }
                     },
-                    LazyTableColumn(
+                    LazyTableColumn.IconButton(
                         name = "Delete",
                         weight = 1.0f,
-                        textAlign = TextAlign.Center
-                    ) { item, weight ->
-                        IconButton(
-                            modifier = Modifier.weight(weight),
-                            onClick = {  }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete"
-                            )
-                        }
-                    }
+                        headerTextAlign = TextAlign.Center,
+                        onClick = {},
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete"
+                    )
                 )
             )
         }

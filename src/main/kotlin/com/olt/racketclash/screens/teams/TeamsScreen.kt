@@ -75,64 +75,38 @@ private fun TeamList(
         modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp),
         onClick = { navigateTo(Screens.EditTeam(it), navigator) },
         columns = listOf(
-            LazyTableColumn(
+            LazyTableColumn.Text(
                 name = "Name",
-                weight = 5.0f
-            ) { item, weight ->
-                Text(
-                    text = item.name,
-                    modifier = Modifier.weight(weight)
-                )
-            },
-            LazyTableColumn(
+                weight = 5.0f,
+                text = { it.name }
+            ),
+            LazyTableColumn.Text(
                 name = "Difficulty",
-                weight = 1.0f
-            ) {item, weight ->
-                Text(
-                    text = "${item.strength}",
-                    modifier = Modifier.weight(weight)
-                )
-            },
-            LazyTableColumn(
+                weight = 1.0f,
+                text = { it.strength.toString() }
+            ),
+            LazyTableColumn.Text(
                 name = "Player",
-                weight = 1.0f
-            ) {item, weight ->
-                Text(
-                    text = "${item.size}",
-                    modifier = Modifier.weight(weight)
-                )
-            },
-            LazyTableColumn(
+                weight = 1.0f,
+                text = { it.size.toString() }
+            ),
+            LazyTableColumn.IconButton(
                 name = "Edit",
                 weight = 0.5f,
-                textAlign = TextAlign.Center
-            ) { item, weight ->
-                IconButton(
-                    modifier = Modifier.weight(weight),
-                    onClick = { navigateTo(Screens.EditTeam(team = item), navigator) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit"
-                    )
-                }
-            },
-            LazyTableColumn(
+                headerTextAlign = TextAlign.Center,
+                onClick = { navigateTo(Screens.EditTeam(team = it), navigator) },
+                imageVector = Icons.Default.Edit,
+                contentDescription = "Edit"
+            ),
+            LazyTableColumn.IconButton(
                 name = "Delete",
                 weight = 0.5f,
-                textAlign = TextAlign.Center
-            ) { item, weight ->
-                IconButton(
-                    modifier = Modifier.weight(weight),
-                    onClick = { deleteTeam(item.id) },
-                    enabled = item.size == 0
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Edit"
-                    )
-                }
-            }
+                headerTextAlign = TextAlign.Center,
+                onClick = { deleteTeam(it.id) },
+                enabled = { it.size == 0 },
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete"
+            )
         )
     )
 }
