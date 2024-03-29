@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -89,14 +88,6 @@ private fun TeamList(
                 name = "Player",
                 weight = 1.0f,
                 text = { it.size.toString() }
-            ),
-            LazyTableColumn.IconButton(
-                name = "Edit",
-                weight = 0.5f,
-                headerTextAlign = TextAlign.Center,
-                onClick = { navigateTo(Screens.EditTeam(team = it), navigator) },
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit"
             ),
             LazyTableColumn.IconButton(
                 name = "Delete",
