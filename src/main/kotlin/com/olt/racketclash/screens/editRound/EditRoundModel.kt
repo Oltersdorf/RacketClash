@@ -1,6 +1,7 @@
 package com.olt.racketclash.screens.editRound
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.data.Database
 import com.olt.racketclash.data.Game
@@ -14,13 +15,13 @@ class EditRoundModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
     private val database: Database,
     private val round: Round
-) : NavigableStateScreenModel<EditRoundModel.Model>(navigateToScreen = navigateToScreen, initialState = Model()) {
+) : NavigableStateScreenModel<EditRoundModel.Model>(navigateToScreen = navigateToScreen, initialState = Model(roundName = round.name)) {
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
             database.games().collect { gamesList ->
-                updateState {
-                    Model(
+                updateState { model ->
+                    model.copy(
                         games = gamesList.filter { it.roundId == round.id }
                     )
                 }
@@ -29,6 +30,25 @@ class EditRoundModel(
     }
 
     data class Model(
+        val roundName: String,
+        val temporaryRoundName: String = roundName,
         val games: List<Game> = emptyList()
     )
+
+    fun updateTemporaryRoundName(newRoundName: String) {
+        screenModelScope.launch(context = Dispatchers.Default) {
+            updateState {
+                it.copy(temporaryRoundName = newRoundName)
+            }
+        }
+    }
+
+    fun saveRoundName() {
+        screenModelScope.launch(context = Dispatchers.IO) {
+            database.updateRoundName(id = round.id, name = state.value.temporaryRoundName)
+            updateState {
+                it.copy(roundName = it.temporaryRoundName)
+            }
+        }
+    }
 }

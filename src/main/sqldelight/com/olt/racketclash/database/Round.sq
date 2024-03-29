@@ -12,3 +12,8 @@ SELECT * FROM roundTable;
 add:
 INSERT INTO roundTable(name, orderNumber)
 VALUES (:name, (SELECT COALESCE(MAX(orderNumber), 0) FROM roundTable) + 1);
+
+updateName:
+UPDATE roundTable
+SET name = :name
+WHERE id = :id;

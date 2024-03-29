@@ -151,6 +151,10 @@ class Database private constructor(
         database.roundQueries.add(name = name)
     }
 
+    fun updateRoundName(id: Long, name: String) {
+        database.roundQueries.updateName(id = id, name = name)
+    }
+
     fun games() : Flow<List<Game>> =
         database
             .gameQueries

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,7 +36,9 @@ class EditRoundScreen(private val modelBuilder: () -> EditRoundModel) : Screen {
         ) {
             EditRoundView(
                 paddingValues = it,
-                model = stateModel
+                model = stateModel,
+                onNameChange = screenModel::updateTemporaryRoundName,
+                saveName = screenModel::saveRoundName
             )
         }
     }
@@ -43,7 +47,9 @@ class EditRoundScreen(private val modelBuilder: () -> EditRoundModel) : Screen {
 @Composable
 private fun EditRoundView(
     paddingValues: PaddingValues,
-    model: EditRoundModel.Model
+    model: EditRoundModel.Model,
+    onNameChange: (String) -> Unit,
+    saveName: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize().padding(paddingValues = paddingValues)) {
         Column(
@@ -51,14 +57,25 @@ private fun EditRoundView(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            var roundName by remember { mutableStateOf("roundName") }
-
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(0.5f),
-                value = roundName,
-                onValueChange = { roundName = it },
-                label = { Text("Name") }
+                value = model.temporaryRoundName,
+                onValueChange = onNameChange,
+                label = { Text("Name") },
+                trailingIcon = {
+                    IconButton(
+                        onClick = saveName,
+                        modifier = Modifier.weight(1.0f),
+                        enabled = model.temporaryRoundName != model.roundName
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Save"
+                        )
+                    }
+                }
             )
+
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Games")
