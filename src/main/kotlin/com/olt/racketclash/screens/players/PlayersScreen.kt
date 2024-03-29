@@ -3,7 +3,7 @@ package com.olt.racketclash.screens.players
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,7 +44,13 @@ class PlayersScreen(private val modelBuilder: () -> PlayersModel) : Screen {
             selectedTab = TournamentTabs.Players,
             navigateTo = screenModel::navigateTo
         ) {
-            PlayerView(paddingValues = it, model = stateModel, updateActive = screenModel::updateActive, navigateTo = screenModel::navigateTo)
+            PlayerView(
+                paddingValues = it,
+                model = stateModel,
+                updateActive = screenModel::updateActive,
+                deletePlayer = screenModel::deletePlayer,
+                navigateTo = screenModel::navigateTo
+            )
         }
     }
 }
@@ -54,12 +60,19 @@ private fun PlayerView(
     paddingValues: PaddingValues,
     model: PlayersModel.Modal,
     updateActive: updateActive,
+    deletePlayer: (Long) -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
     if (model.isLoading)
         Loading(paddingValues = paddingValues)
     else
-        PlayerList(paddingValues = paddingValues, player = model.players, updateActive = updateActive, navigateTo = navigateTo)
+        PlayerList(
+            paddingValues = paddingValues,
+            player = model.players,
+            updateActive = updateActive,
+            deletePlayer = deletePlayer,
+            navigateTo = navigateTo
+        )
 }
 
 @Composable
@@ -67,6 +80,7 @@ private fun PlayerList(
     paddingValues: PaddingValues,
     player: List<Player>,
     updateActive: updateActive,
+    deletePlayer: (Long) -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
     val navigator = LocalNavigator.currentOrThrow
@@ -118,12 +132,13 @@ private fun PlayerList(
                 text = { "${it.points.first} : ${it.points.second}" }
             ),
             LazyTableColumn.IconButton(
-                name = "Edit",
+                name = "Delete",
                 weight = 0.5f,
                 headerTextAlign = TextAlign.Center,
-                onClick = { navigateTo(Screens.EditPlayer(player = it), navigator) },
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit"
+                onClick = { deletePlayer(it.id) },
+                enabled = { it.played == 0 },
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete"
             )
         )
     )
