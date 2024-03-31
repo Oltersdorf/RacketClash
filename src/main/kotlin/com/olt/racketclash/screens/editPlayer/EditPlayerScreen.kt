@@ -14,6 +14,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.Team
 import com.olt.racketclash.navigation.Screens
+import com.olt.racketclash.ui.DropDownMenu
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
 
@@ -43,7 +44,6 @@ class EditPlayerScreen(private val modelBuilder: () -> EditPlayerModel) : Screen
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditPlayerView(
     paddingValues: PaddingValues,
@@ -72,39 +72,15 @@ private fun EditPlayerView(
                 isError = playerName.isBlank()
             )
 
-            var expanded by remember { mutableStateOf(false) }
-
-            ExposedDropdownMenuBox(
+            DropDownMenu(
                 modifier = Modifier.padding(top = 50.dp, bottom = 50.dp),
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
-            ) {
-                TextField(
-                    modifier = Modifier.menuAnchor().fillMaxWidth(),
-                    readOnly = true,
-                    value = selectedTeam.name,
-                    onValueChange = {},
-                    label = { Text("Team") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    isError = selectedTeam.id == -1L
-                )
+                items = teams,
+                value = selectedTeam.name,
+                isError = selectedTeam.id == -1L,
+                textMapper = { it.name },
+                onClick = { selectTeam(it.id) }
+            )
 
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    teams.forEach {
-                        DropdownMenuItem(
-                            text = { Text(text = it.name) },
-                            onClick = {
-                                selectTeam(it.id)
-                                expanded = false
-                            },
-                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                        )
-                    }
-                }
-            }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
