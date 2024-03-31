@@ -17,18 +17,14 @@ class EditGameModel(
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
-            database.round(id = roundId).collect { round ->
-                updateState {
-                    it.copy(roundName = round?.name ?: "")
-                }
+            database.round(id = roundId).collect {
+                updateState { copy(roundName = it?.name ?: "") }
             }
         }
 
         screenModelScope.launch(context = Dispatchers.IO) {
-            database.player().collect { players ->
-                updateState {
-                    it.copy(players = players)
-                }
+            database.player().collect {
+                updateState { copy(players = it) }
             }
         }
     }

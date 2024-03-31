@@ -17,17 +17,15 @@ class GamesModel(
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
-            database.rounds().collect { roundList ->
-                updateState { model ->
-                    Model(rounds = roundList.associateWith { model.rounds[it] ?: emptyList() })
-                }
+            database.rounds().collect {
+                updateState { copy(rounds = it.associateWith { rounds[it] ?: emptyList() }) }
             }
         }
         screenModelScope.launch(context = Dispatchers.IO) {
-            database.games().collect { gamesList ->
-                updateState { model ->
-                    val groupedGames = gamesList.groupBy { it.roundId }
-                    Model(rounds = model.rounds.mapValues { groupedGames[it.key.id] ?: emptyList() })
+            database.games().collect {
+                updateState {
+                    val groupedGames = it.groupBy { it.roundId }
+                    copy(rounds = rounds.mapValues { groupedGames[it.key.id] ?: emptyList() })
                 }
             }
         }

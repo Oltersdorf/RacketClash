@@ -18,13 +18,8 @@ class EditPlayerModel(
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
-            database.teams().collect { teamsList ->
-                updateState { model ->
-                    model.copy(
-                        teams = teamsList,
-                        selectedTeam = teamsList.find { it.id == model.player?.teamId } ?: noTeamSelected
-                    )
-                }
+            database.teams().collect {
+                updateState { copy(teams = it, selectedTeam = it.find { it.id == player?.teamId } ?: noTeamSelected) }
             }
         }
     }
@@ -51,9 +46,7 @@ class EditPlayerModel(
 
     fun selectTeam(id: Long) {
         screenModelScope.launch(context = Dispatchers.Default) {
-            updateState { model ->
-                model.copy(selectedTeam = mutableState.value.teams.find { it.id == id } ?: noTeamSelected)
-            }
+            updateState { copy(selectedTeam = teams.find { it.id == id } ?: noTeamSelected) }
         }
     }
 }

@@ -38,16 +38,16 @@ class NewProjectModel(
     fun changeProjectName(newName: String) {
         screenModelScope.launch(context = Dispatchers.Default) {
             if (mutableState.value.projectNames.contains(newName) || newName.isBlank())
-                updateState { it.copy(canCreate = false, projectName = newName) }
+                updateState { copy(canCreate = false, projectName = newName) }
             else
-                updateState { it.copy(canCreate = true, projectName = newName) }
+                updateState { copy(canCreate = true, projectName = newName) }
         }
     }
 
     fun changeLocation(newLocation: String?) {
         screenModelScope.launch(context = Dispatchers.Default) {
             if (newLocation != null)
-                updateState { it.copy(location = newLocation) }
+                updateState { copy(location = newLocation) }
         }
     }
 }

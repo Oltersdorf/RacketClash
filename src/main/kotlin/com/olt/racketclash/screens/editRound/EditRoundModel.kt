@@ -18,20 +18,16 @@ class EditRoundModel(
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
-            database.games().collect { gamesList ->
-                updateState { model ->
-                    model.copy(
-                        games = gamesList.filter { it.roundId == round.id }
-                    )
+            database.games().collect {
+                updateState {
+                    copy(games = it.filter { it.roundId == it.id })
                 }
             }
         }
 
         screenModelScope.launch(context = Dispatchers.IO) {
-            database.round(id = round.id).collect { round ->
-                updateState {
-                    it.copy(round = round)
-                }
+            database.round(id = round.id).collect {
+                updateState { copy(round = it) }
             }
         }
     }
@@ -44,9 +40,7 @@ class EditRoundModel(
 
     fun updateTemporaryRoundName(newRoundName: String) {
         screenModelScope.launch(context = Dispatchers.Default) {
-            updateState {
-                it.copy(temporaryRoundName = newRoundName)
-            }
+            updateState { copy(temporaryRoundName = newRoundName) }
         }
     }
 

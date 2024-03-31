@@ -9,7 +9,7 @@ abstract class NavigableStateScreenModel<S>(
 ) : StateScreenModel<S>(initialState = initialState) {
     fun navigateTo(screen: Screens, navigator: Navigator) = navigateToScreen(screen, navigator)
 
-    fun updateState(block: (S) -> S) {
+    fun updateState(block: S.() -> S) {
         mutableState.value = block(mutableState.value)
     }
 }
