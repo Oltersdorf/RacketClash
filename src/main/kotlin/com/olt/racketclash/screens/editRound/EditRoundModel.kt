@@ -1,7 +1,6 @@
 package com.olt.racketclash.screens.editRound
 
 import cafe.adriel.voyager.core.model.screenModelScope
-import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.data.Database
 import com.olt.racketclash.data.Game
