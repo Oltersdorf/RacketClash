@@ -6,7 +6,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,6 +15,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.LazyTableColumn
 import com.olt.racketclash.ui.LazyTableWithScroll
 import com.olt.racketclash.ui.TournamentScaffold
@@ -38,7 +41,8 @@ class EditRoundScreen(private val modelBuilder: () -> EditRoundModel) : Screen {
                 paddingValues = it,
                 model = stateModel,
                 onNameChange = screenModel::updateTemporaryRoundName,
-                saveName = screenModel::saveRoundName
+                saveName = screenModel::saveRoundName,
+                navigateTo = screenModel::navigateTo
             )
         }
     }
@@ -49,7 +53,8 @@ private fun EditRoundView(
     paddingValues: PaddingValues,
     model: EditRoundModel.Model,
     onNameChange: (String) -> Unit,
-    saveName: () -> Unit
+    saveName: () -> Unit,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize().padding(paddingValues = paddingValues)) {
         Column(
@@ -66,7 +71,7 @@ private fun EditRoundView(
                     IconButton(
                         onClick = saveName,
                         modifier = Modifier.weight(1.0f),
-                        enabled = model.temporaryRoundName != model.roundName
+                        enabled = model.temporaryRoundName != model.round?.name
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
@@ -76,12 +81,13 @@ private fun EditRoundView(
                 }
             )
 
+            val navigator = LocalNavigator.currentOrThrow
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Games")
                 Spacer(modifier = Modifier.weight(1.0f))
                 IconButton(
-                    onClick = {}
+                    onClick = { navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,

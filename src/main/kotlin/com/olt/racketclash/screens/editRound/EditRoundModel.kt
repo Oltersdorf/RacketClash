@@ -15,7 +15,7 @@ class EditRoundModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
     private val database: Database,
     private val round: Round
-) : NavigableStateScreenModel<EditRoundModel.Model>(navigateToScreen = navigateToScreen, initialState = Model(roundName = round.name)) {
+) : NavigableStateScreenModel<EditRoundModel.Model>(navigateToScreen = navigateToScreen, initialState = Model()) {
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
@@ -27,11 +27,19 @@ class EditRoundModel(
                 }
             }
         }
+
+        screenModelScope.launch(context = Dispatchers.IO) {
+            database.round(id = round.id).collect { round ->
+                updateState {
+                    it.copy(round = round)
+                }
+            }
+        }
     }
 
     data class Model(
-        val roundName: String,
-        val temporaryRoundName: String = roundName,
+        val round: Round? = null,
+        val temporaryRoundName: String = round?.name ?: "",
         val games: List<Game> = emptyList()
     )
 
@@ -46,9 +54,6 @@ class EditRoundModel(
     fun saveRoundName() {
         screenModelScope.launch(context = Dispatchers.IO) {
             database.updateRoundName(id = round.id, name = state.value.temporaryRoundName)
-            updateState {
-                it.copy(roundName = it.temporaryRoundName)
-            }
         }
     }
 }

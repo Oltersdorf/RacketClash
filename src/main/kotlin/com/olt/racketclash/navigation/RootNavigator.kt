@@ -2,6 +2,8 @@ package com.olt.racketclash.navigation
 
 import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.data.*
+import com.olt.racketclash.screens.editGame.EditGameModel
+import com.olt.racketclash.screens.editGame.EditGameScreen
 import com.olt.racketclash.screens.editPlayer.EditPlayerModel
 import com.olt.racketclash.screens.editPlayer.EditPlayerScreen
 import com.olt.racketclash.screens.editRound.EditRoundModel
@@ -55,6 +57,9 @@ class RootNavigator {
     private fun editRoundModelBuilder(round: Round): EditRoundModel =
         EditRoundModel(navigateToScreen = ::navigateTo, database = database!!, round = round)
 
+    private fun editGameModelBuilder(roundId: Long): EditGameModel =
+        EditGameModel(navigateToScreen = ::navigateTo, database = database!!, roundId = roundId)
+
     private fun navigateTo(screens: Screens, navigator: Navigator) {
         when (screens) {
             Screens.Pop -> navigator.pop()
@@ -68,6 +73,7 @@ class RootNavigator {
             Screens.Games -> navigateToGames(navigator = navigator)
             Screens.NewRound -> navigateToNewRound(navigator = navigator)
             is Screens.EditRound -> navigateToEditRound(navigator = navigator, round = screens.round)
+            is Screens.EditGame -> navigateToEditGame(navigator = navigator, roundId = screens.roundId)
         }
     }
 
@@ -111,5 +117,9 @@ class RootNavigator {
 
     private fun navigateToEditRound(navigator: Navigator, round: Round) {
         navigator.push(item = EditRoundScreen { editRoundModelBuilder(round = round) })
+    }
+
+    private fun navigateToEditGame(navigator: Navigator, roundId: Long) {
+        navigator.push(item = EditGameScreen { editGameModelBuilder(roundId = roundId) })
     }
 }

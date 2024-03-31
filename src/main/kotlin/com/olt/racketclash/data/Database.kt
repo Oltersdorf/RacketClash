@@ -3,6 +3,7 @@ package com.olt.racketclash.data
 import app.cash.sqldelight.adapter.primitive.IntColumnAdapter
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.olt.racketclash.database.GameTable
@@ -139,6 +140,22 @@ class Database private constructor(
             .mapToList(context = Dispatchers.IO)
             .map { list ->
                 list.map {
+                    Round(
+                        id = it.id,
+                        name = it.name,
+                        order = it.orderNumber
+                    )
+                }
+            }
+
+    fun round(id: Long) : Flow<Round?> =
+        database
+            .roundQueries
+            .select(id = id)
+            .asFlow()
+            .mapToOneOrNull(context = Dispatchers.IO)
+            .map {
+                it?.let {
                     Round(
                         id = it.id,
                         name = it.name,
