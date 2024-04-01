@@ -82,22 +82,14 @@ private fun NewRoundView(
                     RoundType.EquallyDouble -> EquallyStrongDouble()
                 }
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    val navigator = LocalNavigator.currentOrThrow
-
-                    Spacer(modifier = Modifier.weight(1.0f))
-                    Button(onClick = { navigateTo(Screens.Games, navigator) }) {
-                        Text("Cancel")
-                    }
-                    Button(onClick = {
+                val navigator = LocalNavigator.currentOrThrow
+                CancelSaveButtonRow(
+                    onCancel = { navigateTo(Screens.Games, navigator) },
+                    onSave = {
                         addRound(name)
                         navigateTo(Screens.Games, navigator)
-                    }) {
-                        Text("Save")
                     }
-                }
+                )
             }
 
             VerticalScrollbar(

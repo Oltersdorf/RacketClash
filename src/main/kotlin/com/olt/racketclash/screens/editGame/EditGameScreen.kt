@@ -123,19 +123,11 @@ private fun EditGameView(
                 }
             }
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                val navigator = LocalNavigator.currentOrThrow
-
-                Spacer(modifier = Modifier.weight(1.0f))
-                Button(onClick = { navigateTo(Screens.Pop, navigator) }) {
-                    Text("Cancel")
-                }
-                Button(onClick = { addGame() }) {
-                    Text("Save")
-                }
-            }
+            val navigator = LocalNavigator.currentOrThrow
+            CancelSaveButtonRow(
+                onCancel = { navigateTo(Screens.Pop, navigator) },
+                onSave = { addGame() }
+            )
 
             Row {
                 OutlinedTextField(

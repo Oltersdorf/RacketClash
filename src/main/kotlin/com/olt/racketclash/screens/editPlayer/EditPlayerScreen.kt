@@ -14,6 +14,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.Team
 import com.olt.racketclash.navigation.Screens
+import com.olt.racketclash.ui.CancelSaveButtonRow
 import com.olt.racketclash.ui.DropDownMenu
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
@@ -82,25 +83,15 @@ private fun EditPlayerView(
                 onClick = { selectTeam(it.id) }
             )
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                val navigator = LocalNavigator.currentOrThrow
-
-                Spacer(modifier = Modifier.weight(1.0f))
-                Button(onClick = { navigateTo(Screens.Pop, navigator) }) {
-                    Text("Cancel")
-                }
-                Button(
-                    onClick = {
-                        updatePlayer(player?.id, playerName, selectedTeam.id)
-                        navigateTo(Screens.Pop, navigator)
-                    },
-                    enabled = playerName.isNotBlank() && selectedTeam.id != -1L
-                ) {
-                    Text("Save")
-                }
-            }
+            val navigator = LocalNavigator.currentOrThrow
+            CancelSaveButtonRow(
+                onCancel = { navigateTo(Screens.Pop, navigator) },
+                onSave = {
+                    updatePlayer(player?.id, playerName, selectedTeam.id)
+                    navigateTo(Screens.Pop, navigator)
+                },
+                canSave = playerName.isNotBlank() && selectedTeam.id != -1L
+            )
         }
     }
 }

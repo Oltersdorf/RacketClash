@@ -1,7 +1,6 @@
 package com.olt.racketclash.screens.editTeam
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -16,6 +15,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Team
 import com.olt.racketclash.navigation.Screens
+import com.olt.racketclash.ui.CancelSaveButtonRow
 import com.olt.racketclash.ui.TournamentScaffold
 import com.olt.racketclash.ui.TournamentTabs
 
@@ -78,25 +78,16 @@ private fun EditTeamView(
                 label = { Text("Difficulty") },
                 isError = teamStrength.isEmpty()
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                val navigator = LocalNavigator.currentOrThrow
 
-                Spacer(modifier = Modifier.weight(1.0f))
-                Button(onClick = { navigateTo(Screens.Pop, navigator) }) {
-                    Text("Cancel")
-                }
-                Button(
-                    onClick = {
-                        updateTeam(team?.id, teamName, teamStrength.toInt())
-                        navigateTo(Screens.Pop, navigator)
-                    },
-                    enabled = teamName.isNotBlank() && teamStrength.isNotEmpty()
-                ) {
-                    Text("Save")
-                }
-            }
+            val navigator = LocalNavigator.currentOrThrow
+            CancelSaveButtonRow(
+                onCancel = { navigateTo(Screens.Pop, navigator) },
+                onSave = {
+                    updateTeam(team?.id, teamName, teamStrength.toInt())
+                    navigateTo(Screens.Pop, navigator)
+                },
+                canSave = teamName.isNotBlank() && teamStrength.isNotEmpty()
+            )
         }
     }
 }

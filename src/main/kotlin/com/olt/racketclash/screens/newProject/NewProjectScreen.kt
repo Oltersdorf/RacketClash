@@ -14,6 +14,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
 import com.olt.racketclash.navigation.Screens
+import com.olt.racketclash.ui.CancelSaveButtonRow
 
 class NewProjectScreen(private val modelBuilder: () -> NewProjectModel) : Screen {
 
@@ -66,25 +67,15 @@ class NewProjectScreen(private val modelBuilder: () -> NewProjectModel) : Screen
                     }
                 }
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    val navigator = LocalNavigator.currentOrThrow
-
-                    Spacer(modifier = Modifier.weight(1.0f))
-                    Button(onClick = { screenModel.navigateTo(screen = Screens.Pop, navigator = navigator) }) {
-                        Text("Cancel")
-                    }
-                    Button(
-                        onClick = {
-                            screenModel.addProject()
-                            screenModel.navigateTo(screen = Screens.Pop, navigator = navigator)
-                        },
-                        enabled = stateModel.canCreate
-                    ) {
-                        Text("Create")
-                    }
-                }
+                val navigator = LocalNavigator.currentOrThrow
+                CancelSaveButtonRow(
+                    onCancel = { screenModel.navigateTo(screen = Screens.Pop, navigator = navigator) },
+                    onSave = {
+                        screenModel.addProject()
+                        screenModel.navigateTo(screen = Screens.Pop, navigator = navigator)
+                    },
+                    canSave = stateModel.canCreate
+                )
 
                 Spacer(modifier = Modifier.weight(1.0f))
             }
