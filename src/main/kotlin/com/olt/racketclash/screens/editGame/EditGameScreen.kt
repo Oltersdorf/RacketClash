@@ -1,9 +1,11 @@
 package com.olt.racketclash.screens.editGame
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -12,8 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
-import com.olt.racketclash.ui.TournamentScaffold
-import com.olt.racketclash.ui.TournamentTabs
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import com.olt.racketclash.data.Team
+import com.olt.racketclash.navigation.Screens
+import com.olt.racketclash.ui.*
 
 class EditGameScreen(private val modelBuilder: () -> EditGameModel) : Screen {
 
@@ -30,7 +36,14 @@ class EditGameScreen(private val modelBuilder: () -> EditGameModel) : Screen {
         ) {
             EditGameView(
                 paddingValues = it,
-                model = stateModel
+                model = stateModel,
+                selectedPlayer = screenModel::selectPlayer,
+                removePlayer = screenModel::removePlayer,
+                changeNameFilter = screenModel::changeNameFilter,
+                changeTeamFilter = screenModel::changeTeamFilter,
+                setPlayer = screenModel::setPlayer,
+                addGame = screenModel::addGame,
+                navigateTo = screenModel::navigateTo
             )
         }
     }
@@ -39,7 +52,14 @@ class EditGameScreen(private val modelBuilder: () -> EditGameModel) : Screen {
 @Composable
 private fun EditGameView(
     paddingValues: PaddingValues,
-    model: EditGameModel.Model
+    model: EditGameModel.Model,
+    selectedPlayer: (EditGameModel.SelectedPlayer) -> Unit,
+    removePlayer: (EditGameModel.SelectedPlayer) -> Unit,
+    changeNameFilter: (String) -> Unit,
+    changeTeamFilter: (Team?) -> Unit,
+    setPlayer: (Long) -> Unit,
+    addGame: () -> Unit,
+    navigateTo: (Screens, Navigator) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize().padding(paddingValues = paddingValues)
@@ -50,6 +70,169 @@ private fun EditGameView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = model.roundName, style = MaterialTheme.typography.titleLarge)
+
+            Row(
+                modifier = Modifier.padding(vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically)  {
+                        BorderText<EditGameModel.SelectedPlayer.Left1>(
+                            selectedPlayer = model.selectedPlayer,
+                            text = model.player1LeftDisplayName
+                        )
+                        if (model.player1Left == null)
+                            IconButton(
+                                onClick = { selectedPlayer(EditGameModel.SelectedPlayer.Left1) }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit"
+                                )
+                            }
+                        else
+                            IconButton(
+                                onClick = { removePlayer(EditGameModel.SelectedPlayer.Left1) }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Remove"
+                                )
+                            }
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        BorderText<EditGameModel.SelectedPlayer.Left2>(
+                            selectedPlayer = model.selectedPlayer,
+                            text = model.player2LeftDisplayName
+                        )
+                        if (model.player2Left == null)
+                            IconButton(
+                                onClick = { selectedPlayer(EditGameModel.SelectedPlayer.Left2) }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit"
+                                )
+                            }
+                        else
+                            IconButton(
+                                onClick = { removePlayer(EditGameModel.SelectedPlayer.Left2) }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Remove"
+                                )
+                            }
+                    }
+                }
+
+                Text(modifier = Modifier.padding(horizontal = 20.dp), text = "vs")
+
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically)  {
+                        BorderText<EditGameModel.SelectedPlayer.Right1>(
+                            selectedPlayer = model.selectedPlayer,
+                            text = model.player1RightDisplayName
+                        )
+                        if (model.player1Right == null)
+                            IconButton(
+                                onClick = { selectedPlayer(EditGameModel.SelectedPlayer.Right1) }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit"
+                                )
+                            }
+                        else
+                            IconButton(
+                                onClick = { removePlayer(EditGameModel.SelectedPlayer.Right1) }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Remove"
+                                )
+                            }
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically)  {
+                        BorderText<EditGameModel.SelectedPlayer.Right2>(
+                            selectedPlayer = model.selectedPlayer,
+                            text = model.player2RightDisplayName
+                        )
+                        if (model.player2Right == null)
+                            IconButton(
+                                onClick = { selectedPlayer(EditGameModel.SelectedPlayer.Right2) }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit"
+                                )
+                            }
+                        else
+                            IconButton(
+                                onClick = { removePlayer(EditGameModel.SelectedPlayer.Right2) }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Remove"
+                                )
+                            }
+                    }
+                }
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                val navigator = LocalNavigator.currentOrThrow
+
+                Spacer(modifier = Modifier.weight(1.0f))
+                Button(onClick = { navigateTo(Screens.Pop, navigator) }) {
+                    Text("Cancel")
+                }
+                Button(onClick = { addGame() }) {
+                    Text("Save")
+                }
+            }
+
+            Row {
+                OutlinedTextField(
+                    value = model.nameFilter,
+                    onValueChange = changeNameFilter,
+                    label = { Text("Filter by name") }
+                )
+
+                DropDownMenu(
+                    modifier = Modifier,
+                    items = model.teams,
+                    value = model.teamFilter?.name ?: "<No team selected>",
+                    textMapper = { it?.name ?: "<No team selected>" },
+                    onClick = changeTeamFilter
+                )
+            }
+
+            LazyTableWithScroll(
+                items = model.players,
+                onClick = { setPlayer(it.id) },
+                columns = listOf(
+                    LazyTableColumn.Text(name = "Name", weight = 5.0f, text = { it.name }),
+                    LazyTableColumn.Text(name = "Team", weight = 2.0f, text = { it.teamName })
+                )
+            )
         }
     }
+}
+
+@Composable
+private inline fun <reified T: EditGameModel.SelectedPlayer> BorderText(
+    selectedPlayer: EditGameModel.SelectedPlayer?,
+    text: String
+) {
+    Text(
+        modifier = if (selectedPlayer is T)
+            Modifier.border(width = 1.dp, color = MaterialTheme.colorScheme.primary)
+        else Modifier,
+        text = text
+    )
 }
