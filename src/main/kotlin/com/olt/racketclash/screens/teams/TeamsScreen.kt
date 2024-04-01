@@ -2,9 +2,7 @@ package com.olt.racketclash.screens.teams
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,12 +30,7 @@ class TeamsScreen(private val modelBuilder: () -> TeamsModel) : Screen {
             topAppBarActions = {
                 val navigator = LocalNavigator.currentOrThrow
 
-                IconButton(onClick = { screenModel.navigateTo(screen = Screens.EditTeam(team = null), navigator = navigator) }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add"
-                    )
-                }
+                AddButton { screenModel.navigateTo(screen = Screens.EditTeam(team = null), navigator = navigator) }
             },
             selectedTab = TournamentTabs.Teams,
             navigateTo = screenModel::navigateTo

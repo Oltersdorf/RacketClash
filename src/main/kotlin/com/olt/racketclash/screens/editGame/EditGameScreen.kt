@@ -2,9 +2,6 @@ package com.olt.racketclash.screens.editGame
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -82,23 +79,9 @@ private fun EditGameView(
                             text = model.player1LeftDisplayName
                         )
                         if (model.player1Left == null)
-                            IconButton(
-                                onClick = { selectedPlayer(EditGameModel.SelectedPlayer.Left1) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit"
-                                )
-                            }
+                            EditButton { selectedPlayer(EditGameModel.SelectedPlayer.Left1) }
                         else
-                            IconButton(
-                                onClick = { removePlayer(EditGameModel.SelectedPlayer.Left1) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Remove"
-                                )
-                            }
+                            DeleteButton { removePlayer(EditGameModel.SelectedPlayer.Left1) }
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -107,23 +90,9 @@ private fun EditGameView(
                             text = model.player2LeftDisplayName
                         )
                         if (model.player2Left == null)
-                            IconButton(
-                                onClick = { selectedPlayer(EditGameModel.SelectedPlayer.Left2) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit"
-                                )
-                            }
+                            EditButton { selectedPlayer(EditGameModel.SelectedPlayer.Left2) }
                         else
-                            IconButton(
-                                onClick = { removePlayer(EditGameModel.SelectedPlayer.Left2) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Remove"
-                                )
-                            }
+                            DeleteButton{ removePlayer(EditGameModel.SelectedPlayer.Left2) }
                     }
                 }
 
@@ -136,23 +105,9 @@ private fun EditGameView(
                             text = model.player1RightDisplayName
                         )
                         if (model.player1Right == null)
-                            IconButton(
-                                onClick = { selectedPlayer(EditGameModel.SelectedPlayer.Right1) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit"
-                                )
-                            }
+                            EditButton { selectedPlayer(EditGameModel.SelectedPlayer.Right1) }
                         else
-                            IconButton(
-                                onClick = { removePlayer(EditGameModel.SelectedPlayer.Right1) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Remove"
-                                )
-                            }
+                            DeleteButton { removePlayer(EditGameModel.SelectedPlayer.Right1) }
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically)  {
@@ -161,23 +116,9 @@ private fun EditGameView(
                             text = model.player2RightDisplayName
                         )
                         if (model.player2Right == null)
-                            IconButton(
-                                onClick = { selectedPlayer(EditGameModel.SelectedPlayer.Right2) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit"
-                                )
-                            }
+                            EditButton { selectedPlayer(EditGameModel.SelectedPlayer.Right2) }
                         else
-                            IconButton(
-                                onClick = { removePlayer(EditGameModel.SelectedPlayer.Right2) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Remove"
-                                )
-                            }
+                            DeleteButton { removePlayer(EditGameModel.SelectedPlayer.Right2) }
                     }
                 }
             }

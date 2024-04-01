@@ -2,9 +2,7 @@ package com.olt.racketclash.screens.players
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,13 +31,7 @@ class PlayersScreen(private val modelBuilder: () -> PlayersModel) : Screen {
             topAppBarTitle = "Player",
             topAppBarActions = {
                 val navigator = LocalNavigator.currentOrThrow
-
-                IconButton(onClick = { screenModel.navigateTo(Screens.EditPlayer(player = null), navigator) }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add"
-                    )
-                }
+                AddButton { screenModel.navigateTo(Screens.EditPlayer(player = null), navigator) }
             },
             selectedTab = TournamentTabs.Players,
             navigateTo = screenModel::navigateTo

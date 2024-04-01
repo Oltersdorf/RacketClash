@@ -2,7 +2,6 @@ package com.olt.racketclash.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -71,14 +70,8 @@ private fun NavigationScaffold(
                 navigationIcon = {
                     val navigator = LocalNavigator.currentOrThrow
 
-                    if (hasBackPress) {
-                        IconButton(onClick = { navigator.pop() }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                    }
+                    if (hasBackPress)
+                        BackButton { navigator.pop() }
                 }
             )
         },

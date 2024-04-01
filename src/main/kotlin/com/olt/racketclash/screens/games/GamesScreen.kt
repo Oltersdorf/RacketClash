@@ -6,8 +6,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,8 +19,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Round
 import com.olt.racketclash.navigation.Screens
-import com.olt.racketclash.ui.TournamentScaffold
-import com.olt.racketclash.ui.TournamentTabs
+import com.olt.racketclash.ui.*
 
 internal typealias editGame = (Long, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Boolean) -> Unit
 
@@ -37,13 +34,7 @@ class GamesScreen(private val modelBuilder: () -> GamesModel) : Screen {
             topAppBarTitle = "Games",
             topAppBarActions = {
                 val navigator = LocalNavigator.currentOrThrow
-
-                IconButton(onClick = { screenModel.navigateTo(screen = Screens.NewRound, navigator = navigator) }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add"
-                    )
-                }
+                AddButton { screenModel.navigateTo(screen = Screens.NewRound, navigator = navigator) }
             },
             selectedTab = TournamentTabs.Games,
             navigateTo = screenModel::navigateTo
@@ -81,48 +72,16 @@ private fun Header() {
                 text = "Fields:",
                 modifier = Modifier.padding(start = 10.dp)
             )
-            FilledIconButton(
-                onClick = {},
-                enabled = true
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowLeft,
-                    contentDescription = "Remove"
-                )
-            }
+            FilledArrowLeftButton(enabled = true) {}
             Text("1")
-            FilledIconButton(
-                onClick = {},
-                enabled = true
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Add"
-                )
-            }
+            FilledArrowRightButton(enabled = true) {}
             Text(
                 text = "Timeout:",
                 modifier = Modifier.padding(start = 20.dp)
             )
-            FilledIconButton(
-                onClick = {},
-                enabled = true
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowLeft,
-                    contentDescription = "Remove"
-                )
-            }
+            FilledArrowLeftButton(enabled = true) {}
             Text("1 min")
-            FilledIconButton(
-                onClick = {},
-                enabled = true
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Add"
-                )
-            }
+            FilledArrowRightButton(enabled = true) {}
         }
     }
 }
@@ -185,14 +144,7 @@ private fun Round(
                 Text(modifier = Modifier.padding(start = 6.dp), text = round.name)
                 Spacer(modifier = Modifier.weight(1.0f))
                 val navigator = LocalNavigator.currentOrThrow
-                IconButton(
-                    onClick = { navigateTo(Screens.EditRound(round = round), navigator) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit"
-                    )
-                }
+                EditButton { navigateTo(Screens.EditRound(round = round), navigator) }
             }
             if (games.isEmpty())
                 Text(modifier = Modifier.padding(start = 6.dp), text = "No games available")
@@ -265,23 +217,11 @@ private fun RoundItem(
             Column(
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                IconButton(
-                    onClick = { editGame(game.id, pointsLeft.toInt(), pointsRight.toInt(), 0, 0, 0, 0, 0, 0, 0, 0, true) },
-                    enabled = !game.isDone
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Save"
-                    )
+                SaveButton(enabled = !game.isDone) {
+                    editGame(game.id, pointsLeft.toInt(), pointsRight.toInt(), 0, 0, 0, 0, 0, 0, 0, 0, true)
                 }
-                IconButton(
-                    onClick = { editGame(game.id, pointsLeft.toInt(), pointsRight.toInt(), 0, 0, 0, 0, 0, 0, 0, 0, false) },
-                    enabled = game.isDone
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit"
-                    )
+                EditButton(enabled = game.isDone) {
+                    editGame(game.id, pointsLeft.toInt(), pointsRight.toInt(), 0, 0, 0, 0, 0, 0, 0, 0, false)
                 }
             }
         }

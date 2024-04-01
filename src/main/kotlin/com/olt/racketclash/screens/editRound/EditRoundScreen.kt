@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,10 +17,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.navigation.Screens
-import com.olt.racketclash.ui.LazyTableColumn
-import com.olt.racketclash.ui.LazyTableWithScroll
-import com.olt.racketclash.ui.TournamentScaffold
-import com.olt.racketclash.ui.TournamentTabs
+import com.olt.racketclash.ui.*
 
 class EditRoundScreen(private val modelBuilder: () -> EditRoundModel) : Screen {
 
@@ -68,32 +63,19 @@ private fun EditRoundView(
                 onValueChange = onNameChange,
                 label = { Text("Name") },
                 trailingIcon = {
-                    IconButton(
+                    SaveButton(
                         onClick = saveName,
                         modifier = Modifier.weight(1.0f),
                         enabled = model.temporaryRoundName != model.round?.name
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Save"
-                        )
-                    }
+                    )
                 }
             )
-
-            val navigator = LocalNavigator.currentOrThrow
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Games")
                 Spacer(modifier = Modifier.weight(1.0f))
-                IconButton(
-                    onClick = { navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add"
-                    )
-                }
+                val navigator = LocalNavigator.currentOrThrow
+                AddButton { navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) }
             }
 
             LazyTableWithScroll(

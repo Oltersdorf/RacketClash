@@ -2,9 +2,6 @@ package com.olt.racketclash.screens.projects
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,6 +18,8 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Project
 import com.olt.racketclash.navigation.Screens
+import com.olt.racketclash.ui.AddButton
+import com.olt.racketclash.ui.DeleteButton
 import com.olt.racketclash.ui.LazyTableColumn
 import com.olt.racketclash.ui.LazyTableWithScroll
 
@@ -100,11 +99,7 @@ private fun ProjectSelectHeader(
 
     TopAppBar(
         title = { Text("Select Project") },
-        actions = {
-            IconButton(onClick = { navigateTo(Screens.NewProject, navigator) }) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
-            }
-        },
+        actions = { AddButton { navigateTo(Screens.NewProject, navigator) } },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         )
@@ -139,14 +134,7 @@ private fun ProjectItem(
                 Text("Teams: ${project.teamNumber}")
             }
             Spacer(modifier = Modifier.weight(weight = 1.0f))
-            IconButton(
-                onClick = { deleteProject(project.name) }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete"
-                )
-            }
+            DeleteButton { deleteProject(project.name) }
         }
     }
 }
