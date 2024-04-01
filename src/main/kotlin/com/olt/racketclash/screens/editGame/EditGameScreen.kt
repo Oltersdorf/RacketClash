@@ -146,6 +146,7 @@ private fun EditGameView(
 
                 DropDownMenu(
                     modifier = Modifier,
+                    label = "Team",
                     items = model.teams,
                     value = model.teamFilter?.name ?: "<No team selected>",
                     textMapper = { it?.name ?: "<No team selected>" },

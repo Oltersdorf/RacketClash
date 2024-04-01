@@ -2,9 +2,6 @@ package com.olt.racketclash.screens.newRound
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,8 +13,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.navigation.Screens
-import com.olt.racketclash.ui.TournamentScaffold
-import com.olt.racketclash.ui.TournamentTabs
+import com.olt.racketclash.ui.*
 
 class NewRoundScreen(private val modelBuilder: () -> NewRoundModel) : Screen {
 
@@ -42,7 +38,6 @@ private sealed class RoundType(val name: String) {
     data object EquallyDouble : RoundType("Equally strong doubles")
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NewRoundView(
     paddingValues: PaddingValues,
@@ -72,38 +67,15 @@ private fun NewRoundView(
                     label = { Text("Name") }
                 )
 
-                var expanded by remember { mutableStateOf(false) }
                 var selectedRoundType by remember { mutableStateOf<RoundType>(RoundType.Empty) }
-                ExposedDropdownMenuBox(
+                DropDownMenu(
                     modifier = Modifier.padding(top = 50.dp, bottom = 50.dp),
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-                    TextField(
-                        modifier = Modifier.menuAnchor().fillMaxWidth(),
-                        readOnly = true,
-                        value = selectedRoundType.name,
-                        onValueChange = {},
-                        label = { Text("Team") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
-                    )
-
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        listOf(RoundType.Empty, RoundType.EquallyDouble).forEach {
-                            DropdownMenuItem(
-                                text = { Text(text = it.name) },
-                                onClick = {
-                                    selectedRoundType = it
-                                    expanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
-                        }
-                    }
-                }
+                    label = "Team",
+                    items = listOf(RoundType.Empty, RoundType.EquallyDouble),
+                    value = selectedRoundType.name,
+                    textMapper = { it.name },
+                    onClick = { selectedRoundType = it }
+                )
 
                 when (selectedRoundType) {
                     RoundType.Empty -> {}
@@ -144,25 +116,9 @@ private fun EquallyStrongDouble() {
         horizontalAlignment = Alignment.Start
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            FilledIconButton(
-                onClick = {},
-                enabled = true
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowLeft,
-                    contentDescription = "Remove"
-                )
-            }
+            FilledArrowLeftButton(enabled = true) {}
             Text("1")
-            FilledIconButton(
-                onClick = {},
-                enabled = true
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Add"
-                )
-            }
+            FilledArrowRightButton(enabled = true) {}
             Text(text = "Rounds")
         }
 

@@ -74,6 +74,7 @@ private fun EditPlayerView(
 
             DropDownMenu(
                 modifier = Modifier.padding(top = 50.dp, bottom = 50.dp),
+                label = "Team",
                 items = teams,
                 value = selectedTeam.name,
                 isError = selectedTeam.id == -1L,

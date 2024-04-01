@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 @Composable
 fun <T> DropDownMenu(
     modifier: Modifier,
+    label: String = "",
     items: List<T>,
     value: String,
     isError: Boolean = false,
@@ -27,7 +28,7 @@ fun <T> DropDownMenu(
             readOnly = true,
             value = value,
             onValueChange = {},
-            label = { Text("Team") },
+            label = { Text(label) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             isError = isError
         )
