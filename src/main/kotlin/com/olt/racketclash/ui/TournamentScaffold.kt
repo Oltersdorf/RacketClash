@@ -34,7 +34,7 @@ fun TournamentScaffold(
     hasBackPress: Boolean = false,
     selectedTab: TournamentTabs?,
     navigateTo: (Screens, Navigator) -> Unit,
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable () -> Unit
 ) {
 
     NavigationScaffold(
@@ -57,7 +57,7 @@ private fun NavigationScaffold(
     tabs: List<Tab>,
     selectedTab: Tab?,
     navigateTo: (Screens, Navigator) -> Unit,
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -88,7 +88,11 @@ private fun NavigationScaffold(
                 }
             )
         },
-        content = content
+        content = {
+            Surface(modifier = Modifier.fillMaxSize().padding(paddingValues = it)) {
+                content()
+            }
+        }
     )
 }
 

@@ -37,7 +37,6 @@ class PlayersScreen(private val modelBuilder: () -> PlayersModel) : Screen {
             navigateTo = screenModel::navigateTo
         ) {
             PlayerView(
-                paddingValues = it,
                 model = stateModel,
                 updateActive = screenModel::updateActive,
                 deletePlayer = screenModel::deletePlayer,
@@ -49,17 +48,15 @@ class PlayersScreen(private val modelBuilder: () -> PlayersModel) : Screen {
 
 @Composable
 private fun PlayerView(
-    paddingValues: PaddingValues,
     model: PlayersModel.Modal,
     updateActive: updateActive,
     deletePlayer: (Long) -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
     if (model.isLoading)
-        Loading(paddingValues = paddingValues)
+        Loading()
     else
         PlayerList(
-            paddingValues = paddingValues,
             player = model.players,
             updateActive = updateActive,
             deletePlayer = deletePlayer,
@@ -69,7 +66,6 @@ private fun PlayerView(
 
 @Composable
 private fun PlayerList(
-    paddingValues: PaddingValues,
     player: List<Player>,
     updateActive: updateActive,
     deletePlayer: (Long) -> Unit,
@@ -79,7 +75,7 @@ private fun PlayerList(
 
     LazyTableWithScroll(
         items = player,
-        modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp),
+        modifier = Modifier.padding(5.dp),
         onClick = { navigateTo(Screens.EditPlayer(it), navigator) },
         columns = listOf(
             LazyTableColumn.Checkbox(

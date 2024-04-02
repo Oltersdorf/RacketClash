@@ -33,7 +33,6 @@ class EditPlayerScreen(private val modelBuilder: () -> EditPlayerModel) : Screen
             navigateTo = screenModel::navigateTo
         ) {
             EditPlayerView(
-                paddingValues = it,
                 player = stateModel.player,
                 teams = stateModel.teams,
                 selectedTeam = stateModel.selectedTeam,
@@ -47,7 +46,6 @@ class EditPlayerScreen(private val modelBuilder: () -> EditPlayerModel) : Screen
 
 @Composable
 private fun EditPlayerView(
-    paddingValues: PaddingValues,
     player: Player?,
     teams: List<Team>,
     selectedTeam: Team,
@@ -55,43 +53,39 @@ private fun EditPlayerView(
     selectTeam: (Long) -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize().padding(paddingValues = paddingValues)
+    Column(
+        modifier = Modifier.requiredWidthIn(500.dp).fillMaxWidth(0.5f),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            modifier = Modifier.requiredWidthIn(500.dp).fillMaxWidth(0.5f),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            var playerName by remember { mutableStateOf(player?.name ?: "") }
+        var playerName by remember { mutableStateOf(player?.name ?: "") }
 
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = playerName,
-                onValueChange = { playerName = it },
-                label = { Text("Name") },
-                isError = playerName.isBlank()
-            )
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = playerName,
+            onValueChange = { playerName = it },
+            label = { Text("Name") },
+            isError = playerName.isBlank()
+        )
 
-            DropDownMenu(
-                modifier = Modifier.padding(top = 50.dp, bottom = 50.dp),
-                label = "Team",
-                items = teams,
-                value = selectedTeam.name,
-                isError = selectedTeam.id == -1L,
-                textMapper = { it.name },
-                onClick = { selectTeam(it.id) }
-            )
+        DropDownMenu(
+            modifier = Modifier.padding(top = 50.dp, bottom = 50.dp),
+            label = "Team",
+            items = teams,
+            value = selectedTeam.name,
+            isError = selectedTeam.id == -1L,
+            textMapper = { it.name },
+            onClick = { selectTeam(it.id) }
+        )
 
-            val navigator = LocalNavigator.currentOrThrow
-            CancelSaveButtonRow(
-                onCancel = { navigateTo(Screens.Pop, navigator) },
-                onSave = {
-                    updatePlayer(player?.id, playerName, selectedTeam.id)
-                    navigateTo(Screens.Pop, navigator)
-                },
-                canSave = playerName.isNotBlank() && selectedTeam.id != -1L
-            )
-        }
+        val navigator = LocalNavigator.currentOrThrow
+        CancelSaveButtonRow(
+            onCancel = { navigateTo(Screens.Pop, navigator) },
+            onSave = {
+                updatePlayer(player?.id, playerName, selectedTeam.id)
+                navigateTo(Screens.Pop, navigator)
+            },
+            canSave = playerName.isNotBlank() && selectedTeam.id != -1L
+        )
     }
 }

@@ -35,27 +35,25 @@ class TeamsScreen(private val modelBuilder: () -> TeamsModel) : Screen {
             selectedTab = TournamentTabs.Teams,
             navigateTo = screenModel::navigateTo
         ) {
-            TeamView(paddingValues = it, modal = stateModel, deleteTeam = screenModel::deleteTeam, navigateTo = screenModel::navigateTo)
+            TeamView(modal = stateModel, deleteTeam = screenModel::deleteTeam, navigateTo = screenModel::navigateTo)
         }
     }
 }
 
 @Composable
 private fun TeamView(
-    paddingValues: PaddingValues,
     modal: TeamsModel.Modal,
     deleteTeam: (id: Long) -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
     if (modal.isLoading)
-        Loading(paddingValues = paddingValues)
+        Loading()
     else
-        TeamList(paddingValues = paddingValues, teams = modal.teams, deleteTeam = deleteTeam, navigateTo = navigateTo)
+        TeamList(teams = modal.teams, deleteTeam = deleteTeam, navigateTo = navigateTo)
 }
 
 @Composable
 private fun TeamList(
-    paddingValues: PaddingValues,
     teams: List<Team>,
     deleteTeam: (id: Long) -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
@@ -64,7 +62,7 @@ private fun TeamList(
 
     LazyTableWithScroll(
         items = teams,
-        modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp),
+        modifier = Modifier.padding(5.dp),
         onClick = { navigateTo(Screens.EditTeam(it), navigator) },
         columns = listOf(
             LazyTableColumn.Text(

@@ -28,7 +28,7 @@ class NewRoundScreen(private val modelBuilder: () -> NewRoundModel) : Screen {
             selectedTab = TournamentTabs.Games,
             navigateTo = screenModel::navigateTo
         ) {
-            NewRoundView(paddingValues = it, addRound = screenModel::addRound, navigateTo = screenModel::navigateTo)
+            NewRoundView(addRound = screenModel::addRound, navigateTo = screenModel::navigateTo)
         }
     }
 }
@@ -40,64 +40,59 @@ private sealed class RoundType(val name: String) {
 
 @Composable
 private fun NewRoundView(
-    paddingValues: PaddingValues,
     addRound: (String) -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize().padding(paddingValues = paddingValues)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            val verticalScrollState = rememberScrollState()
+    Box(contentAlignment = Alignment.Center) {
+        val verticalScrollState = rememberScrollState()
 
-            Column(
-                modifier = Modifier
-                    .requiredWidthIn(500.dp)
-                    .fillMaxWidth(0.5f)
-                    .verticalScroll(verticalScrollState),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                var name by remember { mutableStateOf("") }
+        Column(
+            modifier = Modifier
+                .requiredWidthIn(500.dp)
+                .fillMaxWidth(0.5f)
+                .verticalScroll(verticalScrollState),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            var name by remember { mutableStateOf("") }
 
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Name") }
-                )
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Name") }
+            )
 
-                var selectedRoundType by remember { mutableStateOf<RoundType>(RoundType.Empty) }
-                DropDownMenu(
-                    modifier = Modifier.padding(top = 50.dp, bottom = 50.dp),
-                    label = "Team",
-                    items = listOf(RoundType.Empty, RoundType.EquallyDouble),
-                    value = selectedRoundType.name,
-                    textMapper = { it.name },
-                    onClick = { selectedRoundType = it }
-                )
+            var selectedRoundType by remember { mutableStateOf<RoundType>(RoundType.Empty) }
+            DropDownMenu(
+                modifier = Modifier.padding(top = 50.dp, bottom = 50.dp),
+                label = "Team",
+                items = listOf(RoundType.Empty, RoundType.EquallyDouble),
+                value = selectedRoundType.name,
+                textMapper = { it.name },
+                onClick = { selectedRoundType = it }
+            )
 
-                when (selectedRoundType) {
-                    RoundType.Empty -> {}
-                    RoundType.EquallyDouble -> EquallyStrongDouble()
-                }
-
-                val navigator = LocalNavigator.currentOrThrow
-                CancelSaveButtonRow(
-                    onCancel = { navigateTo(Screens.Games, navigator) },
-                    onSave = {
-                        addRound(name)
-                        navigateTo(Screens.Games, navigator)
-                    }
-                )
+            when (selectedRoundType) {
+                RoundType.Empty -> {}
+                RoundType.EquallyDouble -> EquallyStrongDouble()
             }
 
-            VerticalScrollbar(
-                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                adapter = rememberScrollbarAdapter(scrollState = verticalScrollState),
-                style = LocalScrollbarStyle.current.copy(hoverColor = MaterialTheme.colorScheme.secondary, unhoverColor = MaterialTheme.colorScheme.secondary)
+            val navigator = LocalNavigator.currentOrThrow
+            CancelSaveButtonRow(
+                onCancel = { navigateTo(Screens.Games, navigator) },
+                onSave = {
+                    addRound(name)
+                    navigateTo(Screens.Games, navigator)
+                }
             )
         }
+
+        VerticalScrollbar(
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+            adapter = rememberScrollbarAdapter(scrollState = verticalScrollState),
+            style = LocalScrollbarStyle.current.copy(hoverColor = MaterialTheme.colorScheme.secondary, unhoverColor = MaterialTheme.colorScheme.secondary)
+        )
     }
 }
 

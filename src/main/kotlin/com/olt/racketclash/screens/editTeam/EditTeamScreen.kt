@@ -2,7 +2,6 @@ package com.olt.racketclash.screens.editTeam
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,7 +32,6 @@ class EditTeamScreen(private val modelBuilder: () -> EditTeamModel) : Screen {
             navigateTo = screenModel::navigateTo
         ) {
             EditTeamView(
-                paddingValues = it,
                 team = stateModel.team,
                 updateTeam = screenModel::updateTeam,
                 navigateTo = screenModel::navigateTo
@@ -44,50 +42,45 @@ class EditTeamScreen(private val modelBuilder: () -> EditTeamModel) : Screen {
 
 @Composable
 private fun EditTeamView(
-    paddingValues: PaddingValues,
     team: Team?,
     updateTeam: (Long?, String, Int) -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize().padding(paddingValues = paddingValues)
+    Column(
+        modifier = Modifier.requiredWidthIn(500.dp).fillMaxWidth(0.5f),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            modifier = Modifier.requiredWidthIn(500.dp).fillMaxWidth(0.5f),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            var teamName by remember { mutableStateOf(team?.name ?: "") }
-            var teamStrength by remember { mutableStateOf(team?.strength?.toString() ?: "1") }
+        var teamName by remember { mutableStateOf(team?.name ?: "") }
+        var teamStrength by remember { mutableStateOf(team?.strength?.toString() ?: "1") }
 
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = teamName,
-                onValueChange = { teamName = it },
-                label = { Text("Name") },
-                isError = teamName.isBlank()
-            )
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth().padding(top = 50.dp, bottom = 50.dp),
-                value = teamStrength,
-                onValueChange = {
-                    val strength = it.toIntOrNull()
-                    if (it.isEmpty() || (strength != null && strength > 0))
-                        teamStrength = it
-                },
-                label = { Text("Difficulty") },
-                isError = teamStrength.isEmpty()
-            )
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = teamName,
+            onValueChange = { teamName = it },
+            label = { Text("Name") },
+            isError = teamName.isBlank()
+        )
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().padding(top = 50.dp, bottom = 50.dp),
+            value = teamStrength,
+            onValueChange = {
+                val strength = it.toIntOrNull()
+                if (it.isEmpty() || (strength != null && strength > 0))
+                    teamStrength = it
+            },
+            label = { Text("Difficulty") },
+            isError = teamStrength.isEmpty()
+        )
 
-            val navigator = LocalNavigator.currentOrThrow
-            CancelSaveButtonRow(
-                onCancel = { navigateTo(Screens.Pop, navigator) },
-                onSave = {
-                    updateTeam(team?.id, teamName, teamStrength.toInt())
-                    navigateTo(Screens.Pop, navigator)
-                },
-                canSave = teamName.isNotBlank() && teamStrength.isNotEmpty()
-            )
-        }
+        val navigator = LocalNavigator.currentOrThrow
+        CancelSaveButtonRow(
+            onCancel = { navigateTo(Screens.Pop, navigator) },
+            onSave = {
+                updateTeam(team?.id, teamName, teamStrength.toInt())
+                navigateTo(Screens.Pop, navigator)
+            },
+            canSave = teamName.isNotBlank() && teamStrength.isNotEmpty()
+        )
     }
 }

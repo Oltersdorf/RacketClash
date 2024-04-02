@@ -39,21 +39,18 @@ class GamesScreen(private val modelBuilder: () -> GamesModel) : Screen {
             selectedTab = TournamentTabs.Games,
             navigateTo = screenModel::navigateTo
         ) {
-            GamesView(paddingValues = it, rounds = stateModel.rounds, editGame = screenModel::updateGame, navigateTo = screenModel::navigateTo)
+            GamesView(rounds = stateModel.rounds, editGame = screenModel::updateGame, navigateTo = screenModel::navigateTo)
         }
     }
 }
 
 @Composable
 private fun GamesView(
-    paddingValues: PaddingValues,
     rounds: Map<Round, List<Game>>,
     editGame: editGame,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
-    Column(
-        modifier = Modifier.padding(paddingValues = paddingValues).padding(5.dp)
-    ) {
+    Column {
         Header()
         Graph(rounds = rounds, editGame = editGame, navigateTo = navigateTo)
     }
