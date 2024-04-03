@@ -1,13 +1,11 @@
 package com.olt.racketclash.screens.projects
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -31,10 +29,6 @@ class ProjectsScreen(private val modelBuilder: () -> ProjectsModel) : Screen {
             modifier = Modifier.fillMaxSize()
         ) {
             SettingsView {
-                Text(
-                    text = "Racket Clash",
-                    style = MaterialTheme.typography.headlineLarge
-                )
                 ProjectSelect(
                     projects = stateModel.projects,
                     deleteProject = screenModel::deleteProject,
@@ -51,45 +45,27 @@ private fun ProjectSelect(
     deleteProject: deleteProject,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
-    Scaffold(
-        modifier = Modifier.clip(RoundedCornerShape(10.dp)).requiredHeightIn(max = 500.dp),
-        topBar = { ProjectSelectHeader(navigateTo = navigateTo) }
-    ) { paddingValues ->
-        Surface(
-            modifier = Modifier.padding(paddingValues),
-            tonalElevation = 1.dp
-        ) {
-            LazyTableWithScroll(
-                items = projects,
-                showHeader = false,
-                modifier = Modifier.padding(5.dp),
-                itemsSpacedBy = 10.dp,
-                columns = listOf(
-                    LazyTableColumn.Builder { item, _ ->
-                        ProjectItem(
-                            project = item,
-                            deleteProject = deleteProject,
-                            navigateTo = navigateTo
-                        )
-                    }
-                )
-            )
-        }
-    }
-}
+    Text(
+        text = "Racket Clash",
+        style = MaterialTheme.typography.headlineLarge
+    )
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ProjectSelectHeader(
-    navigateTo: (Screens, Navigator) -> Unit
-) {
     val navigator = LocalNavigator.currentOrThrow
-
-    TopAppBar(
-        title = { Text("Select Project") },
-        actions = { AddButton { navigateTo(Screens.NewProject, navigator) } },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+    LazyTableWithScrollScaffold(
+        modifier = Modifier.padding(5.dp),
+        topBarTitle = "Select Project",
+        topBarActions = { AddButton { navigateTo(Screens.NewProject, navigator) } },
+        items = projects,
+        itemsSpacedBy = 10.dp,
+        showHeader = false,
+        columns = listOf(
+            LazyTableColumn.Builder { item, _ ->
+                ProjectItem(
+                    project = item,
+                    deleteProject = deleteProject,
+                    navigateTo = navigateTo
+                )
+            }
         )
     )
 }

@@ -121,25 +121,10 @@ private fun EditGameView(
         onSave = { addGame() }
     )
 
-    Row {
-        OutlinedTextField(
-            value = model.nameFilter,
-            onValueChange = changeNameFilter,
-            label = { Text("Filter by name") }
-        )
-
-        DropDownMenu(
-            modifier = Modifier,
-            label = "Team",
-            items = model.teams,
-            value = model.teamFilter?.name ?: "<No team selected>",
-            textMapper = { it?.name ?: "<No team selected>" },
-            onClick = changeTeamFilter
-        )
-    }
-
-    LazyTableWithScroll(
+    LazyTableWithScrollScaffold(
         modifier = Modifier.requiredHeightIn(max = 500.dp),
+        topBarTitle = "Filter",
+        topBarActions = { Filter(model = model, changeNameFilter = changeNameFilter, changeTeamFilter = changeTeamFilter) },
         items = model.players,
         onClick = { setPlayer(it.id) },
         columns = listOf(
@@ -159,5 +144,29 @@ private inline fun <reified T: EditGameModel.SelectedPlayer> BorderText(
             Modifier.border(width = 1.dp, color = MaterialTheme.colorScheme.primary)
         else Modifier,
         text = text
+    )
+}
+
+@Composable
+private fun Filter(
+    model: EditGameModel.Model,
+    changeNameFilter: (String) -> Unit,
+    changeTeamFilter: (Team?) -> Unit
+) {
+    TextField(
+        modifier = Modifier.width(TextFieldDefaults.MinWidth),
+        value = model.nameFilter,
+        onValueChange = changeNameFilter,
+        label = { Text("Filter by name") },
+        singleLine = true
+    )
+
+    DropDownMenu(
+        modifier = Modifier.padding(start = 5.dp).width(TextFieldDefaults.MinWidth),
+        label = "Team",
+        items = model.teams,
+        value = model.teamFilter?.name ?: "<No team selected>",
+        textMapper = { it?.name ?: "<No team selected>" },
+        onClick = changeTeamFilter
     )
 }

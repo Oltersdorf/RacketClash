@@ -6,10 +6,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -84,6 +86,43 @@ fun <T> LazyTableWithScroll(
             adapter = rememberScrollbarAdapter(scrollState = scrollState),
             style = LocalScrollbarStyle.current.copy(hoverColor = MaterialTheme.colorScheme.secondary, unhoverColor = MaterialTheme.colorScheme.secondary)
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> LazyTableWithScrollScaffold(
+    modifier: Modifier = Modifier,
+    topBarTitle: String,
+    topBarActions: @Composable (RowScope.() -> Unit),
+    items: List<T>,
+    itemsSpacedBy: Dp = 0.dp,
+    showHeader: Boolean = true,
+    onClick: ((T) -> Unit)? = null,
+    columns: List<LazyTableColumn<T>>
+) {
+    Scaffold(
+        modifier = Modifier.clip(RoundedCornerShape(10.dp)).requiredHeightIn(max = 500.dp),
+        topBar = {
+            TopAppBar(
+                title = { Text(topBarTitle) },
+                actions = topBarActions,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            )
+        }
+    ) { paddingValues ->
+        Surface(tonalElevation = 1.dp) {
+            LazyTableWithScroll(
+                modifier = modifier.padding(paddingValues),
+                items = items,
+                itemsSpacedBy = itemsSpacedBy,
+                showHeader = showHeader,
+                onClick = onClick,
+                columns = columns
+            )
+        }
     }
 }
 

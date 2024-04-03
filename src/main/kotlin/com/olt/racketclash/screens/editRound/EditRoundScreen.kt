@@ -7,7 +7,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -64,15 +63,11 @@ private fun EditRoundView(
         }
     )
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text("Games")
-        Spacer(modifier = Modifier.weight(1.0f))
-        val navigator = LocalNavigator.currentOrThrow
-        AddButton { navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) }
-    }
-
-    LazyTableWithScroll(
+    val navigator = LocalNavigator.currentOrThrow
+    LazyTableWithScrollScaffold(
         modifier = Modifier.requiredHeightIn(max = 500.dp),
+        topBarTitle = "Games",
+        topBarActions = { AddButton { navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) } },
         items = model.games,
         columns = listOf(
             LazyTableColumn.Builder(
