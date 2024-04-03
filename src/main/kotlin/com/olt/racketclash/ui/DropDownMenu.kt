@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> DropDownMenu(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     label: String = "",
     items: List<T>,
     value: String,
