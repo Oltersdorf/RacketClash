@@ -1,6 +1,5 @@
 package com.olt.racketclash.ui
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -19,12 +18,11 @@ fun <T> DropDownMenu(
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
-        modifier = modifier,
         expanded = expanded,
         onExpandedChange = { expanded = !expanded }
     ) {
         TextField(
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
+            modifier = Modifier.menuAnchor().then(modifier),
             readOnly = true,
             value = value,
             onValueChange = {},
