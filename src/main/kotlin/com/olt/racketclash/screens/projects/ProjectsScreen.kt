@@ -52,12 +52,12 @@ private fun ProjectSelect(
 
     val navigator = LocalNavigator.currentOrThrow
     LazyTableWithScrollScaffold(
-        modifier = Modifier.padding(5.dp),
         topBarTitle = "Select Project",
         topBarActions = { AddButton { navigateTo(Screens.NewProject, navigator) } },
         items = projects,
         itemsSpacedBy = 10.dp,
         showHeader = false,
+        drawDividers = false,
         columns = listOf(
             LazyTableColumn.Builder { item, _ ->
                 ProjectItem(

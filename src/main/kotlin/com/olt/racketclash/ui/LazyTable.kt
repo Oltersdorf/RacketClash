@@ -2,17 +2,19 @@ package com.olt.racketclash.ui
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -62,7 +64,8 @@ fun <T> LazyTableWithScroll(
     itemsSpacedBy: Dp = 0.dp,
     showHeader: Boolean = true,
     onClick: ((T) -> Unit)? = null,
-    columns: List<LazyTableColumn<T>>
+    columns: List<LazyTableColumn<T>>,
+    drawDividers: Boolean = true
 ) {
     Box(
         modifier = modifier
@@ -78,7 +81,7 @@ fun <T> LazyTableWithScroll(
             if (showHeader)
                 header(columns = columns)
 
-            body(items = items, columns = columns, onClick = onClick)
+            body(items = items, columns = columns, onClick = onClick, drawDividers = drawDividers)
         }
 
         VerticalScrollbar(
@@ -99,7 +102,8 @@ fun <T> LazyTableWithScrollScaffold(
     itemsSpacedBy: Dp = 0.dp,
     showHeader: Boolean = true,
     onClick: ((T) -> Unit)? = null,
-    columns: List<LazyTableColumn<T>>
+    columns: List<LazyTableColumn<T>>,
+    drawDividers: Boolean = true
 ) {
     Scaffold(
         modifier = Modifier.clip(RoundedCornerShape(10.dp)).requiredHeightIn(max = 500.dp),
@@ -120,7 +124,8 @@ fun <T> LazyTableWithScrollScaffold(
                 itemsSpacedBy = itemsSpacedBy,
                 showHeader = showHeader,
                 onClick = onClick,
-                columns = columns
+                columns = columns,
+                drawDividers = drawDividers
             )
         }
     }
@@ -129,8 +134,8 @@ fun <T> LazyTableWithScrollScaffold(
 @OptIn(ExperimentalFoundationApi::class)
 private fun <T> LazyListScope.header(columns: List<LazyTableColumn<T>>) {
     stickyHeader {
-        Surface(tonalElevation = 1.dp) {
-            Row(modifier = Modifier.fillMaxWidth()) {
+        Surface(tonalElevation = 5.dp) {
+            Row(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp, horizontal = 10.dp)) {
                 columns.forEach {
                     Text(
                         text = it.name,
@@ -146,11 +151,15 @@ private fun <T> LazyListScope.header(columns: List<LazyTableColumn<T>>) {
 private fun <T> LazyListScope.body(
     items: List<T>,
     columns: List<LazyTableColumn<T>>,
-    onClick: ((T) -> Unit)?
+    onClick: ((T) -> Unit)?,
+    drawDividers: Boolean
 ) {
-    items(items = items) { item ->
+    itemsIndexed(items = items) { index, item ->
         Row(
-            modifier = Modifier.clickable { onClick?.let { it(item) } },
+            modifier = Modifier
+                .run { if (onClick != null) clickable { onClick(item) } else this }
+                .padding(vertical = 5.dp, horizontal = 10.dp)
+                .run { if (drawDividers && index != 0) bottomBorder(color = MaterialTheme.colorScheme.primary) else this },
             verticalAlignment = Alignment.CenterVertically
         ) {
             columns.forEach {
@@ -164,6 +173,25 @@ private fun <T> LazyListScope.body(
         }
     }
 }
+
+private fun Modifier.bottomBorder(color: Color) = composed(
+    factory = {
+        val density = LocalDensity.current
+        val strokeWidthPx = density.run { 1.dp.toPx() }
+
+        Modifier.drawBehind {
+            val y = -density.run { 4.dp.toPx() }
+            val x = -density.run { 10.dp.toPx() }
+
+            drawLine(
+                color = color,
+                start = Offset(x = x, y = y),
+                end = Offset(x = size.width + -x , y = y),
+                strokeWidth = strokeWidthPx
+            )
+        }
+    }
+)
 
 @Composable
 private fun <T> RowScope.TableText(
