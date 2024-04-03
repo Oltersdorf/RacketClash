@@ -207,6 +207,41 @@ class Database private constructor(
                 }
             }
 
+    fun games(roundId: Long) : Flow<List<Game>> =
+        database
+            .gameQueries
+            .selectAllInRound(roundId = roundId)
+            .asFlow()
+            .mapToList(context = Dispatchers.IO)
+            .map { list ->
+                list.map { selectAll ->
+                    Game(
+                        id = selectAll.id,
+                        roundId = selectAll.roundId,
+                        isDone = selectAll.isDone,
+                        isBye = selectAll.isBye,
+                        playerLeft1Id = selectAll.playerLeft1Id,
+                        playerLeft1Name = selectAll.playerLeft1Name,
+                        playerLeft2Id = selectAll.playerLeft2Id,
+                        playerLeft2Name = selectAll.playerLeft2Name,
+                        playerRight1Id = selectAll.playerRight1Id,
+                        playerRight1Name = selectAll.playerRight1Name,
+                        playerRight2Id = selectAll.playerRight2Id,
+                        playerRight2Name = selectAll.playerRight2Name,
+                        set1Left = selectAll.set1Left,
+                        set1Right = selectAll.set1Right,
+                        set2Left = selectAll.set2Left,
+                        set2Right = selectAll.set2Right,
+                        set3Left = selectAll.set3Left,
+                        set3Right = selectAll.set3Right,
+                        set4Left = selectAll.set4Left,
+                        set4Right = selectAll.set4Right,
+                        set5Left = selectAll.set5Left,
+                        set5Right = selectAll.set5Right
+                    )
+                }
+            }
+
     fun addGame(
         roundId: Long,
         playerLeft1Id: Long?,

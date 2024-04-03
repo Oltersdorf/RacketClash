@@ -18,23 +18,21 @@ class EditRoundModel(
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
-            database.games().collect {
-                updateState {
-                    copy(games = it.filter { it.roundId == it.id })
-                }
+            database.games(roundId = round.id).collect {
+                updateState { copy(games = it) }
             }
         }
 
         screenModelScope.launch(context = Dispatchers.IO) {
             database.round(id = round.id).collect {
-                updateState { copy(round = it) }
+                updateState { copy(round = it, temporaryRoundName = it?.name ?: "") }
             }
         }
     }
 
     data class Model(
         val round: Round? = null,
-        val temporaryRoundName: String = round?.name ?: "",
+        val temporaryRoundName: String = "",
         val games: List<Game> = emptyList()
     )
 
