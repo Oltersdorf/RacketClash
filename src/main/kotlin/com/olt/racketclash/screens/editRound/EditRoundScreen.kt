@@ -32,12 +32,14 @@ class EditRoundScreen(private val modelBuilder: () -> EditRoundModel) : Screen {
             selectedTab = TournamentTabs.Games,
             navigateTo = screenModel::navigateTo
         ) {
-            EditRoundView(
-                model = stateModel,
-                onNameChange = screenModel::updateTemporaryRoundName,
-                saveName = screenModel::saveRoundName,
-                navigateTo = screenModel::navigateTo
-            )
+            SettingsView {
+                EditRoundView(
+                    model = stateModel,
+                    onNameChange = screenModel::updateTemporaryRoundName,
+                    saveName = screenModel::saveRoundName,
+                    navigateTo = screenModel::navigateTo
+                )
+            }
         }
     }
 }
@@ -49,94 +51,88 @@ private fun EditRoundView(
     saveName: () -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
-    Column(
-        modifier = Modifier.requiredWidthIn(500.dp).fillMaxWidth(0.5f),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(0.5f),
-            value = model.temporaryRoundName,
-            onValueChange = onNameChange,
-            label = { Text("Name") },
-            trailingIcon = {
-                SaveButton(
-                    onClick = saveName,
-                    modifier = Modifier.weight(1.0f),
-                    enabled = model.temporaryRoundName != model.round?.name
-                )
-            }
-        )
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Games")
-            Spacer(modifier = Modifier.weight(1.0f))
-            val navigator = LocalNavigator.currentOrThrow
-            AddButton { navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) }
+    OutlinedTextField(
+        modifier = Modifier.fillMaxWidth(),
+        value = model.temporaryRoundName,
+        onValueChange = onNameChange,
+        label = { Text("Name") },
+        trailingIcon = {
+            SaveButton(
+                onClick = saveName,
+                enabled = model.temporaryRoundName != model.round?.name
+            )
         }
+    )
 
-        LazyTableWithScroll(
-            items = model.games,
-            columns = listOf(
-                LazyTableColumn.Builder(
-                    name = "Left",
-                    weight = 5.0f
-                ) { item, weight ->
-                    Column(modifier = Modifier.weight(weight)) {
-                        Text(item.playerLeft1Name ?: "")
-                        Text(item.playerLeft2Name ?: "")
-                    }
-                },
-                LazyTableColumn.Builder(
-                    name = "Results",
-                    weight = 1.0f
-                ) { item, weight ->
-                    Column(modifier = Modifier.weight(weight)) {
-                        BasicTextField(
-                            value = "0:0",
-                            onValueChange = {},
-                            modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
-                        )
-                        BasicTextField(
-                            value = "0:0",
-                            onValueChange = {},
-                            modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
-                        )
-                        BasicTextField(
-                            value = "0:0",
-                            onValueChange = {},
-                            modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
-                        )
-                        BasicTextField(
-                            value = "0:0",
-                            onValueChange = {},
-                            modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
-                        )
-                        BasicTextField(
-                            value = "0:0",
-                            onValueChange = {},
-                            modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
-                        )
-                    }
-                },
-                LazyTableColumn.Builder(
-                    name = "Right",
-                    weight = 5.0f
-                ) { item, weight ->
-                    Column(modifier = Modifier.weight(weight)) {
-                        Text(item.playerRight1Name ?: "")
-                        Text(item.playerRight2Name ?: "")
-                    }
-                },
-                LazyTableColumn.IconButton(
-                    name = "Delete",
-                    weight = 1.0f,
-                    headerTextAlign = TextAlign.Center,
-                    onClick = {},
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete"
-                )
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("Games")
+        Spacer(modifier = Modifier.weight(1.0f))
+        val navigator = LocalNavigator.currentOrThrow
+        AddButton { navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) }
+    }
+
+    LazyTableWithScroll(
+        modifier = Modifier.requiredHeightIn(max = 500.dp),
+        items = model.games,
+        columns = listOf(
+            LazyTableColumn.Builder(
+                name = "Left",
+                weight = 5.0f
+            ) { item, weight ->
+                Column(modifier = Modifier.weight(weight)) {
+                    Text(item.playerLeft1Name ?: "")
+                    Text(item.playerLeft2Name ?: "")
+                }
+            },
+            LazyTableColumn.Builder(
+                name = "Results",
+                weight = 1.0f
+            ) { item, weight ->
+                Column(modifier = Modifier.weight(weight)) {
+                    BasicTextField(
+                        value = "0:0",
+                        onValueChange = {},
+                        modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
+                    )
+                    BasicTextField(
+                        value = "0:0",
+                        onValueChange = {},
+                        modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
+                    )
+                    BasicTextField(
+                        value = "0:0",
+                        onValueChange = {},
+                        modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
+                    )
+                    BasicTextField(
+                        value = "0:0",
+                        onValueChange = {},
+                        modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
+                    )
+                    BasicTextField(
+                        value = "0:0",
+                        onValueChange = {},
+                        modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
+                    )
+                }
+            },
+            LazyTableColumn.Builder(
+                name = "Right",
+                weight = 5.0f
+            ) { item, weight ->
+                Column(modifier = Modifier.weight(weight)) {
+                    Text(item.playerRight1Name ?: "")
+                    Text(item.playerRight2Name ?: "")
+                }
+            },
+            LazyTableColumn.IconButton(
+                name = "Delete",
+                weight = 1.0f,
+                headerTextAlign = TextAlign.Center,
+                onClick = {},
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete"
             )
         )
-    }
+    )
 }

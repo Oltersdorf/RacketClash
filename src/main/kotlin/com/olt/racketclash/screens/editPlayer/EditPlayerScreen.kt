@@ -3,9 +3,7 @@ package com.olt.racketclash.screens.editPlayer
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -14,10 +12,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.Team
 import com.olt.racketclash.navigation.Screens
-import com.olt.racketclash.ui.CancelSaveButtonRow
-import com.olt.racketclash.ui.DropDownMenu
-import com.olt.racketclash.ui.TournamentScaffold
-import com.olt.racketclash.ui.TournamentTabs
+import com.olt.racketclash.ui.*
 
 class EditPlayerScreen(private val modelBuilder: () -> EditPlayerModel) : Screen {
 
@@ -32,14 +27,16 @@ class EditPlayerScreen(private val modelBuilder: () -> EditPlayerModel) : Screen
             selectedTab = TournamentTabs.Players,
             navigateTo = screenModel::navigateTo
         ) {
-            EditPlayerView(
-                player = stateModel.player,
-                teams = stateModel.teams,
-                selectedTeam = stateModel.selectedTeam,
-                updatePlayer = screenModel::updatePlayer,
-                selectTeam = screenModel::selectTeam,
-                navigateTo = screenModel::navigateTo
-            )
+            SettingsView {
+                EditPlayerView(
+                    player = stateModel.player,
+                    teams = stateModel.teams,
+                    selectedTeam = stateModel.selectedTeam,
+                    updatePlayer = screenModel::updatePlayer,
+                    selectTeam = screenModel::selectTeam,
+                    navigateTo = screenModel::navigateTo
+                )
+            }
         }
     }
 }
@@ -53,39 +50,33 @@ private fun EditPlayerView(
     selectTeam: (Long) -> Unit,
     navigateTo: (Screens, Navigator) -> Unit
 ) {
-    Column(
-        modifier = Modifier.requiredWidthIn(500.dp).fillMaxWidth(0.5f),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        var playerName by remember { mutableStateOf(player?.name ?: "") }
+    var playerName by remember { mutableStateOf(player?.name ?: "") }
 
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = playerName,
-            onValueChange = { playerName = it },
-            label = { Text("Name") },
-            isError = playerName.isBlank()
-        )
+    OutlinedTextField(
+        modifier = Modifier.fillMaxWidth(),
+        value = playerName,
+        onValueChange = { playerName = it },
+        label = { Text("Name") },
+        isError = playerName.isBlank()
+    )
 
-        DropDownMenu(
-            modifier = Modifier.padding(top = 50.dp, bottom = 50.dp),
-            label = "Team",
-            items = teams,
-            value = selectedTeam.name,
-            isError = selectedTeam.id == -1L,
-            textMapper = { it.name },
-            onClick = { selectTeam(it.id) }
-        )
+    DropDownMenu(
+        modifier = Modifier.fillMaxWidth(),
+        label = "Team",
+        items = teams,
+        value = selectedTeam.name,
+        isError = selectedTeam.id == -1L,
+        textMapper = { it.name },
+        onClick = { selectTeam(it.id) }
+    )
 
-        val navigator = LocalNavigator.currentOrThrow
-        CancelSaveButtonRow(
-            onCancel = { navigateTo(Screens.Pop, navigator) },
-            onSave = {
-                updatePlayer(player?.id, playerName, selectedTeam.id)
-                navigateTo(Screens.Pop, navigator)
-            },
-            canSave = playerName.isNotBlank() && selectedTeam.id != -1L
-        )
-    }
+    val navigator = LocalNavigator.currentOrThrow
+    CancelSaveButtonRow(
+        onCancel = { navigateTo(Screens.Pop, navigator) },
+        onSave = {
+            updatePlayer(player?.id, playerName, selectedTeam.id)
+            navigateTo(Screens.Pop, navigator)
+        },
+        canSave = playerName.isNotBlank() && selectedTeam.id != -1L
+    )
 }

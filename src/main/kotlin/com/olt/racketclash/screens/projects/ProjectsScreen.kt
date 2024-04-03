@@ -6,11 +6,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -18,10 +16,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Project
 import com.olt.racketclash.navigation.Screens
-import com.olt.racketclash.ui.AddButton
-import com.olt.racketclash.ui.DeleteButton
-import com.olt.racketclash.ui.LazyTableColumn
-import com.olt.racketclash.ui.LazyTableWithScroll
+import com.olt.racketclash.ui.*
 
 internal typealias deleteProject = (name: String) -> Unit
 
@@ -35,13 +30,10 @@ class ProjectsScreen(private val modelBuilder: () -> ProjectsModel) : Screen {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            SettingsView {
                 Text(
                     text = "Racket Clash",
-                    fontSize = 50.sp,
-                    modifier = Modifier.padding(top = 50.dp, bottom = 50.dp)
+                    style = MaterialTheme.typography.headlineLarge
                 )
                 ProjectSelect(
                     projects = stateModel.projects,
@@ -60,15 +52,11 @@ private fun ProjectSelect(
     navigateTo: (Screens, Navigator) -> Unit
 ) {
     Scaffold(
-        modifier = Modifier
-            .padding(bottom = 50.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .requiredWidthIn(min = 500.dp)
-            .fillMaxWidth(0.5f),
+        modifier = Modifier.clip(RoundedCornerShape(10.dp)).requiredHeightIn(max = 500.dp),
         topBar = { ProjectSelectHeader(navigateTo = navigateTo) }
     ) { paddingValues ->
         Surface(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            modifier = Modifier.padding(paddingValues),
             tonalElevation = 1.dp
         ) {
             LazyTableWithScroll(
@@ -84,7 +72,7 @@ private fun ProjectSelect(
                             navigateTo = navigateTo
                         )
                     }
-                ),
+                )
             )
         }
     }

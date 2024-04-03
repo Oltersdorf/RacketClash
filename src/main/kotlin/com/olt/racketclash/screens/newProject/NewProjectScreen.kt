@@ -7,7 +7,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -15,6 +14,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.CancelSaveButtonRow
+import com.olt.racketclash.ui.SettingsView
 
 class NewProjectScreen(private val modelBuilder: () -> NewProjectModel) : Screen {
 
@@ -26,19 +26,11 @@ class NewProjectScreen(private val modelBuilder: () -> NewProjectModel) : Screen
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .requiredWidthIn(min = 500.dp)
-                    .fillMaxWidth(0.5f)
-            ) {
+            SettingsView {
                 Text(
                     text = "New Project",
-                    fontSize = 50.sp,
-                    modifier = Modifier.padding(top = 50.dp, bottom = 50.dp)
+                    style = MaterialTheme.typography.headlineLarge
                 )
-
-                Spacer(modifier = Modifier.weight(1.0f))
 
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -49,7 +41,6 @@ class NewProjectScreen(private val modelBuilder: () -> NewProjectModel) : Screen
                 )
 
                 Row(
-                    modifier = Modifier.padding(top = 50.dp, bottom = 50.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -76,8 +67,6 @@ class NewProjectScreen(private val modelBuilder: () -> NewProjectModel) : Screen
                     },
                     canSave = stateModel.canCreate
                 )
-
-                Spacer(modifier = Modifier.weight(1.0f))
             }
         }
     }
