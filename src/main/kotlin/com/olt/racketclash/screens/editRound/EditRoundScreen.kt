@@ -1,19 +1,17 @@
 package com.olt.racketclash.screens.editRound
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
@@ -34,9 +32,7 @@ class EditRoundScreen(private val modelBuilder: () -> EditRoundModel) : Screen {
             SettingsView {
                 EditRoundView(
                     model = stateModel,
-                    onNameChange = screenModel::updateTemporaryRoundName,
-                    saveName = screenModel::saveRoundName,
-                    navigateTo = screenModel::navigateTo
+                    screenModel = screenModel
                 )
             }
         }
@@ -46,18 +42,16 @@ class EditRoundScreen(private val modelBuilder: () -> EditRoundModel) : Screen {
 @Composable
 private fun EditRoundView(
     model: EditRoundModel.Model,
-    onNameChange: (String) -> Unit,
-    saveName: () -> Unit,
-    navigateTo: (Screens, Navigator) -> Unit
+    screenModel: EditRoundModel
 ) {
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
         value = model.temporaryRoundName,
-        onValueChange = onNameChange,
+        onValueChange = screenModel::updateTemporaryRoundName,
         label = { Text("Name") },
         trailingIcon = {
             SaveButton(
-                onClick = saveName,
+                onClick = screenModel::saveRoundName,
                 enabled = model.temporaryRoundName != model.round?.name
             )
         }
@@ -67,64 +61,64 @@ private fun EditRoundView(
     LazyTableWithScrollScaffold(
         modifier = Modifier.requiredHeightIn(max = 500.dp),
         topBarTitle = "Games",
-        topBarActions = { AddButton { navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) } },
+        topBarActions = { AddButton { screenModel.navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) } },
         items = model.games,
         columns = listOf(
             LazyTableColumn.Builder(
                 name = "Left",
-                weight = 5.0f
+                weight = 5.0f,
+                headerTextAlign = TextAlign.Center
             ) { item, weight ->
-                Column(modifier = Modifier.weight(weight)) {
-                    Text(item.playerLeft1Name ?: "")
-                    Text(item.playerLeft2Name ?: "")
+                Column(
+                    modifier = Modifier.weight(weight),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(item.playerLeft1Name ?: "<Empty>")
+                    Text(item.playerLeft2Name ?: "<Empty>")
                 }
             },
             LazyTableColumn.Builder(
                 name = "Results",
-                weight = 1.0f
+                weight = 1.0f,
+                headerTextAlign = TextAlign.Center
             ) { item, weight ->
-                Column(modifier = Modifier.weight(weight)) {
-                    BasicTextField(
-                        value = "0:0",
-                        onValueChange = {},
-                        modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
-                    )
-                    BasicTextField(
-                        value = "0:0",
-                        onValueChange = {},
-                        modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
-                    )
-                    BasicTextField(
-                        value = "0:0",
-                        onValueChange = {},
-                        modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
-                    )
-                    BasicTextField(
-                        value = "0:0",
-                        onValueChange = {},
-                        modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
-                    )
-                    BasicTextField(
-                        value = "0:0",
-                        onValueChange = {},
-                        modifier = Modifier.background(color = MaterialTheme.colorScheme.primary).widthIn(max = 20.dp)
-                    )
+                Column(
+                    modifier = Modifier.weight(weight),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (item.isDone) {
+                        if (item.set1Left + item.set1Right > 0)
+                            Text("${item.set1Left} : ${item.set1Right}")
+                        if (item.set2Left + item.set2Right > 0)
+                            Text("${item.set2Left} : ${item.set2Right}")
+                        if (item.set3Left + item.set3Right > 0)
+                            Text("${item.set3Left} : ${item.set3Right}")
+                        if (item.set4Left + item.set4Right > 0)
+                            Text("${item.set4Left} : ${item.set4Right}")
+                        if (item.set5Left + item.set5Right > 0)
+                            Text("${item.set5Left} : ${item.set5Right}")
+                    } else
+                        Text("pending")
                 }
             },
             LazyTableColumn.Builder(
                 name = "Right",
-                weight = 5.0f
+                weight = 5.0f,
+                headerTextAlign = TextAlign.Center
             ) { item, weight ->
-                Column(modifier = Modifier.weight(weight)) {
-                    Text(item.playerRight1Name ?: "")
-                    Text(item.playerRight2Name ?: "")
+                Column(
+                    modifier = Modifier.weight(weight),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(item.playerRight1Name ?: "<Empty>")
+                    Text(item.playerRight2Name ?: "<Empty>")
                 }
             },
             LazyTableColumn.IconButton(
                 name = "Delete",
                 weight = 1.0f,
                 headerTextAlign = TextAlign.Center,
-                onClick = {},
+                onClick = { screenModel.deleteGame(gameId = it.id) },
                 imageVector = Icons.Default.Delete,
                 contentDescription = "Delete"
             )

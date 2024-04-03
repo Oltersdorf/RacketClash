@@ -47,4 +47,10 @@ class EditRoundModel(
             database.updateRoundName(id = round.id, name = state.value.temporaryRoundName)
         }
     }
+
+    fun deleteGame(gameId: Long) {
+        screenModelScope.launch(context = Dispatchers.IO) {
+            database.deleteGame(id = gameId)
+        }
+    }
 }
