@@ -49,7 +49,7 @@ class RootNavigator {
         EditPlayerModel(navigateToScreen = ::navigateTo, database = database!!, player = player)
 
     private fun gamesModelBuilder(): GamesModel =
-        GamesModel(navigateToScreen = ::navigateTo, database = database!!)
+        GamesModel(navigateToScreen = ::navigateTo, database = database!!, fileHandler = fileHandler)
 
     private fun newRoundModelBuilder(): NewRoundModel =
         NewRoundModel(navigateToScreen = ::navigateTo, database = database!!)
