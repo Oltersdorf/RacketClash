@@ -6,6 +6,7 @@ data class Player(
     val name: String = "",
     val teamId: Long = -1,
     val teamName: String = "",
+    val teamStrength: Int = 0,
     val played: Int = 0,
     val bye: Int = 0,
     val games: Pair<Int, Int> = Pair(0, 0),

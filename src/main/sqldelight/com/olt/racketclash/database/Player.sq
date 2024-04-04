@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS playerTable (
 );
 
 selectAll:
-SELECT playerTable.id, active, playerTable.name, teamId, teamTable.name AS teamName,
+SELECT playerTable.id, active, playerTable.name, teamId, teamTable.name AS teamName, teamTable.strength AS teamStrength,
 playerLeft1Id, playerLeft2Id,
 SUM(gameTable.isDone) AS played, SUM(gameTable.isBye) AS bye,
 SUM(gameTable.set1Left) AS set1Left, SUM(gameTable.set1Right) AS set1Right
@@ -18,6 +18,19 @@ JOIN playerTable
 ON playerTable.teamId = teamTable.id
 LEFT OUTER JOIN gameTable
 ON gameTable.playerLeft1Id = playerTable.id OR gameTable.playerLeft2Id = playerTable.id OR gameTable.playerRight1Id = playerTable.id OR gameTable.playerRight2Id = playerTable.id
+GROUP BY playerTable.id;
+
+selectActive:
+SELECT playerTable.id, active, playerTable.name, teamId, teamTable.name AS teamName, teamTable.strength AS teamStrength,
+playerLeft1Id, playerLeft2Id,
+SUM(gameTable.isDone) AS played, SUM(gameTable.isBye) AS bye,
+SUM(gameTable.set1Left) AS set1Left, SUM(gameTable.set1Right) AS set1Right
+FROM teamTable
+JOIN playerTable
+ON playerTable.teamId = teamTable.id
+LEFT OUTER JOIN gameTable
+ON gameTable.playerLeft1Id = playerTable.id OR gameTable.playerLeft2Id = playerTable.id OR gameTable.playerRight1Id = playerTable.id OR gameTable.playerRight2Id = playerTable.id
+WHERE active = TRUE
 GROUP BY playerTable.id;
 
 add:

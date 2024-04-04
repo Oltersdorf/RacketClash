@@ -16,7 +16,7 @@ class PlayersModel(
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
-            database.player().collect {
+            database.players().collect {
                 updateState { copy(isLoading = false, players = it) }
             }
         }

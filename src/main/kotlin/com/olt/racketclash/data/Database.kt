@@ -78,7 +78,7 @@ class Database private constructor(
         fileHandler.updateTeamCountForProject(projectName = projectName, teamNumber = database.teamQueries.selectAll().executeAsList().size)
     }
 
-    fun player() : Flow<List<Player>> =
+    fun players() : Flow<List<Player>> =
         database
             .playerQueries
             .selectAll()
@@ -105,6 +105,7 @@ class Database private constructor(
                         name = selectAll.name,
                         teamId = selectAll.teamId,
                         teamName = selectAll.teamName,
+                        teamStrength = selectAll.teamStrength,
                         played = selectAll.played?.toInt() ?: 0,
                         bye = selectAll.bye?.toInt() ?: 0,
                         games = Pair(first = gamesLeft, second = gamesRight),
@@ -112,6 +113,43 @@ class Database private constructor(
                         points = Pair(first = (if (isLeft) selectAll.set1Left else selectAll.set1Right)?.toInt() ?: 0, second = (if (isLeft) selectAll.set1Right else selectAll.set1Left)?.toInt() ?: 0)
                     )
                 }.sortedWith(comparator = compareBy({ it.games.first }, { it.games.second }, { it.sets.first }, { it.sets.second }, { it.points.first }, { it.points.second }))
+            }
+
+    fun activePlayers() : Flow<List<Player>> =
+        database
+            .playerQueries
+            .selectActive()
+            .asFlow()
+            .mapToList(context = Dispatchers.IO)
+            .map { list ->
+                list.map { selectAll ->
+                    val isLeft = selectAll.playerLeft1Id == selectAll.id || selectAll.playerLeft2Id == selectAll.id
+                    val gamesLeft = if (isLeft) {
+                        if ((selectAll.set1Left?.toInt() ?: 0) > (selectAll.set1Right?.toInt() ?: 0))
+                            1
+                        else
+                            0
+                    } else {
+                        if ((selectAll.set1Left?.toInt() ?: 0) > (selectAll.set1Right?.toInt() ?: 0))
+                            0
+                        else
+                            1
+                    }
+                    val gamesRight = if (gamesLeft == 0) 1 else 0
+                    Player(
+                        id = selectAll.id,
+                        active = selectAll.active,
+                        name = selectAll.name,
+                        teamId = selectAll.teamId,
+                        teamName = selectAll.teamName,
+                        teamStrength = selectAll.teamStrength,
+                        played = selectAll.played?.toInt() ?: 0,
+                        bye = selectAll.bye?.toInt() ?: 0,
+                        games = Pair(first = gamesLeft, second = gamesRight),
+                        sets = Pair(first = gamesLeft, second = gamesRight),
+                        points = Pair(first = (if (isLeft) selectAll.set1Left else selectAll.set1Right)?.toInt() ?: 0, second = (if (isLeft) selectAll.set1Right else selectAll.set1Left)?.toInt() ?: 0)
+                    )
+                }
             }
 
     suspend fun addPlayer(name: String, teamId: Long) {

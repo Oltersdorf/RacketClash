@@ -26,7 +26,7 @@ class EditGameModel(
         }
 
         screenModelScope.launch(context = Dispatchers.IO) {
-            database.player().collect {
+            database.players().collect {
                 unfilteredPlayers = it
             }
         }
