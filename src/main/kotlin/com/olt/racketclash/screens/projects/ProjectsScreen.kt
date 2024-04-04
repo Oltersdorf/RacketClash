@@ -81,7 +81,7 @@ private fun ProjectItem(
 
     Card(
         onClick = {
-            navigateTo(Screens.OpenProject(projectLocation = project.location, projectName = project.name), navigator)
+            navigateTo(Screens.OpenProject(project = project), navigator)
         },
         modifier = Modifier.fillMaxWidth()
     ) {

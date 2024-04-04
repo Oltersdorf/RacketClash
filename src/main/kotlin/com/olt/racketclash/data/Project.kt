@@ -8,5 +8,7 @@ data class Project(
     val lastModified: String,
     val location: String,
     val playerNumber: Int = 0,
-    val teamNumber: Int = 0
+    val teamNumber: Int = 0,
+    val fields: Int = 1,
+    val timeout: Int = 1
 )

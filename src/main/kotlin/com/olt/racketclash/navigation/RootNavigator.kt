@@ -65,7 +65,7 @@ class RootNavigator {
             Screens.Pop -> navigator.pop()
             Screens.Projects -> navigateToProjects(navigator = navigator)
             Screens.NewProject -> navigateToNewProject(navigator = navigator)
-            is Screens.OpenProject -> openProject(navigator = navigator, location = screens.projectLocation, projectName = screens.projectName)
+            is Screens.OpenProject -> openProject(navigator = navigator, project = screens.project)
             Screens.Teams -> navigateToTeams(navigator = navigator)
             is Screens.EditTeam -> navigateToEditTeam(navigator = navigator, team = screens.team)
             Screens.Players -> navigateToPlayers(navigator = navigator)
@@ -86,8 +86,9 @@ class RootNavigator {
         navigator.push(NewProjectScreen(::newProjectModelBuilder))
     }
 
-    private fun openProject(navigator: Navigator, location: String, projectName: String) {
-        database = Database(tournamentPath = location, fileHandler = fileHandler, projectName = projectName)
+    private fun openProject(navigator: Navigator, project: Project) {
+        fileHandler.setCurrentProject(project = project)
+        database = Database(tournamentPath = project.location, fileHandler = fileHandler, projectName = project.name)
         navigateToTeams(navigator = navigator)
     }
 

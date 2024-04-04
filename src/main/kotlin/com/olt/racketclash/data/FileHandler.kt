@@ -19,6 +19,8 @@ class FileHandler {
     private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
 
     private val projectsChannel = MutableStateFlow<List<Project>>(emptyList())
+    private val fieldsChannel = MutableStateFlow(1)
+    private val timeoutChannel = MutableStateFlow(1)
 
     companion object {
         val defaultProjectLocation: String = Path(System.getProperty("user.home")).absolutePathString()
@@ -32,8 +34,17 @@ class FileHandler {
     }
 
     fun projects() : StateFlow<List<Project>> = projectsChannel.asStateFlow()
+    fun fields() : StateFlow<Int> = fieldsChannel.asStateFlow()
+    fun timeout() : StateFlow<Int> = timeoutChannel.asStateFlow()
 
     private fun currentTime(): String = LocalDateTime.now().format(dateTimeFormatter)
+
+    fun setCurrentProject(project: Project) {
+        runBlocking(Dispatchers.IO) {
+            fieldsChannel.emit(project.fields)
+            timeoutChannel.emit(project.timeout)
+        }
+    }
 
     suspend fun addProject(name: String, location: String) {
         val projectPath = Path(location, name)
@@ -81,6 +92,16 @@ class FileHandler {
         projects.replaceAll { if (it.name == projectName) it.copy(teamNumber = teamNumber, lastModified = currentTime()) else it }
         writeProjects(projects)
         projectsChannel.emit(projects)
+    }
+
+    suspend fun setFields(newFields: Int) {
+        fieldsChannel.emit(newFields)
+        writeProjects(projects = projectsChannel.value)
+    }
+
+    suspend fun setTimeout(newTimeout: Int) {
+        timeoutChannel.emit(newTimeout)
+        writeProjects(projects = projectsChannel.value)
     }
 
     private fun writeProjects(projects: List<Project>) {
