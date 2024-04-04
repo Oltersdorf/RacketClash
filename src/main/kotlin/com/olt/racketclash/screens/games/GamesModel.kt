@@ -50,6 +50,12 @@ class GamesModel(
         val active: List<Long> = emptyList()
     )
 
+    fun deleteRound(id: Long) {
+        screenModelScope.launch(context = Dispatchers.IO) {
+            database.deleteRound(id = id)
+        }
+    }
+
     fun setDone(
         game: Game,
         isDone: Boolean

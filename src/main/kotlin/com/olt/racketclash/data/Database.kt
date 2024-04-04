@@ -206,6 +206,10 @@ class Database private constructor(
         database.roundQueries.add(name = name)
     }
 
+    fun deleteRound(id: Long) {
+        database.roundQueries.delete(id = id)
+    }
+
     fun updateRoundName(id: Long, name: String) {
         database.roundQueries.updateName(id = id, name = name)
     }

@@ -139,6 +139,7 @@ private fun Round(
                 Spacer(modifier = Modifier.weight(1.0f))
                 val navigator = LocalNavigator.currentOrThrow
                 EditButton { screenModel.navigateTo(Screens.EditRound(round = round), navigator) }
+                DeleteButton(enabled = games.isEmpty()) { screenModel.deleteRound(id = round.id) }
             }
 
             if (games.isEmpty())
