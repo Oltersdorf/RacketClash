@@ -333,4 +333,30 @@ class Database private constructor(
     fun deleteGame(id: Long) {
         database.gameQueries.delete(id = id)
     }
+
+    fun addRoundsWithGames(
+        rounds: Map<String, List<Game>>,
+        bye: List<Game>
+    ) {
+        database.transaction {
+            rounds.onEachIndexed { index, (key, value) ->
+                database.roundQueries.add(name = key)
+                val roundId = database.roundQueries.lastInsertRowId().executeAsOne()
+
+                value.forEach {
+                    database.gameQueries.add(
+                        roundId = roundId,
+                        playerLeft1Id = it.playerLeft1Id,
+                        playerLeft2Id = it.playerLeft2Id,
+                        playerRight1Id = it.playerRight1Id,
+                        playerRight2Id = it.playerRight2Id
+                    )
+                }
+
+                bye.filter { it.roundId == index.toLong() + 1 }.forEach {
+                    database.gameQueries.addBye(roundId = roundId, playerLeft1Id = it.playerLeft1Id)
+                }
+            }
+        }
+    }
 }

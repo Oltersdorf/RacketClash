@@ -9,7 +9,6 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
@@ -28,79 +27,153 @@ class NewRoundScreen(private val modelBuilder: () -> NewRoundModel) : Screen {
             navigateTo = screenModel::navigateTo
         ) {
             SettingsView {
-                NewRoundView(
-                    addRound = screenModel::addRound,
-                    navigateTo = screenModel::navigateTo
-                )
+                NewRoundView(model = stateModel, screenModel = screenModel)
             }
         }
     }
 }
 
-private sealed class RoundType(val name: String) {
-    data object Empty : RoundType("Empty")
-    data object EquallyDouble : RoundType("Equally strong doubles")
-}
-
 @Composable
 private fun NewRoundView(
-    addRound: (String) -> Unit,
-    navigateTo: (Screens, Navigator) -> Unit
+    model: NewRoundModel.Model,
+    screenModel: NewRoundModel
 ) {
-    var name by remember { mutableStateOf("") }
-
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
-        value = name,
-        onValueChange = { name = it },
-        label = { Text("Name") }
+        value = model.roundName,
+        onValueChange = { screenModel.changeRoundName(newName = it) },
+        label = { Text("Name") },
+        enabled = !model.generating,
+        isError = model.roundName.isBlank()
     )
 
-    var selectedRoundType by remember { mutableStateOf<RoundType>(RoundType.Empty) }
     DropDownMenu(
         modifier = Modifier.fillMaxWidth(),
         label = "Type",
-        items = listOf(RoundType.Empty, RoundType.EquallyDouble),
-        value = selectedRoundType.name,
-        textMapper = { it.name },
-        onClick = { selectedRoundType = it }
+        items = model.roundTypes,
+        value = roundTypeToString(roundType = model.selectedRoundType),
+        textMapper = ::roundTypeToString,
+        onClick = screenModel::changeRoundType
     )
 
-    when (selectedRoundType) {
-        RoundType.Empty -> {}
-        RoundType.EquallyDouble -> EquallyStrongDouble()
+    when (model.selectedRoundType) {
+        NewRoundModel.RoundType.Empty ->
+            Empty(model = model, screenModel = screenModel)
+        is NewRoundModel.RoundType.EquallyStrongDouble ->
+            EquallyStrongDouble(model = model, screenModel = screenModel, roundType = model.selectedRoundType)
     }
+}
 
+@Composable
+private fun CancelSaveButtonRow(
+    model: NewRoundModel.Model,
+    screenModel: NewRoundModel,
+    onSave: () -> Unit
+) {
     val navigator = LocalNavigator.currentOrThrow
     CancelSaveButtonRow(
-        onCancel = { navigateTo(Screens.Games, navigator) },
+        onCancel = { screenModel.navigateTo(Screens.Games, navigator) },
+        canSave = model.canCreate && !model.generating,
         onSave = {
-            addRound(name)
-            navigateTo(Screens.Games, navigator)
+            onSave()
+            screenModel.navigateTo(Screens.Games, navigator)
         }
     )
 }
 
 @Composable
-private fun EquallyStrongDouble() {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            FilledArrowLeftButton(enabled = true) {}
-            Text("1")
-            FilledArrowRightButton(enabled = true) {}
-            Text(text = "Rounds")
+private fun Empty(
+    model: NewRoundModel.Model,
+    screenModel: NewRoundModel
+) {
+    CancelSaveButtonRow(model = model, screenModel = screenModel, onSave = screenModel::addEmptyRound)
+}
+
+@Composable
+private fun EquallyStrongDouble(
+    model: NewRoundModel.Model,
+    screenModel: NewRoundModel,
+    roundType: NewRoundModel.RoundType.EquallyStrongDouble
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(text = "Rounds:")
+        FilledArrowLeftButton(enabled = roundType.canSubtractRounds && !model.generating) {
+            screenModel.changeEquallyStrongDoublesRounds(newRounds = roundType.rounds - 1)
+        }
+        Text(roundType.rounds.toString())
+        FilledArrowRightButton(enabled = !model.generating) {
+            screenModel.changeEquallyStrongDoublesRounds(newRounds = roundType.rounds + 1)
         }
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                modifier = Modifier.padding(start = 0.dp),
-                checked = false,
-                onCheckedChange = {}
-            )
-            Text("Different partners each round")
+        Checkbox(
+            enabled = !model.generating,
+            checked = roundType.differentPartnersEachRound,
+            onCheckedChange = screenModel::changeEquallyStrongDoublesDifferentPartners
+        )
+        Text("Different partners each round")
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+            enabled = !model.generating,
+            checked = roundType.tryUntilNoMoreThanOneByePerPerson,
+            onCheckedChange = screenModel::changeTryUntilNoMoreThanOneByePerPerson
+        )
+        Text("Only one bye per person")
+
+        Checkbox(
+            enabled = !model.generating,
+            checked = roundType.tryUntilWorstPerformanceIsZero,
+            onCheckedChange = screenModel::changeTryUntilStrengthDifferenceIsZero
+        )
+        Text("Worst strength difference is zero")
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(text = "Max repeats:")
+        FilledArrowLeftButton(enabled = roundType.canSubtractMaxRepeats && !model.generating) {
+            screenModel.changeEquallyStrongDoublesMaxRepeats(newMaxRepeats = roundType.maxRepeat - 1)
+        }
+        Text(roundType.maxRepeat.toString())
+        FilledArrowRightButton(enabled = !model.generating) {
+            screenModel.changeEquallyStrongDoublesMaxRepeats(newMaxRepeats = roundType.maxRepeat + 1)
+        }
+    }
+
+    if (model.generating)
+        Loading()
+    else if(roundType.games.isNotEmpty()) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("${roundType.games.size} games generated")
+            Text("Worst strength difference is ${roundType.performance}")
+            Text("Bye: ${roundType.bye.keys.joinToString(separator = ", ")}")
+        }
+    }
+
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Spacer(modifier = Modifier.weight(1.0f))
+        Button(
+            onClick = screenModel::generateEquallyStrongDoubles,
+            enabled = !model.generating
+        ) {
+            Text("Generate")
+        }
+
+        val navigator = LocalNavigator.currentOrThrow
+        Button(
+            onClick = {
+                screenModel.addEquallyStrongDoubles()
+                screenModel.navigateTo(screen = Screens.Games, navigator = navigator)
+            },
+            enabled = roundType.games.isNotEmpty() && model.canCreate
+        ) {
+            Text("Save")
         }
     }
 }
+
+private fun roundTypeToString(roundType: NewRoundModel.RoundType) : String =
+    when (roundType) {
+        NewRoundModel.RoundType.Empty -> "Empty"
+        is NewRoundModel.RoundType.EquallyStrongDouble -> "Equally strong doubles"
+    }

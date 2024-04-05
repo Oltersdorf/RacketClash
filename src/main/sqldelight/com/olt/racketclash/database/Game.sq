@@ -68,6 +68,10 @@ add:
 INSERT INTO gameTable(roundId, playerLeft1Id, playerLeft2Id, playerRight1Id, playerRight2Id)
 VALUES (:roundId, :playerLeft1Id, :playerLeft2Id, :playerRight1Id, :playerRight2Id);
 
+addBye:
+INSERT INTO gameTable(roundId, playerLeft1Id, playerLeft2Id, playerRight1Id, playerRight2Id, isBye, isDone, set1Left)
+VALUES (:roundId, :playerLeft1Id, NULL, NULL, NULL, TRUE, TRUE, 1);
+
 update:
 UPDATE gameTable
 SET set1Left = :set1Left, set1Right = :set1Right,
