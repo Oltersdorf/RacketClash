@@ -29,6 +29,11 @@ class GamesModel(
             }
         }
         screenModelScope.launch(context = Dispatchers.IO) {
+            database.bye().collect {
+                updateState { copy(bye = it.groupBy { it.roundId }) }
+            }
+        }
+        screenModelScope.launch(context = Dispatchers.IO) {
             fileHandler.fields().collect {
                 updateState { copy(fields = it, canSubtractFields = it > 1) }
             }
@@ -47,6 +52,7 @@ class GamesModel(
         val canSubtractTimeout: Boolean = false,
         val rounds: List<Round> = emptyList(),
         val games: Map<Long, List<Game>> = emptyMap(),
+        val bye: Map<Long, List<Game>> = emptyMap(),
         val active: List<Long> = emptyList()
     )
 

@@ -97,7 +97,13 @@ private fun Graph(
                 state = horizontalScrollState
             ) {
                 items(items = model.rounds) {
-                    Round(round = it, games = model.games[it.id] ?: emptyList(), active = model.active, screenModel = screenModel)
+                    Round(
+                        round = it,
+                        games = model.games[it.id] ?: emptyList(),
+                        bye = model.bye[it.id] ?: emptyList(),
+                        active = model.active,
+                        screenModel = screenModel
+                    )
                 }
             }
         }
@@ -120,6 +126,7 @@ private fun Graph(
 private fun Round(
     round: Round,
     games: List<Game>,
+    bye: List<Game>,
     active: List<Long>,
     screenModel: GamesModel
 ) {
@@ -144,6 +151,8 @@ private fun Round(
                 DeleteButton(enabled = games.isEmpty()) { screenModel.deleteRound(id = round.id) }
             }
 
+            if (bye.isNotEmpty()) ByeItem(bye = bye)
+
             if (games.isEmpty())
                 Text(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp).fillMaxWidth(),
@@ -152,14 +161,39 @@ private fun Round(
                 )
             else
                 games.forEachIndexed { index, game ->
-                    RoundItem(isFirst = index == 0, active = active.contains(game.id), game = game, screenModel = screenModel)
+                    GameItem(isFirst = bye.isEmpty() && index == 0, active = active.contains(game.id), game = game, screenModel = screenModel)
                 }
         }
     }
 }
 
 @Composable
-private fun RoundItem(
+private fun ByeItem(bye: List<Game>) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 10.dp, vertical = 5.dp)
+            .border(width = 2.dp, color = MaterialTheme.colorScheme.primaryContainer)
+            .background(MaterialTheme.colorScheme.secondary)
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            modifier = Modifier.padding(top = 5.dp),
+            color = MaterialTheme.colorScheme.onSecondary,
+            style = MaterialTheme.typography.titleLarge, text = "Bye"
+        )
+        bye.forEachIndexed { index, game ->
+            Text(
+                modifier = Modifier.padding(bottom = if (index + 1 == bye.size) 5.dp else 0.dp),
+                color = MaterialTheme.colorScheme.onSecondary,
+                text = game.playerLeft1Name ?: ""
+            )
+        }
+    }
+}
+
+@Composable
+private fun GameItem(
     isFirst: Boolean,
     active: Boolean,
     game: Game,
@@ -211,9 +245,15 @@ private fun RoundItem(
         }
 
         if (game.isDone)
-            EditButton(modifier = Modifier.padding(vertical = 5.dp)) { screenModel.setDone(game = game, isDone = false) }
+            EditButton(
+                modifier = Modifier.padding(vertical = 5.dp),
+                colors = IconButtonDefaults.iconButtonColors(contentColor = textColor)
+            ) { screenModel.setDone(game = game, isDone = false) }
         else
-            SaveButton(modifier = Modifier.padding(vertical = 5.dp)) { screenModel.setDone(game = game, isDone = true) }
+            SaveButton(
+                modifier = Modifier.padding(vertical = 5.dp),
+                colors = IconButtonDefaults.iconButtonColors(contentColor = textColor)
+            ) { screenModel.setDone(game = game, isDone = true) }
     }
 }
 
@@ -276,15 +316,15 @@ private fun DoneSet(
     ) {
         Text(
             modifier = Modifier.weight(1.0f),
-            color = MaterialTheme.colorScheme.onTertiary,
+            color = MaterialTheme.colorScheme.onSecondary,
             text = setLeft.toString(),
             textAlign = TextAlign.End,
             softWrap = false
         )
-        Text(color = MaterialTheme.colorScheme.onTertiary, text = " : ")
+        Text(color = MaterialTheme.colorScheme.onSecondary, text = " : ")
         Text(
             modifier = Modifier.weight(1.0f),
-            color = MaterialTheme.colorScheme.onTertiary,
+            color = MaterialTheme.colorScheme.onSecondary,
             text = setRight.toString(),
             softWrap = false
         )
