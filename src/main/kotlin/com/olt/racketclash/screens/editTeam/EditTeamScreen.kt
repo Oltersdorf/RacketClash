@@ -12,10 +12,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Team
 import com.olt.racketclash.navigation.Screens
-import com.olt.racketclash.ui.CancelSaveButtonRow
-import com.olt.racketclash.ui.SettingsView
-import com.olt.racketclash.ui.TournamentScaffold
-import com.olt.racketclash.ui.TournamentTabs
+import com.olt.racketclash.ui.*
 
 class EditTeamScreen(private val modelBuilder: () -> EditTeamModel) : Screen {
 
@@ -48,7 +45,7 @@ private fun EditTeamView(
     navigateTo: (Screens, Navigator) -> Unit
 ) {
     var teamName by remember { mutableStateOf(team?.name ?: "") }
-    var teamStrength by remember { mutableStateOf(team?.strength?.toString() ?: "1") }
+    var teamStrength by remember { mutableStateOf(team?.strength ?: 1) }
 
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
@@ -57,25 +54,21 @@ private fun EditTeamView(
         label = { Text("Name") },
         isError = teamName.isBlank()
     )
-    OutlinedTextField(
-        modifier = Modifier.fillMaxWidth(),
+
+    NumberSelector(
+        label = "Difficulty:",
         value = teamStrength,
-        onValueChange = {
-            val strength = it.toIntOrNull()
-            if (it.isEmpty() || (strength != null && strength > 0))
-                teamStrength = it
-        },
-        label = { Text("Difficulty") },
-        isError = teamStrength.isEmpty()
+        onValueChange = { teamStrength = it },
+        min = 1
     )
 
     val navigator = LocalNavigator.currentOrThrow
     CancelSaveButtonRow(
         onCancel = { navigateTo(Screens.Pop, navigator) },
         onSave = {
-            updateTeam(team?.id, teamName, teamStrength.toInt())
+            updateTeam(team?.id, teamName, teamStrength)
             navigateTo(Screens.Pop, navigator)
         },
-        canSave = teamName.isNotBlank() && teamStrength.isNotEmpty()
+        canSave = teamName.isNotBlank()
     )
 }

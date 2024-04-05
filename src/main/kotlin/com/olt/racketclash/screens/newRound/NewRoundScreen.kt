@@ -96,14 +96,13 @@ private fun EquallyStrongDouble(
     roundType: NewRoundModel.RoundType.EquallyStrongDouble
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text = "Rounds:")
-        FilledArrowLeftButton(enabled = roundType.canSubtractRounds && !model.generating) {
-            screenModel.changeEquallyStrongDoublesRounds(newRounds = roundType.rounds - 1)
-        }
-        Text(roundType.rounds.toString())
-        FilledArrowRightButton(enabled = !model.generating) {
-            screenModel.changeEquallyStrongDoublesRounds(newRounds = roundType.rounds + 1)
-        }
+        NumberSelector(
+            enabled = !model.generating,
+            label = "Rounds:",
+            value = roundType.rounds,
+            onValueChange = screenModel::changeEquallyStrongDoublesRounds,
+            min = 1
+        )
 
         Checkbox(
             enabled = !model.generating,
@@ -129,16 +128,13 @@ private fun EquallyStrongDouble(
         Text("Worst strength difference is zero")
     }
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text = "Max repeats:")
-        FilledArrowLeftButton(enabled = roundType.canSubtractMaxRepeats && !model.generating) {
-            screenModel.changeEquallyStrongDoublesMaxRepeats(newMaxRepeats = roundType.maxRepeat - 1)
-        }
-        Text(roundType.maxRepeat.toString())
-        FilledArrowRightButton(enabled = !model.generating) {
-            screenModel.changeEquallyStrongDoublesMaxRepeats(newMaxRepeats = roundType.maxRepeat + 1)
-        }
-    }
+    NumberSelector(
+        enabled = !model.generating,
+        label = "Max repeats:",
+        value = roundType.maxRepeat,
+        onValueChange = screenModel::changeEquallyStrongDoublesMaxRepeats,
+        min = 1
+    )
 
     if (model.generating)
         Loading()

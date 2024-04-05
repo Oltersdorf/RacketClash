@@ -35,21 +35,19 @@ class GamesModel(
         }
         screenModelScope.launch(context = Dispatchers.IO) {
             fileHandler.fields().collect {
-                updateState { copy(fields = it, canSubtractFields = it > 1) }
+                updateState { copy(fields = it) }
             }
         }
         screenModelScope.launch(context = Dispatchers.IO) {
             fileHandler.timeout().collect {
-                updateState { copy(timeout = it, canSubtractTimeout = it > 1) }
+                updateState { copy(timeout = it) }
             }
         }
     }
 
     data class Model(
         val fields: Int = 1,
-        val canSubtractFields: Boolean = false,
         val timeout: Int = 1,
-        val canSubtractTimeout: Boolean = false,
         val rounds: List<Round> = emptyList(),
         val games: Map<Long, List<Game>> = emptyMap(),
         val bye: Map<Long, List<Game>> = emptyMap(),

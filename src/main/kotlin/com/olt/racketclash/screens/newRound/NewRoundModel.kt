@@ -27,12 +27,10 @@ class NewRoundModel(
         data object Empty : RoundType()
         data class EquallyStrongDouble(
             val rounds: Int = 1,
-            val canSubtractRounds: Boolean = false,
             val differentPartnersEachRound: Boolean = true,
             val tryUntilWorstPerformanceIsZero: Boolean = true,
             val tryUntilNoMoreThanOneByePerPerson: Boolean = true,
             val maxRepeat: Int = 10,
-            val canSubtractMaxRepeats: Boolean = true,
             val bye: Map<String, Game> = emptyMap(),
             val games: List<Game> = emptyList(),
             val performance: Int = 0
@@ -81,7 +79,7 @@ class NewRoundModel(
             updateState {
                 val roundType = selectedRoundType as? RoundType.EquallyStrongDouble
                 if (newRounds >= 1 && roundType != null && !generating)
-                    copy(selectedRoundType = roundType.copy(rounds = newRounds, canSubtractRounds = newRounds > 1))
+                    copy(selectedRoundType = roundType.copy(rounds = newRounds))
                 else this
             }
         }
@@ -125,7 +123,7 @@ class NewRoundModel(
             updateState {
                 val roundType = selectedRoundType as? RoundType.EquallyStrongDouble
                 if (newMaxRepeats >= 1 && roundType != null && !generating)
-                    copy(selectedRoundType = roundType.copy(maxRepeat = newMaxRepeats, canSubtractMaxRepeats = newMaxRepeats > 1))
+                    copy(selectedRoundType = roundType.copy(maxRepeat = newMaxRepeats))
                 else this
             }
         }

@@ -61,22 +61,23 @@ private fun Header(
     Surface(tonalElevation = 5.dp) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Text(
-                text = "Fields:",
-                modifier = Modifier.padding(start = 10.dp)
+            NumberSelector(
+                modifier = Modifier.padding(start = 10.dp),
+                label = "Fields:",
+                value = model.fields,
+                onValueChange = screenModel::changeFields,
+                min = 1
             )
-            FilledArrowLeftButton(enabled = model.canSubtractFields) { screenModel.changeFields(newFields = model.fields - 1) }
-            Text(model.fields.toString())
-            FilledArrowRightButton { screenModel.changeFields(newFields = model.fields + 1) }
-            Text(
-                text = "Timeout:",
-                modifier = Modifier.padding(start = 20.dp)
+            NumberSelector(
+                label = "Timeout:",
+                value = model.timeout,
+                valuePostText = "min",
+                onValueChange = screenModel::changeTimeout,
+                min = 1
             )
-            FilledArrowLeftButton(enabled = model.canSubtractTimeout) { screenModel.changeTimeout(newTimeout = model.timeout - 1) }
-            Text("${model.timeout} min")
-            FilledArrowRightButton { screenModel.changeTimeout(newTimeout = model.timeout + 1) }
         }
     }
 }
