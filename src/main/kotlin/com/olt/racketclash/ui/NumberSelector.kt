@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 @Composable
 fun NumberSelector(
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     label: String? = null,
     value: Int,
     valuePostText: String = "",
@@ -23,10 +24,10 @@ fun NumberSelector(
     ) {
         if (label != null) Text(label)
 
-        ArrowLeftButton(enabled = value - step >= min) { onValueChange(value - step) }
+        ArrowLeftButton(enabled = value - step >= min && enabled) { onValueChange(value - step) }
 
         Text(value.toString() + valuePostText)
 
-        ArrowRightButton(enabled = value + step <= max) { onValueChange(value + step) }
+        ArrowRightButton(enabled = value + step <= max && enabled) { onValueChange(value + step) }
     }
 }
