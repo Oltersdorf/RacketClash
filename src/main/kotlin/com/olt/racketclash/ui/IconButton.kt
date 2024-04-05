@@ -2,9 +2,7 @@ package com.olt.racketclash.ui
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -13,6 +11,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 fun SimpleIconButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     imageVector: ImageVector,
     contentDescription: String,
     onClick: () -> Unit
@@ -20,6 +19,7 @@ fun SimpleIconButton(
     IconButton(
         modifier = modifier,
         enabled = enabled,
+        colors = colors,
         onClick = onClick
     ) {
         Icon(
@@ -33,6 +33,7 @@ fun SimpleIconButton(
 fun SimpleFilledIconButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(),
     imageVector: ImageVector,
     contentDescription: String,
     onClick: () -> Unit
@@ -40,6 +41,7 @@ fun SimpleFilledIconButton(
     FilledIconButton(
         modifier = modifier,
         enabled = enabled,
+        colors = colors,
         onClick = onClick
     ) {
         Icon(
@@ -53,11 +55,13 @@ fun SimpleFilledIconButton(
 fun BackButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     onClick: () -> Unit
 ) {
     SimpleIconButton(
         modifier = modifier,
         enabled = enabled,
+        colors = colors,
         imageVector = Icons.Default.ArrowBack,
         contentDescription = "Back",
         onClick = onClick
@@ -68,11 +72,13 @@ fun BackButton(
 fun AddButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     onClick: () -> Unit
 ) {
     SimpleIconButton(
         modifier = modifier,
         enabled = enabled,
+        colors = colors,
         imageVector = Icons.Default.Add,
         contentDescription = "Add",
         onClick = onClick
@@ -83,11 +89,13 @@ fun AddButton(
 fun DeleteButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     onClick: () -> Unit
 ) {
     SimpleIconButton(
         modifier = modifier,
         enabled = enabled,
+        colors = colors,
         imageVector = Icons.Default.Delete,
         contentDescription = "Delete",
         onClick = onClick
@@ -98,11 +106,13 @@ fun DeleteButton(
 fun EditButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     onClick: () -> Unit
 ) {
     SimpleIconButton(
         modifier = modifier,
         enabled = enabled,
+        colors = colors,
         imageVector = Icons.Default.Edit,
         contentDescription = "Edit",
         onClick = onClick
@@ -113,11 +123,13 @@ fun EditButton(
 fun SaveButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     onClick: () -> Unit
 ) {
     SimpleIconButton(
         modifier = modifier,
         enabled = enabled,
+        colors = colors,
         imageVector = Icons.Default.Check,
         contentDescription = "Save",
         onClick = onClick
@@ -128,11 +140,13 @@ fun SaveButton(
 fun FilledArrowLeftButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(),
     onClick: () -> Unit
 ) {
     SimpleFilledIconButton(
         modifier = modifier,
         enabled = enabled,
+        colors = colors,
         imageVector = Icons.Default.KeyboardArrowLeft,
         contentDescription = "-",
         onClick = onClick
@@ -143,11 +157,13 @@ fun FilledArrowLeftButton(
 fun FilledArrowRightButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(),
     onClick: () -> Unit
 ) {
     SimpleFilledIconButton(
         modifier = modifier,
         enabled = enabled,
+        colors = colors,
         imageVector = Icons.Default.KeyboardArrowRight,
         contentDescription = "+",
         onClick = onClick
