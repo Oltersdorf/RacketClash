@@ -137,6 +137,40 @@ fun SaveButton(
 }
 
 @Composable
+fun ArrowLeftButton(
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
+    onClick: () -> Unit
+) {
+    SimpleIconButton(
+        modifier = modifier,
+        enabled = enabled,
+        colors = colors,
+        imageVector = Icons.Default.KeyboardArrowLeft,
+        contentDescription = "-",
+        onClick = onClick
+    )
+}
+
+@Composable
+fun ArrowRightButton(
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
+    onClick: () -> Unit
+) {
+    SimpleIconButton(
+        modifier = modifier,
+        enabled = enabled,
+        colors = colors,
+        imageVector = Icons.Default.KeyboardArrowRight,
+        contentDescription = "+",
+        onClick = onClick
+    )
+}
+
+@Composable
 fun FilledArrowLeftButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
