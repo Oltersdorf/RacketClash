@@ -86,17 +86,19 @@ private fun Graph(
     model: GamesModel.Model,
     screenModel: GamesModel
 ) {
-    val horizontalScrollState = rememberLazyListState()
-    val verticalScrollState = rememberScrollState()
-
     Box {
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
-            modifier = Modifier.verticalScroll(verticalScrollState).padding(20.dp),
-            state = horizontalScrollState
-        ) {
-            items(items = model.rounds) {
-                Round(round = it, games = model.games[it.id] ?: emptyList(), active = model.active, screenModel = screenModel)
+        val horizontalScrollState = rememberLazyListState()
+        val verticalScrollState = rememberScrollState()
+
+        Box(modifier = Modifier.padding(20.dp)) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                modifier = Modifier.verticalScroll(verticalScrollState),
+                state = horizontalScrollState
+            ) {
+                items(items = model.rounds) {
+                    Round(round = it, games = model.games[it.id] ?: emptyList(), active = model.active, screenModel = screenModel)
+                }
             }
         }
 
