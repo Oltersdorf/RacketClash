@@ -1,35 +1,41 @@
 import kotlin.Boolean;
+import kotlin.Int;
 
 CREATE TABLE IF NOT EXISTS playerTable (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     active INTEGER AS Boolean NOT NULL DEFAULT FALSE,
     name TEXT NOT NULL,
     teamId INTEGER NOT NULL,
+    openGames INTEGER AS Int NOT NULL DEFAULT 0,
+    played INTEGER AS Int NOT NULL DEFAULT 0,
+    bye INTEGER AS Int NOT NULL DEFAULT 0,
+    wonGames INTEGER AS Int NOT NULL DEFAULT 0,
+    lostGames INTEGER AS Int NOT NULL DEFAULT 0,
+    wonSets INTEGER AS Int NOT NULL DEFAULT 0,
+    lostSets INTEGER AS Int NOT NULL DEFAULT 0,
+    wonPoints INTEGER AS Int NOT NULL DEFAULT 0,
+    lostPoints INTEGER AS Int NOT NULL DEFAULT 0,
     FOREIGN KEY (teamId) REFERENCES teamTable (id)
 );
 
 selectAll:
-SELECT playerTable.id, active, playerTable.name, teamId, teamTable.name AS teamName, teamTable.strength AS teamStrength,
-playerLeft1Id, playerLeft2Id,
-SUM(gameTable.isDone) AS played, SUM(gameTable.isBye) AS bye,
-SUM(gameTable.set1Left) AS set1Left, SUM(gameTable.set1Right) AS set1Right
+SELECT playerTable.id, active, playerTable.name,
+openGames, played, bye,
+wonGames, lostGames, wonSets, lostSets, wonPoints, lostPoints,
+teamId, teamTable.name AS teamName, teamTable.strength AS teamStrength
 FROM teamTable
 JOIN playerTable
 ON playerTable.teamId = teamTable.id
-LEFT OUTER JOIN gameTable
-ON gameTable.playerLeft1Id = playerTable.id OR gameTable.playerLeft2Id = playerTable.id OR gameTable.playerRight1Id = playerTable.id OR gameTable.playerRight2Id = playerTable.id
 GROUP BY playerTable.id;
 
 selectActive:
-SELECT playerTable.id, active, playerTable.name, teamId, teamTable.name AS teamName, teamTable.strength AS teamStrength,
-playerLeft1Id, playerLeft2Id,
-SUM(gameTable.isDone) AS played, SUM(gameTable.isBye) AS bye,
-SUM(gameTable.set1Left) AS set1Left, SUM(gameTable.set1Right) AS set1Right
+SELECT playerTable.id, active, playerTable.name,
+openGames, played, bye,
+wonGames, lostGames, wonSets, lostSets, wonPoints, lostPoints,
+teamId, teamTable.name AS teamName, teamTable.strength AS teamStrength
 FROM teamTable
 JOIN playerTable
 ON playerTable.teamId = teamTable.id
-LEFT OUTER JOIN gameTable
-ON gameTable.playerLeft1Id = playerTable.id OR gameTable.playerLeft2Id = playerTable.id OR gameTable.playerRight1Id = playerTable.id OR gameTable.playerRight2Id = playerTable.id
 WHERE active = TRUE
 GROUP BY playerTable.id;
 
@@ -45,6 +51,67 @@ WHERE id = :id;
 setActive:
 UPDATE playerTable
 SET active = :active
+WHERE id = :id;
+
+setGameDone:
+UPDATE playerTable
+SET openGames = (SELECT openGames FROM playerTable WHERE id = :id) - 1,
+played = (SELECT played FROM playerTable WHERE id = :id) + 1,
+wonGames = (SELECT played FROM playerTable WHERE id = :id) + :wonGame,
+lostGames = (SELECT played FROM playerTable WHERE id = :id) + :lostGame,
+wonSets = (SELECT played FROM playerTable WHERE id = :id) + :wonSets,
+lostSets = (SELECT played FROM playerTable WHERE id = :id) + :lostSets,
+wonPoints = (SELECT played FROM playerTable WHERE id = :id) + :wonPoints,
+lostGames = (SELECT played FROM playerTable WHERE id = :id) + :lostPoints
+WHERE id = :id;
+
+setGameUndone:
+UPDATE playerTable
+SET openGames = (SELECT openGames FROM playerTable WHERE id = :id) + 1,
+played = (SELECT played FROM playerTable WHERE id = :id) - 1,
+wonGames = (SELECT played FROM playerTable WHERE id = :id) - :wonGame,
+lostGames = (SELECT played FROM playerTable WHERE id = :id) - :lostGame,
+wonSets = (SELECT played FROM playerTable WHERE id = :id) - :wonSets,
+lostSets = (SELECT played FROM playerTable WHERE id = :id) - :lostSets,
+wonPoints = (SELECT played FROM playerTable WHERE id = :id) - :wonPoints,
+lostGames = (SELECT played FROM playerTable WHERE id = :id) - :lostPoints
+WHERE id = :id;
+
+addUndoneGame:
+UPDATE playerTable
+SET openGames = (SELECT openGames FROM playerTable WHERE id = :id) + 1
+WHERE id = :id;
+
+removeDoneGame:
+UPDATE playerTable
+SET played = (SELECT openGames FROM playerTable WHERE id = :id) - 1,
+wonGames = (SELECT played FROM playerTable WHERE id = :id) - :wonGame,
+lostGames = (SELECT played FROM playerTable WHERE id = :id) - :lostGame,
+wonSets = (SELECT played FROM playerTable WHERE id = :id) - :wonSets,
+lostSets = (SELECT played FROM playerTable WHERE id = :id) - :lostSets,
+wonPoints = (SELECT played FROM playerTable WHERE id = :id) - :wonPoints,
+lostGames = (SELECT played FROM playerTable WHERE id = :id) - :lostPoints
+WHERE id = :id;
+
+removeUndoneGame:
+UPDATE playerTable
+SET openGames = (SELECT openGames FROM playerTable WHERE id = :id) - 1
+WHERE id = :id;
+
+addByeGame:
+UPDATE playerTable
+SET bye = (SELECT openGames FROM playerTable WHERE id = :id) + 1,
+wonGames = (SELECT played FROM playerTable WHERE id = :id) + 1,
+wonSets = (SELECT played FROM playerTable WHERE id = :id) + 1,
+wonPoints = (SELECT played FROM playerTable WHERE id = :id) + 1
+WHERE id = :id;
+
+removeByeGame:
+UPDATE playerTable
+SET bye = (SELECT openGames FROM playerTable WHERE id = :id) - 1,
+wonGames = (SELECT played FROM playerTable WHERE id = :id) - 1,
+wonSets = (SELECT played FROM playerTable WHERE id = :id) - 1,
+wonPoints = (SELECT played FROM playerTable WHERE id = :id) - 1
 WHERE id = :id;
 
 delete:

@@ -103,6 +103,11 @@ LEFT JOIN playerTable AS p2R ON p2R.id = gameTable.playerRight2Id
 WHERE roundId = :roundId AND isBye = TRUE
 GROUP BY gameTable.id;
 
+select:
+SELECT *
+FROM gameTable
+WHERE id = :id;
+
 add:
 INSERT INTO gameTable(roundId, playerLeft1Id, playerLeft2Id, playerRight1Id, playerRight2Id)
 VALUES (:roundId, :playerLeft1Id, :playerLeft2Id, :playerRight1Id, :playerRight2Id);

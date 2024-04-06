@@ -7,9 +7,13 @@ data class Player(
     val teamId: Long = -1,
     val teamName: String = "",
     val teamStrength: Int = 0,
+    val openGames: Int = 0,
     val played: Int = 0,
     val bye: Int = 0,
-    val games: Pair<Int, Int> = Pair(0, 0),
-    val sets: Pair<Int, Int> = Pair(0, 0),
-    val points: Pair<Int, Int> = Pair(0, 0)
+    val wonGames: Int = 0,
+    val lostGames: Int = 0,
+    val wonSets: Int = 0,
+    val lostSets: Int = 0,
+    val wonPoints: Int = 0,
+    val lostPoints: Int = 0
 )

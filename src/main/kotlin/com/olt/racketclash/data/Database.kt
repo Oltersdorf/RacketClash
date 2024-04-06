@@ -6,11 +6,8 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
-import com.olt.racketclash.database.GameTable
-import com.olt.racketclash.database.RacketClashDatabase
+import com.olt.racketclash.database.*
 import com.olt.racketclash.database.RacketClashDatabase.Companion.Schema
-import com.olt.racketclash.database.RoundTable
-import com.olt.racketclash.database.TeamTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -45,7 +42,14 @@ class Database private constructor(
             set4LeftAdapter = IntColumnAdapter, set4RightAdapter = IntColumnAdapter,
             set5LeftAdapter = IntColumnAdapter, set5RightAdapter = IntColumnAdapter
         ),
-        roundTableAdapter = RoundTable.Adapter(orderNumberAdapter = IntColumnAdapter)
+        roundTableAdapter = RoundTable.Adapter(orderNumberAdapter = IntColumnAdapter),
+        playerTableAdapter = PlayerTable.Adapter(
+            openGamesAdapter = IntColumnAdapter, playedAdapter = IntColumnAdapter,
+            byeAdapter = IntColumnAdapter,
+            wonGamesAdapter = IntColumnAdapter, lostGamesAdapter = IntColumnAdapter,
+            wonSetsAdapter = IntColumnAdapter, lostSetsAdapter = IntColumnAdapter,
+            wonPointsAdapter = IntColumnAdapter, lostPointsAdapter = IntColumnAdapter
+        )
     )
 
     init {
@@ -86,19 +90,6 @@ class Database private constructor(
             .mapToList(context = Dispatchers.IO)
             .map { list ->
                 list.map { selectAll ->
-                    val isLeft = selectAll.playerLeft1Id == selectAll.id || selectAll.playerLeft2Id == selectAll.id
-                    val gamesLeft = if (isLeft) {
-                        if ((selectAll.set1Left?.toInt() ?: 0) > (selectAll.set1Right?.toInt() ?: 0))
-                            1
-                        else
-                            0
-                    } else {
-                        if ((selectAll.set1Left?.toInt() ?: 0) > (selectAll.set1Right?.toInt() ?: 0))
-                            0
-                        else
-                            1
-                    }
-                    val gamesRight = if (gamesLeft == 0) 1 else 0
                     Player(
                         id = selectAll.id,
                         active = selectAll.active,
@@ -106,13 +97,17 @@ class Database private constructor(
                         teamId = selectAll.teamId,
                         teamName = selectAll.teamName,
                         teamStrength = selectAll.teamStrength,
-                        played = selectAll.played?.toInt() ?: 0,
-                        bye = selectAll.bye?.toInt() ?: 0,
-                        games = Pair(first = gamesLeft, second = gamesRight),
-                        sets = Pair(first = gamesLeft, second = gamesRight),
-                        points = Pair(first = (if (isLeft) selectAll.set1Left else selectAll.set1Right)?.toInt() ?: 0, second = (if (isLeft) selectAll.set1Right else selectAll.set1Left)?.toInt() ?: 0)
+                        openGames = selectAll.openGames,
+                        played = selectAll.played,
+                        bye = selectAll.bye,
+                        wonGames = selectAll.wonGames,
+                        lostGames = selectAll.lostGames,
+                        wonSets = selectAll.wonSets,
+                        lostSets = selectAll.lostSets,
+                        wonPoints = selectAll.wonPoints,
+                        lostPoints = selectAll.lostPoints
                     )
-                }.sortedWith(comparator = compareBy({ it.games.first }, { it.games.second }, { it.sets.first }, { it.sets.second }, { it.points.first }, { it.points.second }))
+                }.sortedWith(comparator = compareBy({ it.wonGames }, { it.lostGames }, { it.wonSets }, { it.lostSets }, { it.wonPoints }, { it.lostPoints }))
             }
 
     fun activePlayers() : Flow<List<Player>> =
@@ -123,19 +118,6 @@ class Database private constructor(
             .mapToList(context = Dispatchers.IO)
             .map { list ->
                 list.map { selectAll ->
-                    val isLeft = selectAll.playerLeft1Id == selectAll.id || selectAll.playerLeft2Id == selectAll.id
-                    val gamesLeft = if (isLeft) {
-                        if ((selectAll.set1Left?.toInt() ?: 0) > (selectAll.set1Right?.toInt() ?: 0))
-                            1
-                        else
-                            0
-                    } else {
-                        if ((selectAll.set1Left?.toInt() ?: 0) > (selectAll.set1Right?.toInt() ?: 0))
-                            0
-                        else
-                            1
-                    }
-                    val gamesRight = if (gamesLeft == 0) 1 else 0
                     Player(
                         id = selectAll.id,
                         active = selectAll.active,
@@ -143,11 +125,15 @@ class Database private constructor(
                         teamId = selectAll.teamId,
                         teamName = selectAll.teamName,
                         teamStrength = selectAll.teamStrength,
-                        played = selectAll.played?.toInt() ?: 0,
-                        bye = selectAll.bye?.toInt() ?: 0,
-                        games = Pair(first = gamesLeft, second = gamesRight),
-                        sets = Pair(first = gamesLeft, second = gamesRight),
-                        points = Pair(first = (if (isLeft) selectAll.set1Left else selectAll.set1Right)?.toInt() ?: 0, second = (if (isLeft) selectAll.set1Right else selectAll.set1Left)?.toInt() ?: 0)
+                        openGames = selectAll.openGames,
+                        played = selectAll.played,
+                        bye = selectAll.bye,
+                        wonGames = selectAll.wonGames,
+                        lostGames = selectAll.lostGames,
+                        wonSets = selectAll.wonSets,
+                        lostSets = selectAll.lostSets,
+                        wonPoints = selectAll.wonPoints,
+                        lostPoints = selectAll.lostPoints
                     )
                 }
             }
@@ -361,13 +347,20 @@ class Database private constructor(
         playerRight1Id: Long?,
         playerRight2Id: Long?
     ) {
-        database.gameQueries.add(
-            roundId = roundId,
-            playerLeft1Id = playerLeft1Id,
-            playerLeft2Id = playerLeft2Id,
-            playerRight1Id = playerRight1Id,
-            playerRight2Id = playerRight2Id
-        )
+        database.transaction {
+            database.gameQueries.add(
+                roundId = roundId,
+                playerLeft1Id = playerLeft1Id,
+                playerLeft2Id = playerLeft2Id,
+                playerRight1Id = playerRight1Id,
+                playerRight2Id = playerRight2Id
+            )
+
+            playerLeft1Id?.let { database.playerQueries.addUndoneGame(id = it) }
+            playerLeft2Id?.let { database.playerQueries.addUndoneGame(id = it) }
+            playerRight1Id?.let { database.playerQueries.addUndoneGame(id = it) }
+            playerRight2Id?.let { database.playerQueries.addUndoneGame(id = it) }
+        }
     }
 
     fun updateGame(
@@ -384,24 +377,218 @@ class Database private constructor(
         set5Right: Int,
         isDone: Boolean
     ) {
-        database.gameQueries.update(
-            id = id,
-            set1Left = set1Left,
-            set1Right = set1Right,
-            set2Left = set2Left,
-            set2Right = set2Right,
-            set3Left = set3Left,
-            set3Right = set3Right,
-            set4Left = set4Left,
-            set4Right = set4Right,
-            set5Left = set5Left,
-            set5Right = set5Right,
-            isDone = isDone
-        )
+        database.transaction {
+            database.gameQueries.update(
+                id = id,
+                set1Left = set1Left,
+                set1Right = set1Right,
+                set2Left = set2Left,
+                set2Right = set2Right,
+                set3Left = set3Left,
+                set3Right = set3Right,
+                set4Left = set4Left,
+                set4Right = set4Right,
+                set5Left = set5Left,
+                set5Right = set5Right,
+                isDone = isDone
+            )
+
+            val game = database.gameQueries.select(id = id).executeAsOneOrNull()
+            val leftWonSets = listOf(
+                if (set1Left - set1Right > 0) 1 else 0,
+                if (set2Left - set2Right > 0) 1 else 0,
+                if (set3Left - set3Right > 0) 1 else 0,
+                if (set4Left - set4Right > 0) 1 else 0,
+                if (set5Left - set5Right > 0) 1 else 0
+            ).sum()
+            val rightWonSets = listOf(
+                if (set1Left - set1Right < 0) 1 else 0,
+                if (set2Left - set2Right < 0) 1 else 0,
+                if (set3Left - set3Right < 0) 1 else 0,
+                if (set4Left - set4Right < 0) 1 else 0,
+                if (set5Left - set5Right < 0) 1 else 0
+            ).sum()
+            val leftWon = if (leftWonSets > rightWonSets) 1 else 0
+            val rightWon = if (leftWonSets < rightWonSets) 1 else 0
+            val leftPoints = set1Left + set2Left + set3Left + set4Left + set5Left
+            val rightPoints = set1Right + set2Right + set3Right + set4Right + set5Right
+
+            if (isDone) {
+                game?.playerLeft1Id?.let {
+                    database.playerQueries.setGameDone(
+                        id = it,
+                        wonGame = leftWon,
+                        lostGame = rightWon,
+                        wonSets = leftWonSets,
+                        lostSets = rightWonSets,
+                        wonPoints = leftPoints,
+                        lostPoints = rightPoints
+                    )
+                }
+                game?.playerLeft2Id?.let {
+                    database.playerQueries.setGameDone(
+                        id = it,
+                        wonGame = leftWon,
+                        lostGame = rightWon,
+                        wonSets = leftWonSets,
+                        lostSets = rightWonSets,
+                        wonPoints = leftPoints,
+                        lostPoints = rightPoints
+                    )
+                }
+                game?.playerRight1Id?.let {
+                    database.playerQueries.setGameDone(
+                        id = it,
+                        wonGame = rightWon,
+                        lostGame = leftWon,
+                        wonSets = rightWonSets,
+                        lostSets = leftWonSets,
+                        wonPoints = rightPoints,
+                        lostPoints = leftPoints
+                    )
+                }
+                game?.playerRight2Id?.let {
+                    database.playerQueries.setGameDone(
+                        id = it,
+                        wonGame = rightWon,
+                        lostGame = leftWon,
+                        wonSets = rightWonSets,
+                        lostSets = leftWonSets,
+                        wonPoints = rightPoints,
+                        lostPoints = leftPoints
+                    )
+                }
+            } else {
+                game?.playerLeft1Id?.let {
+                    database.playerQueries.setGameUndone(
+                        id = it,
+                        wonGame = leftWon,
+                        lostGame = rightWon,
+                        wonSets = leftWonSets,
+                        lostSets = rightWonSets,
+                        wonPoints = leftPoints,
+                        lostPoints = rightPoints
+                    )
+                }
+                game?.playerLeft2Id?.let {
+                    database.playerQueries.setGameUndone(
+                        id = it,
+                        wonGame = leftWon,
+                        lostGame = rightWon,
+                        wonSets = leftWonSets,
+                        lostSets = rightWonSets,
+                        wonPoints = leftPoints,
+                        lostPoints = rightPoints
+                    )
+                }
+                game?.playerRight1Id?.let {
+                    database.playerQueries.setGameUndone(
+                        id = it,
+                        wonGame = rightWon,
+                        lostGame = leftWon,
+                        wonSets = rightWonSets,
+                        lostSets = leftWonSets,
+                        wonPoints = rightPoints,
+                        lostPoints = leftPoints
+                    )
+                }
+                game?.playerRight2Id?.let {
+                    database.playerQueries.setGameUndone(
+                        id = it,
+                        wonGame = rightWon,
+                        lostGame = leftWon,
+                        wonSets = rightWonSets,
+                        lostSets = leftWonSets,
+                        wonPoints = rightPoints,
+                        lostPoints = leftPoints
+                    )
+                }
+            }
+        }
     }
 
     fun deleteGame(id: Long) {
-        database.gameQueries.delete(id = id)
+        database.transaction {
+            val game = database.gameQueries.select(id = id).executeAsOneOrNull()
+            database.gameQueries.delete(id = id)
+
+            if (game != null) {
+                val leftWonSets = listOf(
+                    if (game.set1Left - game.set1Right > 0) 1 else 0,
+                    if (game.set2Left - game.set2Right > 0) 1 else 0,
+                    if (game.set3Left - game.set3Right > 0) 1 else 0,
+                    if (game.set4Left - game.set4Right > 0) 1 else 0,
+                    if (game.set5Left - game.set5Right > 0) 1 else 0
+                ).sum()
+                val rightWonSets = listOf(
+                    if (game.set1Left - game.set1Right < 0) 1 else 0,
+                    if (game.set2Left - game.set2Right < 0) 1 else 0,
+                    if (game.set3Left - game.set3Right < 0) 1 else 0,
+                    if (game.set4Left - game.set4Right < 0) 1 else 0,
+                    if (game.set5Left - game.set5Right < 0) 1 else 0
+                ).sum()
+                val leftWon = if (leftWonSets > rightWonSets) 1 else 0
+                val rightWon = if (leftWonSets < rightWonSets) 1 else 0
+                val leftPoints = game.set1Left + game.set2Left + game.set3Left + game.set4Left + game.set5Left
+                val rightPoints = game.set1Right + game.set2Right + game.set3Right + game.set4Right + game.set5Right
+
+                if (game.isBye)
+                    game.playerLeft1Id?.let { database.playerQueries.removeByeGame(it) }
+                else if (game.isDone) {
+                    game.playerLeft1Id?.let {
+                        database.playerQueries.removeDoneGame(
+                            id = it,
+                            wonGame = leftWon,
+                            lostGame = rightWon,
+                            wonSets = leftWonSets,
+                            lostSets = rightWonSets,
+                            wonPoints = leftPoints,
+                            lostPoints = rightPoints
+                        )
+                    }
+                    game.playerLeft2Id?.let {
+                        database.playerQueries.removeDoneGame(
+                            id = it,
+                            wonGame = leftWon,
+                            lostGame = rightWon,
+                            wonSets = leftWonSets,
+                            lostSets = rightWonSets,
+                            wonPoints = leftPoints,
+                            lostPoints = rightPoints
+                        )
+                    }
+                    game.playerRight1Id?.let {
+                        database.playerQueries.removeDoneGame(
+                            id = it,
+                            wonGame = rightWon,
+                            lostGame = leftWon,
+                            wonSets = rightWonSets,
+                            lostSets = leftWonSets,
+                            wonPoints = rightPoints,
+                            lostPoints = leftPoints
+                        )
+                    }
+                    game.playerRight2Id?.let {
+                        database.playerQueries.removeDoneGame(
+                            id = it,
+                            wonGame = rightWon,
+                            lostGame = leftWon,
+                            wonSets = rightWonSets,
+                            lostSets = leftWonSets,
+                            wonPoints = rightPoints,
+                            lostPoints = leftPoints
+                        )
+                    }
+                } else {
+                    game.playerLeft1Id?.let { database.playerQueries.removeUndoneGame(id = it) }
+                    game.playerLeft2Id?.let { database.playerQueries.removeUndoneGame(id = it) }
+                    game.playerRight1Id?.let { database.playerQueries.removeUndoneGame(id = it) }
+                    game.playerRight2Id?.let { database.playerQueries.removeUndoneGame(id = it) }
+                }
+            }
+
+        }
+
     }
 
     fun addRoundsWithGames(
@@ -414,7 +601,7 @@ class Database private constructor(
                 val roundId = database.roundQueries.lastInsertRowId().executeAsOne()
 
                 value.forEach {
-                    database.gameQueries.add(
+                    addGame(
                         roundId = roundId,
                         playerLeft1Id = it.playerLeft1Id,
                         playerLeft2Id = it.playerLeft2Id,
@@ -423,8 +610,9 @@ class Database private constructor(
                     )
                 }
 
-                bye.filter { it.roundId == index.toLong() + 1 }.forEach {
-                    database.gameQueries.addBye(roundId = roundId, playerLeft1Id = it.playerLeft1Id)
+                bye.filter { it.roundId == index.toLong() + 1 }.forEach { game ->
+                    database.gameQueries.addBye(roundId = roundId, playerLeft1Id = game.playerLeft1Id)
+                    game.playerLeft1Id?.let { database.playerQueries.addByeGame(it) }
                 }
             }
         }

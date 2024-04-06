@@ -95,6 +95,11 @@ private fun PlayerList(
                 text = { it.teamName }
             ),
             LazyTableColumn.Text(
+                name = "pending",
+                weight = 1.0f,
+                text = { it.openGames.toString() }
+            ),
+            LazyTableColumn.Text(
                 name = "played",
                 weight = 1.0f,
                 text = { it.played.toString() }
@@ -107,17 +112,17 @@ private fun PlayerList(
             LazyTableColumn.Text(
                 name = "Games",
                 weight = 1.0f,
-                text = { "${it.games.first} : ${it.games.second}" }
+                text = { "${it.wonGames} : ${it.lostGames}" }
             ),
             LazyTableColumn.Text(
                 name = "Sets",
                 weight = 1.0f,
-                text = { "${it.sets.first} : ${it.sets.second}" }
+                text = { "${it.wonSets} : ${it.lostSets}" }
             ),
             LazyTableColumn.Text(
                 name = "Points",
                 weight = 1.0f,
-                text = { "${it.points.first} : ${it.points.second}" }
+                text = { "${it.wonPoints} : ${it.lostPoints}" }
             ),
             LazyTableColumn.IconButton(
                 name = "Delete",
