@@ -129,7 +129,7 @@ private fun PlayerList(
                 weight = 0.5f,
                 headerTextAlign = TextAlign.Center,
                 onClick = { deletePlayer(it.id) },
-                enabled = { it.played == 0 },
+                enabled = { it.openGames == 0 && it.bye == 0 && it.played == 0 },
                 imageVector = Icons.Default.Delete,
                 contentDescription = "Delete"
             )
