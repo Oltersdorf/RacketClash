@@ -57,24 +57,24 @@ setGameDone:
 UPDATE playerTable
 SET openGames = (SELECT openGames FROM playerTable WHERE id = :id) - 1,
 played = (SELECT played FROM playerTable WHERE id = :id) + 1,
-wonGames = (SELECT played FROM playerTable WHERE id = :id) + :wonGame,
-lostGames = (SELECT played FROM playerTable WHERE id = :id) + :lostGame,
-wonSets = (SELECT played FROM playerTable WHERE id = :id) + :wonSets,
-lostSets = (SELECT played FROM playerTable WHERE id = :id) + :lostSets,
-wonPoints = (SELECT played FROM playerTable WHERE id = :id) + :wonPoints,
-lostGames = (SELECT played FROM playerTable WHERE id = :id) + :lostPoints
+wonGames = (SELECT wonGames FROM playerTable WHERE id = :id) + :wonGame,
+lostGames = (SELECT lostGames FROM playerTable WHERE id = :id) + :lostGame,
+wonSets = (SELECT wonSets FROM playerTable WHERE id = :id) + :wonSets,
+lostSets = (SELECT lostSets FROM playerTable WHERE id = :id) + :lostSets,
+wonPoints = (SELECT wonPoints FROM playerTable WHERE id = :id) + :wonPoints,
+lostPoints = (SELECT lostPoints FROM playerTable WHERE id = :id) + :lostPoints
 WHERE id = :id;
 
 setGameUndone:
 UPDATE playerTable
 SET openGames = (SELECT openGames FROM playerTable WHERE id = :id) + 1,
 played = (SELECT played FROM playerTable WHERE id = :id) - 1,
-wonGames = (SELECT played FROM playerTable WHERE id = :id) - :wonGame,
-lostGames = (SELECT played FROM playerTable WHERE id = :id) - :lostGame,
-wonSets = (SELECT played FROM playerTable WHERE id = :id) - :wonSets,
-lostSets = (SELECT played FROM playerTable WHERE id = :id) - :lostSets,
-wonPoints = (SELECT played FROM playerTable WHERE id = :id) - :wonPoints,
-lostGames = (SELECT played FROM playerTable WHERE id = :id) - :lostPoints
+wonGames = (SELECT wonGames FROM playerTable WHERE id = :id) - :wonGame,
+lostGames = (SELECT lostGames FROM playerTable WHERE id = :id) - :lostGame,
+wonSets = (SELECT wonSets FROM playerTable WHERE id = :id) - :wonSets,
+lostSets = (SELECT lostSets FROM playerTable WHERE id = :id) - :lostSets,
+wonPoints = (SELECT wonPoints FROM playerTable WHERE id = :id) - :wonPoints,
+lostPoints = (SELECT lostPoints FROM playerTable WHERE id = :id) - :lostPoints
 WHERE id = :id;
 
 addUndoneGame:
@@ -84,13 +84,13 @@ WHERE id = :id;
 
 removeDoneGame:
 UPDATE playerTable
-SET played = (SELECT openGames FROM playerTable WHERE id = :id) - 1,
-wonGames = (SELECT played FROM playerTable WHERE id = :id) - :wonGame,
-lostGames = (SELECT played FROM playerTable WHERE id = :id) - :lostGame,
-wonSets = (SELECT played FROM playerTable WHERE id = :id) - :wonSets,
-lostSets = (SELECT played FROM playerTable WHERE id = :id) - :lostSets,
-wonPoints = (SELECT played FROM playerTable WHERE id = :id) - :wonPoints,
-lostGames = (SELECT played FROM playerTable WHERE id = :id) - :lostPoints
+SET played = (SELECT played FROM playerTable WHERE id = :id) - 1,
+wonGames = (SELECT wonGames FROM playerTable WHERE id = :id) - :wonGame,
+lostGames = (SELECT lostGames FROM playerTable WHERE id = :id) - :lostGame,
+wonSets = (SELECT wonSets FROM playerTable WHERE id = :id) - :wonSets,
+lostSets = (SELECT lostSets FROM playerTable WHERE id = :id) - :lostSets,
+wonPoints = (SELECT wonPoints FROM playerTable WHERE id = :id) - :wonPoints,
+lostPoints = (SELECT lostPoints FROM playerTable WHERE id = :id) - :lostPoints
 WHERE id = :id;
 
 removeUndoneGame:
@@ -100,20 +100,24 @@ WHERE id = :id;
 
 addByeGame:
 UPDATE playerTable
-SET bye = (SELECT openGames FROM playerTable WHERE id = :id) + 1,
-wonGames = (SELECT played FROM playerTable WHERE id = :id) + 1,
-wonSets = (SELECT played FROM playerTable WHERE id = :id) + 1,
-wonPoints = (SELECT played FROM playerTable WHERE id = :id) + 1
+SET bye = (SELECT bye FROM playerTable WHERE id = :id) + 1,
+wonGames = (SELECT wonGames FROM playerTable WHERE id = :id) + 1,
+wonSets = (SELECT wonSets FROM playerTable WHERE id = :id) + 1,
+wonPoints = (SELECT wonPoints FROM playerTable WHERE id = :id) + 1
 WHERE id = :id;
 
 removeByeGame:
 UPDATE playerTable
-SET bye = (SELECT openGames FROM playerTable WHERE id = :id) - 1,
-wonGames = (SELECT played FROM playerTable WHERE id = :id) - 1,
-wonSets = (SELECT played FROM playerTable WHERE id = :id) - 1,
-wonPoints = (SELECT played FROM playerTable WHERE id = :id) - 1
+SET bye = (SELECT bye FROM playerTable WHERE id = :id) - 1,
+wonGames = (SELECT wonGames FROM playerTable WHERE id = :id) - 1,
+wonSets = (SELECT wonSets FROM playerTable WHERE id = :id) - 1,
+wonPoints = (SELECT wonPoints FROM playerTable WHERE id = :id) - 1
 WHERE id = :id;
 
 delete:
 DELETE FROM playerTable
 WHERE id = :id;
+
+size:
+SELECT COUNT(*)
+FROM gameTable;

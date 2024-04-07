@@ -2,7 +2,7 @@ package com.olt.racketclash.screens.editTeam
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
-import com.olt.racketclash.data.Database
+import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Team
 import com.olt.racketclash.navigation.NavigableStateScreenModel
 import com.olt.racketclash.navigation.Screens

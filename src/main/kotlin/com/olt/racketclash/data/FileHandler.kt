@@ -83,16 +83,16 @@ class FileHandler {
         }
     }
 
-    suspend fun updatePlayerCountForProject(projectName: String, playerNumber: Int) {
+    suspend fun updatePlayerCount(playerNumber: Int) {
         val projects = projectsChannel.value.toMutableList()
-        projects.replaceAll { if (it.name == projectName) it.copy(playerNumber = playerNumber, lastModified = currentTime()) else it }
+        projects.replaceAll { if (it.name == currentProject?.name) it.copy(playerNumber = playerNumber, lastModified = currentTime()) else it }
         writeProjects(projects)
         projectsChannel.emit(projects)
     }
 
-    suspend fun updateTeamCountForProject(projectName: String, teamNumber: Int) {
+    suspend fun updateTeamCount(teamNumber: Int) {
         val projects = projectsChannel.value.toMutableList()
-        projects.replaceAll { if (it.name == projectName) it.copy(teamNumber = teamNumber, lastModified = currentTime()) else it }
+        projects.replaceAll { if (it.name == currentProject?.name) it.copy(teamNumber = teamNumber, lastModified = currentTime()) else it }
         writeProjects(projects)
         projectsChannel.emit(projects)
     }

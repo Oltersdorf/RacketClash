@@ -25,3 +25,7 @@ WHERE id = :id;
 delete:
 DELETE FROM teamTable
 WHERE id = :id;
+
+size:
+SELECT COUNT(*)
+FROM gameTable;

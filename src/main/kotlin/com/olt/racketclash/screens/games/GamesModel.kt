@@ -2,7 +2,7 @@ package com.olt.racketclash.screens.games
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
-import com.olt.racketclash.data.Database
+import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.FileHandler
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Round

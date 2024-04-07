@@ -2,6 +2,7 @@ package com.olt.racketclash.navigation
 
 import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.data.*
+import com.olt.racketclash.database.Database
 import com.olt.racketclash.screens.editGame.EditGameModel
 import com.olt.racketclash.screens.editGame.EditGameScreen
 import com.olt.racketclash.screens.editPlayer.EditPlayerModel
@@ -88,7 +89,7 @@ class RootNavigator {
 
     private fun openProject(navigator: Navigator, project: Project) {
         fileHandler.setCurrentProject(project = project)
-        database = Database(tournamentPath = project.location, fileHandler = fileHandler, projectName = project.name)
+        database = Database(tournamentPath = project.location, fileHandler = fileHandler)
         navigateToTeams(navigator = navigator)
     }
 
