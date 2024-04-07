@@ -7,7 +7,11 @@ CREATE TABLE IF NOT EXISTS teamTable (
 );
 
 selectAll:
-SELECT teamTable.id, teamTable.name, strength, COUNT(playerTable.id) AS size
+SELECT teamTable.id, teamTable.name, strength, COUNT(playerTable.id) AS size,
+SUM(openGames) AS openGames, SUM(bye) AS bye, SUM(played) AS played,
+SUM(wonGames) AS wonGames, SUM(lostGames) AS lostGames,
+SUM(wonSets) AS wonSets, SUM(lostSets) AS lostSets,
+SUM(wonPoints) AS wonPoints, SUM(lostPoints) AS lostPoints
 FROM teamTable
 LEFT OUTER JOIN playerTable
 ON playerTable.teamId = teamTable.id
