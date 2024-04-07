@@ -80,6 +80,36 @@ private fun TeamList(
                 weight = 1.0f,
                 text = { it.size.toString() }
             ),
+            LazyTableColumn.Text(
+                name = "pending",
+                weight = 1.0f,
+                text = { it.openGames.toString() }
+            ),
+            LazyTableColumn.Text(
+                name = "played",
+                weight = 1.0f,
+                text = { it.played.toString() }
+            ),
+            LazyTableColumn.Text(
+                name = "bye",
+                weight = 1.0f,
+                text = { it.bye.toString() }
+            ),
+            LazyTableColumn.Text(
+                name = "Games",
+                weight = 1.0f,
+                text = { "${it.wonGames} : ${it.lostGames}" }
+            ),
+            LazyTableColumn.Text(
+                name = "Sets",
+                weight = 1.0f,
+                text = { "${it.wonSets} : ${it.lostSets}" }
+            ),
+            LazyTableColumn.Text(
+                name = "Points",
+                weight = 1.0f,
+                text = { "${it.wonPoints} : ${it.lostPoints}" }
+            ),
             LazyTableColumn.IconButton(
                 name = "Delete",
                 weight = 0.5f,
