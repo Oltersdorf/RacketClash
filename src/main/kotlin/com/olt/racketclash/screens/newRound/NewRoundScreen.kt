@@ -142,7 +142,7 @@ private fun EquallyStrongDouble(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text("${roundType.games.size} games generated")
             Text("Worst strength difference is ${roundType.performance}")
-            Text("Bye: ${roundType.bye.keys.joinToString(separator = ", ")}")
+            Text("Bye: ${roundType.byePlayer}")
         }
     }
 

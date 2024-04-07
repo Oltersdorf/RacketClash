@@ -31,7 +31,8 @@ class NewRoundModel(
             val tryUntilWorstPerformanceIsZero: Boolean = true,
             val tryUntilNoMoreThanOneByePerPerson: Boolean = true,
             val maxRepeat: Int = 10,
-            val bye: Map<String, Game> = emptyMap(),
+            val byeGames: List<Game> = emptyList(),
+            val byePlayer: String = "",
             val games: List<Game> = emptyList(),
             val performance: Int = 0
         ) : RoundType()
@@ -156,10 +157,16 @@ class NewRoundModel(
                                     playerLeft1Id = it
                                 )
                             }
-                        }.associateBy { game ->
+                        }
+
+                    val generatedByePlayers = generatedBye
+                        .groupingBy { game ->
                             val player = players.find { it.id == game.playerLeft1Id }
                             "${player?.name} (${player?.teamName})"
                         }
+                        .eachCount()
+                        .flatMap { listOf("${it.value}x ${it.key}") }
+                        .joinToString(separator = ", ")
 
                     val generatedGames = games.flatMap { entry ->
                         entry.value.map {
@@ -177,7 +184,8 @@ class NewRoundModel(
                         generating = false,
                         selectedRoundType = roundType.copy(
                             games = generatedGames,
-                            bye = generatedBye,
+                            byeGames = generatedBye,
+                            byePlayer = generatedByePlayers,
                             performance = worstPerformance)
                     )
                 }
@@ -194,7 +202,7 @@ class NewRoundModel(
                 val games = roundType.games.groupBy { it.roundId }
                 val rounds = games.mapKeys { "${model.roundName} ${it.key}" }
 
-                database.addRoundsWithGames(rounds = rounds, bye = roundType.bye.values.toList())
+                database.addRoundsWithGames(rounds = rounds, bye = roundType.byeGames)
             }
         }
     }
