@@ -120,4 +120,4 @@ WHERE id = :id;
 
 size:
 SELECT COUNT(*)
-FROM gameTable;
+FROM playerTable;
