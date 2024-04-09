@@ -57,19 +57,10 @@ sealed class LazyTableColumn<T>(
     ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign)
 }
 
-data class Sorting(
-    val text: String,
-    val onChange: () -> Unit
-)
-
 @Composable
 fun <T> LazyTableWithScroll(
     modifier: Modifier = Modifier,
-    filter: String = "",
-    onFilterChange: ((String) -> Unit)? = null,
-    filterLabelText: String = "Filter",
-    sorting: List<Sorting> = emptyList(),
-    selectedSorting: Sorting? = null,
+    header: @Composable (RowScope.() -> Unit)? = null,
     items: List<T>,
     itemsSpacedBy: Dp = 0.dp,
     showHeader: Boolean = true,
@@ -78,26 +69,11 @@ fun <T> LazyTableWithScroll(
     drawDividers: Boolean = true
 ) {
     Column {
-        Row {
-            Spacer(modifier = Modifier.weight(1.0f))
-
-            if (onFilterChange != null)
-                OutlinedTextField(
-                    singleLine = true,
-                    value = filter,
-                    onValueChange = onFilterChange,
-                    label = { Text(filterLabelText) }
-                )
-
-            if (sorting.isNotEmpty() && selectedSorting != null)
-                DropDownMenu(
-                    label = "Sort by",
-                    items = sorting,
-                    value = selectedSorting.text,
-                    textMapper = { it.text },
-                    onClick = { it.onChange() }
-                )
-        }
+        if (header != null)
+            Row(
+                modifier = Modifier.padding(start = 5.dp, end = 5.dp, top = 5.dp),
+                content = header
+            )
 
         Box(
             modifier = modifier
@@ -131,11 +107,6 @@ fun <T> LazyTableWithScrollScaffold(
     modifier: Modifier = Modifier,
     topBarTitle: String,
     topBarActions: @Composable (RowScope.() -> Unit),
-    filter: String = "",
-    onFilterChange: ((String) -> Unit)? = null,
-    filterLabelText: String = "Filter",
-    sorting: List<Sorting> = emptyList(),
-    selectedSorting: Sorting? = null,
     items: List<T>,
     itemsSpacedBy: Dp = 0.dp,
     showHeader: Boolean = true,
@@ -158,11 +129,6 @@ fun <T> LazyTableWithScrollScaffold(
         Surface(tonalElevation = 1.dp) {
             LazyTableWithScroll(
                 modifier = modifier.padding(paddingValues),
-                filter = filter,
-                onFilterChange = onFilterChange,
-                filterLabelText = filterLabelText,
-                sorting = sorting,
-                selectedSorting = selectedSorting,
                 items = items,
                 itemsSpacedBy = itemsSpacedBy,
                 showHeader = showHeader,
