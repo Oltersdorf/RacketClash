@@ -3,6 +3,9 @@ package com.olt.racketclash.screens.teams
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -12,9 +15,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.olt.racketclash.data.Team
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
 
@@ -35,35 +36,62 @@ class TeamsScreen(private val modelBuilder: () -> TeamsModel) : Screen {
             selectedTab = TournamentTabs.Teams,
             navigateTo = screenModel::navigateTo
         ) {
-            TeamView(modal = stateModel, deleteTeam = screenModel::deleteTeam, navigateTo = screenModel::navigateTo)
+            TeamView(model = stateModel, screenModel = screenModel)
         }
     }
 }
 
 @Composable
 private fun TeamView(
-    modal: TeamsModel.Modal,
-    deleteTeam: (id: Long) -> Unit,
-    navigateTo: (Screens, Navigator) -> Unit
+    model: TeamsModel.Modal,
+    screenModel: TeamsModel
 ) {
-    if (modal.isLoading)
+    if (model.isLoading)
         Loading()
     else
-        TeamList(teams = modal.teams, deleteTeam = deleteTeam, navigateTo = navigateTo)
+        TeamList(model = model, screenModel = screenModel)
 }
 
 @Composable
 private fun TeamList(
-    teams: List<Team>,
-    deleteTeam: (id: Long) -> Unit,
-    navigateTo: (Screens, Navigator) -> Unit
+    model: TeamsModel.Modal,
+    screenModel: TeamsModel
 ) {
     val navigator = LocalNavigator.currentOrThrow
 
     LazyTableWithScroll(
-        items = teams,
+        header = {
+            Spacer(modifier = Modifier.weight(1.0f))
+
+            TextField(
+                modifier = Modifier.width(TextFieldDefaults.MinWidth),
+                value = model.filter,
+                onValueChange = screenModel::changeFilter,
+                label = { Text("Filter by name") },
+                singleLine = true
+            )
+
+            DropDownMenu(
+                modifier = Modifier.padding(start = 5.dp).width(TextFieldDefaults.MinWidth),
+                label = "Sort by",
+                items = model.availableSorting,
+                value = model.sortedBy,
+                textMapper = {
+                    when (it) {
+                        TeamsModel.Sorting.NameAscending -> "Name ascending"
+                        TeamsModel.Sorting.NameDescending -> "Name descending"
+                        TeamsModel.Sorting.PointsAscending -> "Points ascending"
+                        TeamsModel.Sorting.PointsDescending -> "Points descending"
+                        TeamsModel.Sorting.StrengthAscending -> "Strength ascending"
+                        TeamsModel.Sorting.StrengthDescending -> "Strength descending"
+                    }
+                },
+                onClick = screenModel::changeSorting
+            )
+        },
+        items = model.teams,
         modifier = Modifier.padding(5.dp),
-        onClick = { navigateTo(Screens.EditTeam(it), navigator) },
+        onClick = { screenModel.navigateTo(screen = Screens.EditTeam(it), navigator = navigator) },
         columns = listOf(
             LazyTableColumn.Text(
                 name = "Name",
@@ -114,7 +142,7 @@ private fun TeamList(
                 name = "Delete",
                 weight = 0.5f,
                 headerTextAlign = TextAlign.Center,
-                onClick = { deleteTeam(it.id) },
+                onClick = { screenModel.deleteTeam(id = it.id) },
                 enabled = { it.size == 0 },
                 imageVector = Icons.Default.Delete,
                 contentDescription = "Delete"
