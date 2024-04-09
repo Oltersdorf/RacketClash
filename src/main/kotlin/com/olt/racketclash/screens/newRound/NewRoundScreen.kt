@@ -10,6 +10,7 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.olt.racketclash.data.Player
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
 
@@ -150,24 +151,9 @@ private fun EquallyStrongDouble(
             DropDownMenu(
                 modifier = Modifier.padding(start = 5.dp).width(TextFieldDefaults.MinWidth),
                 label = "Sort by",
-                items = model.availableSorting,
+                items = Player.sortingOptions(),
                 value = model.sortedBy,
-                textMapper = {
-                    when (it) {
-                        NewRoundModel.Sorting.NameAscending -> "Name ascending"
-                        NewRoundModel.Sorting.NameDescending -> "Name descending"
-                        NewRoundModel.Sorting.PointsAscending -> "Points ascending"
-                        NewRoundModel.Sorting.PointsDescending -> "Points descending"
-                        NewRoundModel.Sorting.TeamAscending -> "Team ascending"
-                        NewRoundModel.Sorting.TeamDescending -> "Team descending"
-                        NewRoundModel.Sorting.ByeAscending -> "Bye ascending"
-                        NewRoundModel.Sorting.ByeDescending -> "Bye descending"
-                        NewRoundModel.Sorting.PendingAscending -> "Pending ascending"
-                        NewRoundModel.Sorting.PendingDescending -> "Pending descending"
-                        NewRoundModel.Sorting.PlayedAscending -> "Played ascending"
-                        NewRoundModel.Sorting.PlayedDescending -> "Played descending"
-                    }
-                },
+                textMapper = Player.Sorting::text,
                 onClick = screenModel::changeSorting
             )
         },

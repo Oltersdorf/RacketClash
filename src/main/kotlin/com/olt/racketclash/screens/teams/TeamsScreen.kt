@@ -16,6 +16,7 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.olt.racketclash.data.Team
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
 
@@ -74,18 +75,9 @@ private fun TeamList(
             DropDownMenu(
                 modifier = Modifier.padding(start = 5.dp).width(TextFieldDefaults.MinWidth),
                 label = "Sort by",
-                items = model.availableSorting,
+                items = Team.sortingOptions(),
                 value = model.sortedBy,
-                textMapper = {
-                    when (it) {
-                        TeamsModel.Sorting.NameAscending -> "Name ascending"
-                        TeamsModel.Sorting.NameDescending -> "Name descending"
-                        TeamsModel.Sorting.PointsAscending -> "Points ascending"
-                        TeamsModel.Sorting.PointsDescending -> "Points descending"
-                        TeamsModel.Sorting.StrengthAscending -> "Strength ascending"
-                        TeamsModel.Sorting.StrengthDescending -> "Strength descending"
-                    }
-                },
+                textMapper = Team.Sorting::text,
                 onClick = screenModel::changeSorting
             )
         },

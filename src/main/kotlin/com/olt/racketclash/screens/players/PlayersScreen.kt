@@ -16,6 +16,7 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.olt.racketclash.data.Player
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
 
@@ -79,24 +80,9 @@ private fun PlayerList(
             DropDownMenu(
                 modifier = Modifier.padding(start = 5.dp).width(TextFieldDefaults.MinWidth),
                 label = "Sort by",
-                items = model.availableSorting,
+                items = Player.sortingOptions(),
                 value = model.sortedBy,
-                textMapper = {
-                    when (it) {
-                        PlayersModel.Sorting.NameAscending -> "Name ascending"
-                        PlayersModel.Sorting.NameDescending -> "Name descending"
-                        PlayersModel.Sorting.PointsAscending -> "Points ascending"
-                        PlayersModel.Sorting.PointsDescending -> "Points descending"
-                        PlayersModel.Sorting.TeamAscending -> "Team ascending"
-                        PlayersModel.Sorting.TeamDescending -> "Team descending"
-                        PlayersModel.Sorting.ByeAscending -> "Bye ascending"
-                        PlayersModel.Sorting.ByeDescending -> "Bye descending"
-                        PlayersModel.Sorting.PendingAscending -> "Pending ascending"
-                        PlayersModel.Sorting.PendingDescending -> "Pending descending"
-                        PlayersModel.Sorting.PlayedAscending -> "Played ascending"
-                        PlayersModel.Sorting.PlayedDescending -> "Played descending"
-                    }
-                },
+                textMapper = Player.Sorting::text,
                 onClick = screenModel::changeSorting
             )
         },

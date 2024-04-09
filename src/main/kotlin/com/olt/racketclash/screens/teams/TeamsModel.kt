@@ -4,6 +4,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Team
+import com.olt.racketclash.data.sort
 import com.olt.racketclash.navigation.NavigableStateScreenModel
 import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
@@ -23,33 +24,18 @@ class TeamsModel(
                     completeTeams = teamList
                     copy(
                         isLoading = false,
-                        teams = teamList.sortAndFilter(filter = filter, sortedBy = sortedBy)
+                        teams = teamList.filter { it.name.contains(filter) }.sort(sortedBy = sortedBy)
                     )
                 }
             }
         }
     }
 
-    sealed class Sorting {
-        data object NameAscending : Sorting()
-        data object NameDescending : Sorting()
-        data object StrengthAscending : Sorting()
-        data object StrengthDescending : Sorting()
-        data object PointsAscending : Sorting()
-        data object PointsDescending : Sorting()
-    }
-
     data class Modal(
         val isLoading: Boolean = true,
         val teams: List<Team> = emptyList(),
         val filter: String = "",
-        val availableSorting: List<Sorting> =
-            listOf(
-                Sorting.NameAscending, Sorting.NameDescending,
-                Sorting.StrengthAscending, Sorting.StrengthDescending,
-                Sorting.PointsAscending, Sorting.PointsDescending
-            ),
-        val sortedBy: Sorting = Sorting.NameAscending
+        val sortedBy: Team.Sorting = Team.Sorting.NameAscending
     )
 
     fun deleteTeam(id: Long) {
@@ -65,34 +51,20 @@ class TeamsModel(
             updateState {
                 copy(
                     filter = newFilter,
-                    teams = completeTeams.sortAndFilter(filter = newFilter, sortedBy = sortedBy)
+                    teams = completeTeams.filter { it.name.contains(newFilter) }.sort(sortedBy = sortedBy)
                 )
             }
         }
     }
 
-    fun changeSorting(newSorting: Sorting) {
+    fun changeSorting(newSorting: Team.Sorting) {
         screenModelScope.launch(context = Dispatchers.Default) {
             updateState {
                 copy(
                     sortedBy = newSorting,
-                    teams = completeTeams.sortAndFilter(filter = filter, sortedBy = newSorting)
+                    teams = completeTeams.filter { it.name.contains(filter) }.sort(sortedBy = newSorting)
                 )
             }
         }
     }
-
-    private fun List<Team>.sortAndFilter(filter: String, sortedBy: Sorting): List<Team> {
-        val teams = filter { it.name.contains(filter) }
-
-        return when (sortedBy) {
-            Sorting.NameAscending -> teams.sortedBy { it.name }
-            Sorting.NameDescending -> teams.sortedByDescending { it.name }
-            Sorting.PointsAscending -> teams.sortedWith(compareBy(Team::wonGames, Team::lostGames, Team::wonSets, Team::lostSets, Team::wonPoints, Team::lostPoints))
-            Sorting.PointsDescending -> teams.sortedWith(compareBy(Team::wonGames, Team::lostGames, Team::wonSets, Team::lostSets, Team::wonPoints, Team::lostPoints).reversed())
-            Sorting.StrengthAscending -> teams.sortedBy { it.strength }
-            Sorting.StrengthDescending -> teams.sortedByDescending { it.strength }
-        }
-    }
-
 }
