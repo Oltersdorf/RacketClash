@@ -165,7 +165,7 @@ private fun Filter(
         modifier = Modifier.padding(start = 5.dp).width(TextFieldDefaults.MinWidth),
         label = "Team",
         items = model.teams,
-        value = model.teamFilter?.name ?: "<No team selected>",
+        value = model.teamFilter,
         textMapper = { it?.name ?: "<No team selected>" },
         onClick = changeTeamFilter
     )

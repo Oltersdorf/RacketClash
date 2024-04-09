@@ -10,7 +10,7 @@ fun <T> DropDownMenu(
     modifier: Modifier = Modifier,
     label: String = "",
     items: List<T>,
-    value: String,
+    value: T,
     isError: Boolean = false,
     textMapper: (T) -> String,
     onClick: (T) -> Unit
@@ -24,7 +24,7 @@ fun <T> DropDownMenu(
         TextField(
             modifier = Modifier.menuAnchor().then(modifier),
             readOnly = true,
-            value = value,
+            value = textMapper(value),
             onValueChange = {},
             label = { Text(label) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
