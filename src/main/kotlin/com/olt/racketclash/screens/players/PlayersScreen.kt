@@ -3,6 +3,9 @@ package com.olt.racketclash.screens.players
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -12,13 +15,9 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.olt.racketclash.data.Player
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
-
-internal typealias updateActive = (id: Long, active: Boolean) -> Unit
 
 class PlayersScreen(private val modelBuilder: () -> PlayersModel) : Screen {
 
@@ -38,9 +37,7 @@ class PlayersScreen(private val modelBuilder: () -> PlayersModel) : Screen {
         ) {
             PlayerView(
                 model = stateModel,
-                updateActive = screenModel::updateActive,
-                deletePlayer = screenModel::deletePlayer,
-                navigateTo = screenModel::navigateTo
+                screenModel = screenModel
             )
         }
     }
@@ -49,40 +46,69 @@ class PlayersScreen(private val modelBuilder: () -> PlayersModel) : Screen {
 @Composable
 private fun PlayerView(
     model: PlayersModel.Modal,
-    updateActive: updateActive,
-    deletePlayer: (Long) -> Unit,
-    navigateTo: (Screens, Navigator) -> Unit
+    screenModel: PlayersModel
 ) {
     if (model.isLoading)
         Loading()
     else
         PlayerList(
-            player = model.players,
-            updateActive = updateActive,
-            deletePlayer = deletePlayer,
-            navigateTo = navigateTo
+            model = model,
+            screenModel = screenModel
         )
 }
 
 @Composable
 private fun PlayerList(
-    player: List<Player>,
-    updateActive: updateActive,
-    deletePlayer: (Long) -> Unit,
-    navigateTo: (Screens, Navigator) -> Unit
+    model: PlayersModel.Modal,
+    screenModel: PlayersModel
 ) {
     val navigator = LocalNavigator.currentOrThrow
 
     LazyTableWithScroll(
-        items = player,
+        header = {
+            Spacer(modifier = Modifier.weight(1.0f))
+
+            TextField(
+                modifier = Modifier.width(TextFieldDefaults.MinWidth),
+                value = model.filter,
+                onValueChange = screenModel::changeFilter,
+                label = { Text("Filter by name") },
+                singleLine = true
+            )
+
+            DropDownMenu(
+                modifier = Modifier.padding(start = 5.dp).width(TextFieldDefaults.MinWidth),
+                label = "Sort by",
+                items = model.availableSorting,
+                value = model.sortedBy,
+                textMapper = {
+                    when (it) {
+                        PlayersModel.Sorting.NameAscending -> "Name ascending"
+                        PlayersModel.Sorting.NameDescending -> "Name descending"
+                        PlayersModel.Sorting.PointsAscending -> "Points ascending"
+                        PlayersModel.Sorting.PointsDescending -> "Points descending"
+                        PlayersModel.Sorting.TeamAscending -> "Team ascending"
+                        PlayersModel.Sorting.TeamDescending -> "Team descending"
+                        PlayersModel.Sorting.ByeAscending -> "Bye ascending"
+                        PlayersModel.Sorting.ByeDescending -> "Bye descending"
+                        PlayersModel.Sorting.PendingAscending -> "Pending ascending"
+                        PlayersModel.Sorting.PendingDescending -> "Pending descending"
+                        PlayersModel.Sorting.PlayedAscending -> "Played ascending"
+                        PlayersModel.Sorting.PlayedDescending -> "Played descending"
+                    }
+                },
+                onClick = screenModel::changeSorting
+            )
+        },
+        items = model.players,
         modifier = Modifier.padding(5.dp),
-        onClick = { navigateTo(Screens.EditPlayer(it), navigator) },
+        onClick = { screenModel.navigateTo(Screens.EditPlayer(it), navigator) },
         columns = listOf(
             LazyTableColumn.Checkbox(
                 name = "Active",
                 weight = 1.0f,
                 checked = { it.active },
-                onCheckChanged = { item, checked -> updateActive(item.id, checked) }
+                onCheckChanged = { item, checked -> screenModel.updateActive(item.id, checked) }
             ),
             LazyTableColumn.Text(
                 name = "Name",
@@ -128,7 +154,7 @@ private fun PlayerList(
                 name = "Delete",
                 weight = 0.5f,
                 headerTextAlign = TextAlign.Center,
-                onClick = { deletePlayer(it.id) },
+                onClick = { screenModel.deletePlayer(it.id) },
                 enabled = { it.openGames == 0 && it.bye == 0 && it.played == 0 },
                 imageVector = Icons.Default.Delete,
                 contentDescription = "Delete"
