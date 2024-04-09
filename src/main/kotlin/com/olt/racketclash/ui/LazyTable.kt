@@ -57,9 +57,19 @@ sealed class LazyTableColumn<T>(
     ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign)
 }
 
+data class Sorting(
+    val text: String,
+    val onChange: () -> Unit
+)
+
 @Composable
 fun <T> LazyTableWithScroll(
     modifier: Modifier = Modifier,
+    filter: String = "",
+    onFilterChange: ((String) -> Unit)? = null,
+    filterLabelText: String = "Filter",
+    sorting: List<Sorting> = emptyList(),
+    selectedSorting: Sorting? = null,
     items: List<T>,
     itemsSpacedBy: Dp = 0.dp,
     showHeader: Boolean = true,
@@ -67,28 +77,51 @@ fun <T> LazyTableWithScroll(
     columns: List<LazyTableColumn<T>>,
     drawDividers: Boolean = true
 ) {
-    Box(
-        modifier = modifier
-    ) {
-        val scrollState = rememberLazyListState()
-        val canScroll = scrollState.canScrollBackward || scrollState.canScrollForward
+    Column {
+        Row {
+            Spacer(modifier = Modifier.weight(1.0f))
 
-        LazyColumn(
-            modifier = Modifier.padding(end = if (canScroll) 14.dp else 0.dp),
-            verticalArrangement = Arrangement.spacedBy(itemsSpacedBy),
-            state = scrollState
-        ) {
-            if (showHeader)
-                header(columns = columns)
+            if (onFilterChange != null)
+                OutlinedTextField(
+                    singleLine = true,
+                    value = filter,
+                    onValueChange = onFilterChange,
+                    label = { Text(filterLabelText) }
+                )
 
-            body(items = items, columns = columns, onClick = onClick, drawDividers = drawDividers)
+            if (sorting.isNotEmpty() && selectedSorting != null)
+                DropDownMenu(
+                    label = "Sort by",
+                    items = sorting,
+                    value = selectedSorting.text,
+                    textMapper = { it.text },
+                    onClick = { it.onChange() }
+                )
         }
 
-        VerticalScrollbar(
-            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-            adapter = rememberScrollbarAdapter(scrollState = scrollState),
-            style = LocalScrollbarStyle.current.copy(hoverColor = MaterialTheme.colorScheme.secondary, unhoverColor = MaterialTheme.colorScheme.secondary)
-        )
+        Box(
+            modifier = modifier
+        ) {
+            val scrollState = rememberLazyListState()
+            val canScroll = scrollState.canScrollBackward || scrollState.canScrollForward
+
+            LazyColumn(
+                modifier = Modifier.padding(end = if (canScroll) 14.dp else 0.dp),
+                verticalArrangement = Arrangement.spacedBy(itemsSpacedBy),
+                state = scrollState
+            ) {
+                if (showHeader)
+                    header(columns = columns)
+
+                body(items = items, columns = columns, onClick = onClick, drawDividers = drawDividers)
+            }
+
+            VerticalScrollbar(
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                adapter = rememberScrollbarAdapter(scrollState = scrollState),
+                style = LocalScrollbarStyle.current.copy(hoverColor = MaterialTheme.colorScheme.secondary, unhoverColor = MaterialTheme.colorScheme.secondary)
+            )
+        }
     }
 }
 
@@ -98,6 +131,11 @@ fun <T> LazyTableWithScrollScaffold(
     modifier: Modifier = Modifier,
     topBarTitle: String,
     topBarActions: @Composable (RowScope.() -> Unit),
+    filter: String = "",
+    onFilterChange: ((String) -> Unit)? = null,
+    filterLabelText: String = "Filter",
+    sorting: List<Sorting> = emptyList(),
+    selectedSorting: Sorting? = null,
     items: List<T>,
     itemsSpacedBy: Dp = 0.dp,
     showHeader: Boolean = true,
@@ -120,6 +158,11 @@ fun <T> LazyTableWithScrollScaffold(
         Surface(tonalElevation = 1.dp) {
             LazyTableWithScroll(
                 modifier = modifier.padding(paddingValues),
+                filter = filter,
+                onFilterChange = onFilterChange,
+                filterLabelText = filterLabelText,
+                sorting = sorting,
+                selectedSorting = selectedSorting,
                 items = items,
                 itemsSpacedBy = itemsSpacedBy,
                 showHeader = showHeader,
