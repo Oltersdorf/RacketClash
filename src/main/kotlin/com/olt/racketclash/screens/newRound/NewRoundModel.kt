@@ -15,12 +15,32 @@ class NewRoundModel(
     private val database: Database
 ) : NavigableStateScreenModel<NewRoundModel.Model>(navigateToScreen, Model()) {
 
+    private var completePlayers: List<Player> = emptyList()
+
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
             database.activePlayers().collect {
-                updateState { copy(players = it) }
+                updateState {
+                    completePlayers = it
+                    copy(players = it.sortAndFilter(filter = filter, sortedBy = sortedBy))
+                }
             }
         }
+    }
+
+    sealed class Sorting {
+        data object NameAscending : Sorting()
+        data object NameDescending : Sorting()
+        data object TeamAscending : Sorting()
+        data object TeamDescending : Sorting()
+        data object PointsAscending : Sorting()
+        data object PointsDescending : Sorting()
+        data object PendingAscending : Sorting()
+        data object PendingDescending : Sorting()
+        data object ByeAscending : Sorting()
+        data object ByeDescending : Sorting()
+        data object PlayedAscending : Sorting()
+        data object PlayedDescending : Sorting()
     }
 
     sealed class RoundType {
@@ -44,7 +64,18 @@ class NewRoundModel(
         val generating: Boolean = false,
         val players: List<Player> = emptyList(),
         val roundTypes: List<RoundType> = listOf(RoundType.Empty, RoundType.EquallyStrongDouble()),
-        val selectedRoundType: RoundType = RoundType.Empty
+        val selectedRoundType: RoundType = RoundType.Empty,
+        val filter: String = "",
+        val availableSorting: List<Sorting> =
+            listOf(
+                Sorting.NameAscending, Sorting.NameDescending,
+                Sorting.TeamAscending, Sorting.TeamDescending,
+                Sorting.PointsAscending, Sorting.PointsDescending,
+                Sorting.PendingAscending, Sorting.PendingDescending,
+                Sorting.PlayedAscending, Sorting.PlayedDescending,
+                Sorting.ByeAscending, Sorting.ByeDescending
+            ),
+        val sortedBy: Sorting = Sorting.NameAscending
     )
 
     fun changeRoundName(newName: String) {
@@ -142,7 +173,7 @@ class NewRoundModel(
                     val generator = EquallyStrongDoublesGenerator()
                     val (games, bye, worstPerformance) = generator.getDoubles(
                         rounds = roundType.rounds,
-                        players = players,
+                        players = players.filter { it.active },
                         differentPartnersEachRound = roundType.differentPartnersEachRound,
                         tryUntilWorstPerformanceIsZero = roundType.tryUntilWorstPerformanceIsZero,
                         tryUntilNoMoreThanOneBye = roundType.tryUntilNoMoreThanOneByePerPerson,
@@ -204,6 +235,59 @@ class NewRoundModel(
 
                 database.addRoundsWithGames(rounds = rounds, bye = roundType.byeGames)
             }
+        }
+    }
+
+    fun changeFilter(newFilter: String) {
+        screenModelScope.launch(context = Dispatchers.Default) {
+            updateState {
+                copy(
+                    filter = newFilter,
+                    players = completePlayers.sortAndFilter(filter = newFilter, sortedBy = sortedBy)
+                )
+            }
+        }
+    }
+
+    fun changeSorting(newSorting: Sorting) {
+        screenModelScope.launch(context = Dispatchers.Default) {
+            updateState {
+                copy(
+                    sortedBy = newSorting,
+                    players = completePlayers.sortAndFilter(filter = filter, sortedBy = newSorting)
+                )
+            }
+        }
+    }
+
+    fun updateActive(playerId: Long, active: Boolean) {
+        screenModelScope.launch(context = Dispatchers.Default) {
+            updateState {
+                 completePlayers = completePlayers
+                     .toMutableList()
+                     .apply { replaceAll { if (it.id == playerId) it.copy(active = active) else it } }
+
+                copy(players = completePlayers.sortAndFilter(filter = filter, sortedBy = sortedBy))
+            }
+        }
+    }
+
+    private fun List<Player>.sortAndFilter(filter: String, sortedBy: Sorting): List<Player> {
+        val teams = filter { it.name.contains(filter) }
+
+        return when (sortedBy) {
+            Sorting.NameAscending -> teams.sortedBy { it.name }
+            Sorting.NameDescending -> teams.sortedByDescending { it.name }
+            Sorting.PointsAscending -> teams.sortedWith(compareBy(Player::wonGames, Player::lostGames, Player::wonSets, Player::lostSets, Player::wonPoints, Player::lostPoints))
+            Sorting.PointsDescending -> teams.sortedWith(compareBy(Player::wonGames, Player::lostGames, Player::wonSets, Player::lostSets, Player::wonPoints, Player::lostPoints).reversed())
+            Sorting.TeamAscending -> teams.sortedBy { it.teamName }
+            Sorting.TeamDescending -> teams.sortedByDescending { it.teamName }
+            Sorting.ByeAscending -> teams.sortedBy { it.bye }
+            Sorting.ByeDescending -> teams.sortedByDescending { it.bye }
+            Sorting.PendingAscending -> teams.sortedBy { it.openGames }
+            Sorting.PendingDescending -> teams.sortedByDescending { it.openGames }
+            Sorting.PlayedAscending -> teams.sortedBy { it.played }
+            Sorting.PlayedDescending -> teams.sortedByDescending { it.played }
         }
     }
 }

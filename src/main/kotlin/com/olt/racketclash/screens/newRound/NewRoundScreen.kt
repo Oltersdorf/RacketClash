@@ -136,6 +136,92 @@ private fun EquallyStrongDouble(
         min = 1
     )
 
+    LazyTableWithScrollScaffold(
+        topBarTitle = "Players",
+        topBarActions = {
+            TextField(
+                modifier = Modifier.width(TextFieldDefaults.MinWidth),
+                value = model.filter,
+                onValueChange = screenModel::changeFilter,
+                label = { Text("Filter by name") },
+                singleLine = true
+            )
+
+            DropDownMenu(
+                modifier = Modifier.padding(start = 5.dp).width(TextFieldDefaults.MinWidth),
+                label = "Sort by",
+                items = model.availableSorting,
+                value = model.sortedBy,
+                textMapper = {
+                    when (it) {
+                        NewRoundModel.Sorting.NameAscending -> "Name ascending"
+                        NewRoundModel.Sorting.NameDescending -> "Name descending"
+                        NewRoundModel.Sorting.PointsAscending -> "Points ascending"
+                        NewRoundModel.Sorting.PointsDescending -> "Points descending"
+                        NewRoundModel.Sorting.TeamAscending -> "Team ascending"
+                        NewRoundModel.Sorting.TeamDescending -> "Team descending"
+                        NewRoundModel.Sorting.ByeAscending -> "Bye ascending"
+                        NewRoundModel.Sorting.ByeDescending -> "Bye descending"
+                        NewRoundModel.Sorting.PendingAscending -> "Pending ascending"
+                        NewRoundModel.Sorting.PendingDescending -> "Pending descending"
+                        NewRoundModel.Sorting.PlayedAscending -> "Played ascending"
+                        NewRoundModel.Sorting.PlayedDescending -> "Played descending"
+                    }
+                },
+                onClick = screenModel::changeSorting
+            )
+        },
+        items = model.players,
+        columns = listOf(
+            LazyTableColumn.Checkbox(
+                name = "Active",
+                weight = 1.0f,
+                checked = { it.active },
+                onCheckChanged = { item, checked -> screenModel.updateActive(item.id, checked) }
+            ),
+            LazyTableColumn.Text(
+                name = "Name",
+                weight = 5.0f,
+                text = { it.name }
+            ),
+            LazyTableColumn.Text(
+                name = "Team",
+                weight = 2.0f,
+                text = { it.teamName }
+            ),
+            LazyTableColumn.Text(
+                name = "pending",
+                weight = 1.0f,
+                text = { it.openGames.toString() }
+            ),
+            LazyTableColumn.Text(
+                name = "played",
+                weight = 1.0f,
+                text = { it.played.toString() }
+            ),
+            LazyTableColumn.Text(
+                name = "bye",
+                weight = 1.0f,
+                text = { it.bye.toString() }
+            ),
+            LazyTableColumn.Text(
+                name = "Games",
+                weight = 1.0f,
+                text = { "${it.wonGames} : ${it.lostGames}" }
+            ),
+            LazyTableColumn.Text(
+                name = "Sets",
+                weight = 1.0f,
+                text = { "${it.wonSets} : ${it.lostSets}" }
+            ),
+            LazyTableColumn.Text(
+                name = "Points",
+                weight = 1.0f,
+                text = { "${it.wonPoints} : ${it.lostPoints}" }
+            )
+        )
+    )
+
     if (model.generating)
         Loading()
     else if(roundType.games.isNotEmpty()) {
