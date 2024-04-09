@@ -73,8 +73,8 @@ private fun EditRoundView(
                     modifier = Modifier.weight(weight),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(item.playerLeft1Name ?: "<Empty>")
-                    Text(item.playerLeft2Name ?: "<Empty>")
+                    Text("${item.playerLeft1Name ?: "<Empty>"} (${item.playerLeft1TeamName})")
+                    Text("${item.playerLeft2Name ?: "<Empty>"} (${item.playerLeft2TeamName})")
                 }
             },
             LazyTableColumn.Builder(
@@ -110,8 +110,8 @@ private fun EditRoundView(
                     modifier = Modifier.weight(weight),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(item.playerRight1Name ?: "<Empty>")
-                    Text(item.playerRight2Name ?: "<Empty>")
+                    Text("${item.playerRight1Name ?: "<Empty>"} (${item.playerRight1TeamName})")
+                    Text("${item.playerRight2Name ?: "<Empty>"} (${item.playerRight2TeamName})")
                 }
             },
             LazyTableColumn.IconButton(

@@ -187,7 +187,7 @@ private fun ByeItem(bye: List<Game>) {
             Text(
                 modifier = Modifier.padding(bottom = if (index + 1 == bye.size) 5.dp else 0.dp),
                 color = MaterialTheme.colorScheme.onSecondary,
-                text = game.playerLeft1Name ?: ""
+                text = "${game.playerLeft1Name} (${game.playerLeft1TeamName})"
             )
         }
     }
@@ -214,8 +214,8 @@ private fun GameItem(
             modifier = Modifier.weight(1.0f).padding(vertical = 5.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(color = textColor, text = game.playerLeft1Name ?: "<Empty>")
-            Text(color = textColor, text = game.playerLeft2Name ?: "<Empty>")
+            Text(color = textColor, text = "${game.playerLeft1Name ?: "<Empty>"} (${game.playerLeft1TeamName})")
+            Text(color = textColor, text = "${game.playerLeft2Name ?: "<Empty>"} (${game.playerLeft2TeamName})")
         }
 
         Column(
@@ -241,8 +241,8 @@ private fun GameItem(
             modifier = Modifier.weight(1.0f).padding(vertical = 5.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(color = textColor, text = game.playerRight1Name ?: "<Empty>")
-            Text(color = textColor, text = game.playerRight2Name ?: "<Empty>")
+            Text(color = textColor, text = "${game.playerRight1Name ?: "<Empty>"} (${game.playerRight1TeamName})")
+            Text(color = textColor, text = "${game.playerRight2Name ?: "<Empty>"} (${game.playerRight2TeamName})")
         }
 
         if (game.isDone)

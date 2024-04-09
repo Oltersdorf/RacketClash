@@ -29,77 +29,173 @@ CREATE TABLE IF NOT EXISTS gameTable (
 
 selectAllNonBye:
 SELECT gameTable.id, roundId, isDone, isBye,
-playerLeft1Id, p1L.name AS playerLeft1Name,
-playerLeft2Id, p2L.name AS playerLeft2Name,
-playerRight1Id, p1R.name AS playerRight1Name,
-playerRight2Id, p2R.name AS playerRight2Name,
+playerLeft1Id, p1L.name AS playerLeft1Name, p1L.teamName AS playerLeft1TeamName,
+playerLeft2Id, p2L.name AS playerLeft2Name, p2L.teamName AS playerLeft2TeamName,
+playerRight1Id, p1R.name AS playerRight1Name, p1R.teamName AS playerRight1TeamName,
+playerRight2Id, p2R.name AS playerRight2Name, p2R.teamName AS playerRight2TeamName,
 set1Left, set1Right,
 set2Left, set2Right,
 set3Left, set3Right,
 set4Left, set4Right,
 set5Left, set5Right
 FROM gameTable
-LEFT JOIN playerTable AS p1L ON p1L.id = gameTable.playerLeft1Id
-LEFT JOIN playerTable AS p2L ON p2L.id = gameTable.playerLeft2Id
-LEFT JOIN playerTable AS p1R ON p1R.id = gameTable.playerRight1Id
-LEFT JOIN playerTable AS p2R ON p2R.id = gameTable.playerRight2Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p1L ON p1L.id = gameTable.playerLeft1Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p2L ON p2L.id = gameTable.playerLeft2Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p1R ON p1R.id = gameTable.playerRight1Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p2R ON p2R.id = gameTable.playerRight2Id
 WHERE isBye = FALSE
 GROUP BY gameTable.id;
 
 selectAllBye:
 SELECT gameTable.id, roundId, isDone, isBye,
-playerLeft1Id, p1L.name AS playerLeft1Name,
-playerLeft2Id, p2L.name AS playerLeft2Name,
-playerRight1Id, p1R.name AS playerRight1Name,
-playerRight2Id, p2R.name AS playerRight2Name,
+playerLeft1Id, p1L.name AS playerLeft1Name, p1L.teamName AS playerLeft1TeamName,
+playerLeft2Id, p2L.name AS playerLeft2Name, p2L.teamName AS playerLeft2TeamName,
+playerRight1Id, p1R.name AS playerRight1Name, p1R.teamName AS playerRight1TeamName,
+playerRight2Id, p2R.name AS playerRight2Name, p2R.teamName AS playerRight2TeamName,
 set1Left, set1Right,
 set2Left, set2Right,
 set3Left, set3Right,
 set4Left, set4Right,
 set5Left, set5Right
 FROM gameTable
-LEFT JOIN playerTable AS p1L ON p1L.id = gameTable.playerLeft1Id
-LEFT JOIN playerTable AS p2L ON p2L.id = gameTable.playerLeft2Id
-LEFT JOIN playerTable AS p1R ON p1R.id = gameTable.playerRight1Id
-LEFT JOIN playerTable AS p2R ON p2R.id = gameTable.playerRight2Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p1L ON p1L.id = gameTable.playerLeft1Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p2L ON p2L.id = gameTable.playerLeft2Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p1R ON p1R.id = gameTable.playerRight1Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p2R ON p2R.id = gameTable.playerRight2Id
 WHERE isBye = TRUE
 GROUP BY gameTable.id;
 
 selectAllNonByeInRound:
 SELECT gameTable.id, roundId, isDone, isBye,
-playerLeft1Id, p1L.name AS playerLeft1Name,
-playerLeft2Id, p2L.name AS playerLeft2Name,
-playerRight1Id, p1R.name AS playerRight1Name,
-playerRight2Id, p2R.name AS playerRight2Name,
+playerLeft1Id, p1L.name AS playerLeft1Name, p1L.teamName AS playerLeft1TeamName,
+playerLeft2Id, p2L.name AS playerLeft2Name, p2L.teamName AS playerLeft2TeamName,
+playerRight1Id, p1R.name AS playerRight1Name, p1R.teamName AS playerRight1TeamName,
+playerRight2Id, p2R.name AS playerRight2Name, p2R.teamName AS playerRight2TeamName,
 set1Left, set1Right,
 set2Left, set2Right,
 set3Left, set3Right,
 set4Left, set4Right,
 set5Left, set5Right
 FROM gameTable
-LEFT JOIN playerTable AS p1L ON p1L.id = gameTable.playerLeft1Id
-LEFT JOIN playerTable AS p2L ON p2L.id = gameTable.playerLeft2Id
-LEFT JOIN playerTable AS p1R ON p1R.id = gameTable.playerRight1Id
-LEFT JOIN playerTable AS p2R ON p2R.id = gameTable.playerRight2Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p1L ON p1L.id = gameTable.playerLeft1Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p2L ON p2L.id = gameTable.playerLeft2Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p1R ON p1R.id = gameTable.playerRight1Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p2R ON p2R.id = gameTable.playerRight2Id
 WHERE roundId = :roundId AND isBye = FALSE
 GROUP BY gameTable.id;
 
 selectAllByeInRound:
 SELECT gameTable.id, roundId, isDone, isBye,
-playerLeft1Id, p1L.name AS playerLeft1Name,
-playerLeft2Id, p2L.name AS playerLeft2Name,
-playerRight1Id, p1R.name AS playerRight1Name,
-playerRight2Id, p2R.name AS playerRight2Name,
+playerLeft1Id, p1L.name AS playerLeft1Name, p1L.teamName AS playerLeft1TeamName,
+playerLeft2Id, p2L.name AS playerLeft2Name, p2L.teamName AS playerLeft2TeamName,
+playerRight1Id, p1R.name AS playerRight1Name, p1R.teamName AS playerRight1TeamName,
+playerRight2Id, p2R.name AS playerRight2Name, p2R.teamName AS playerRight2TeamName,
 set1Left, set1Right,
 set2Left, set2Right,
 set3Left, set3Right,
 set4Left, set4Right,
 set5Left, set5Right
 FROM gameTable
-LEFT JOIN playerTable AS p1L ON p1L.id = gameTable.playerLeft1Id
-LEFT JOIN playerTable AS p2L ON p2L.id = gameTable.playerLeft2Id
-LEFT JOIN playerTable AS p1R ON p1R.id = gameTable.playerRight1Id
-LEFT JOIN playerTable AS p2R ON p2R.id = gameTable.playerRight2Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p1L ON p1L.id = gameTable.playerLeft1Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p2L ON p2L.id = gameTable.playerLeft2Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p1R ON p1R.id = gameTable.playerRight1Id
+LEFT JOIN (
+    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+    FROM teamTable
+    JOIN playerTable
+    ON playerTable.teamId = teamTable.id
+    GROUP BY playerTable.id
+) AS p2R ON p2R.id = gameTable.playerRight2Id
 WHERE roundId = :roundId AND isBye = TRUE
 GROUP BY gameTable.id;
 
