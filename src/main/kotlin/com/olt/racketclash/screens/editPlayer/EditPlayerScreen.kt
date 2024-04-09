@@ -64,7 +64,7 @@ private fun EditPlayerView(
         modifier = Modifier.fillMaxWidth(),
         label = "Team",
         items = teams,
-        value = selectedTeam.name,
+        value = selectedTeam,
         isError = selectedTeam.id == -1L,
         textMapper = { it.name },
         onClick = { selectTeam(it.id) }

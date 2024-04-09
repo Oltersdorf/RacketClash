@@ -51,7 +51,7 @@ private fun NewRoundView(
         modifier = Modifier.fillMaxWidth(),
         label = "Type",
         items = model.roundTypes,
-        value = roundTypeToString(roundType = model.selectedRoundType),
+        value = model.selectedRoundType,
         textMapper = ::roundTypeToString,
         onClick = screenModel::changeRoundType
     )
