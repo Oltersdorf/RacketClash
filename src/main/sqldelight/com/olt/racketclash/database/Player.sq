@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS playerTable (
     teamId INTEGER NOT NULL,
     openGames INTEGER AS Int NOT NULL DEFAULT 0,
     played INTEGER AS Int NOT NULL DEFAULT 0,
-    bye INTEGER AS Int NOT NULL DEFAULT 0,
     wonGames INTEGER AS Int NOT NULL DEFAULT 0,
     lostGames INTEGER AS Int NOT NULL DEFAULT 0,
     wonSets INTEGER AS Int NOT NULL DEFAULT 0,
@@ -20,22 +19,26 @@ CREATE TABLE IF NOT EXISTS playerTable (
 
 selectAll:
 SELECT playerTable.id, active, playerTable.name,
-openGames, played, bye,
+openGames, played, COUNT(byeTable.id) AS bye,
 wonGames, lostGames, wonSets, lostSets, wonPoints, lostPoints,
 teamId, teamTable.name AS teamName, teamTable.strength AS teamStrength
 FROM teamTable
 JOIN playerTable
 ON playerTable.teamId = teamTable.id
+LEFT JOIN byeTable
+ON byeTable.playerId = playerTable.id
 GROUP BY playerTable.id;
 
 selectActive:
-SELECT playerTable.id, active, playerTable.name,
-openGames, played, bye,
+SELECT playerTable.id, playerTable.name,
+openGames, played, COUNT(byeTable.id) AS bye,
 wonGames, lostGames, wonSets, lostSets, wonPoints, lostPoints,
 teamId, teamTable.name AS teamName, teamTable.strength AS teamStrength
 FROM teamTable
 JOIN playerTable
 ON playerTable.teamId = teamTable.id
+LEFT JOIN byeTable
+ON byeTable.playerId = playerTable.id
 WHERE active = TRUE
 GROUP BY playerTable.id;
 
@@ -100,16 +103,14 @@ WHERE id = :id;
 
 addByeGame:
 UPDATE playerTable
-SET bye = (SELECT bye FROM playerTable WHERE id = :id) + 1,
-wonGames = (SELECT wonGames FROM playerTable WHERE id = :id) + 1,
+SET wonGames = (SELECT wonGames FROM playerTable WHERE id = :id) + 1,
 wonSets = (SELECT wonSets FROM playerTable WHERE id = :id) + 1,
 wonPoints = (SELECT wonPoints FROM playerTable WHERE id = :id) + 1
 WHERE id = :id;
 
 removeByeGame:
 UPDATE playerTable
-SET bye = (SELECT bye FROM playerTable WHERE id = :id) - 1,
-wonGames = (SELECT wonGames FROM playerTable WHERE id = :id) - 1,
+SET wonGames = (SELECT wonGames FROM playerTable WHERE id = :id) - 1,
 wonSets = (SELECT wonSets FROM playerTable WHERE id = :id) - 1,
 wonPoints = (SELECT wonPoints FROM playerTable WHERE id = :id) - 1
 WHERE id = :id;

@@ -11,7 +11,6 @@ class PlayersDatabase(private val queries: PlayerQueries) {
         val playerAdapter by lazy {
             PlayerTable.Adapter(
                 openGamesAdapter = IntColumnAdapter, playedAdapter = IntColumnAdapter,
-                byeAdapter = IntColumnAdapter,
                 wonGamesAdapter = IntColumnAdapter, lostGamesAdapter = IntColumnAdapter,
                 wonSetsAdapter = IntColumnAdapter, lostSetsAdapter = IntColumnAdapter,
                 wonPointsAdapter = IntColumnAdapter, lostPointsAdapter = IntColumnAdapter
