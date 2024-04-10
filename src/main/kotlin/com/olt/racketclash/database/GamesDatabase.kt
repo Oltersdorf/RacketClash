@@ -21,22 +21,12 @@ class GamesDatabase(private val queries: GameQueries) {
 
     fun games(): Flow<List<Game>> =
         queries
-            .selectAllNonBye()
+            .selectAll()
             .mapToList { it.toGame() }
 
     fun games(roundId: Long): Flow<List<Game>> =
         queries
-            .selectAllNonByeInRound(roundId = roundId)
-            .mapToList { it.toGame() }
-
-    fun bye(): Flow<List<Game>> =
-        queries
-            .selectAllBye()
-            .mapToList { it.toGame() }
-
-    fun bye(roundId: Long): Flow<List<Game>> =
-        queries
-            .selectAllByeInRound(roundId = roundId)
+            .selectAllInRound(roundId = roundId)
             .mapToList { it.toGame() }
 
     fun select(id: Long): GameTable? = queries.select(id = id).executeAsOneOrNull()
@@ -53,9 +43,6 @@ class GamesDatabase(private val queries: GameQueries) {
                 playerRight1Id = playerRight1Id, playerRight2Id = playerRight2Id
             )
         }
-
-    fun addBye(roundId: Long?, playerLeft1Id: Long?) =
-        roundId?.let { queries.addBye(roundId = it, playerLeft1Id = playerLeft1Id) }
 
     fun deleteGame(id: Long) = queries.delete(id = id)
 

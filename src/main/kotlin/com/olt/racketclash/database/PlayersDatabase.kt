@@ -94,9 +94,7 @@ class PlayersDatabase(private val queries: PlayerQueries) {
     fun deleteGame(game: GameTable) {
         val stats = game.toGameStats()
 
-        if (game.isBye)
-            removeByeGame(id = game.playerLeft1Id)
-        else if (game.isDone) {
+        if (game.isDone) {
             game.playerLeft1Id?.let { removeDoneGame(it, isLeft = true, stats = stats) }
             game.playerLeft2Id?.let { removeDoneGame(it, isLeft = true, stats = stats) }
             game.playerRight1Id?.let { removeDoneGame(it, isLeft = false, stats = stats) }
@@ -108,6 +106,8 @@ class PlayersDatabase(private val queries: PlayerQueries) {
             removeUndoneGame(id = game.playerRight2Id)
         }
     }
+
+    fun deleteBye(playerId: Long) = removeByeGame(id = playerId)
 
     private fun removeByeGame(id: Long?) = id?.let { queries.removeByeGame(id = id) }
 

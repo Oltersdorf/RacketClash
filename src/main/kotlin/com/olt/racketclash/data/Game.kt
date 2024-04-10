@@ -4,7 +4,6 @@ data class Game(
     val id: Long = -1,
     val roundId: Long = -1,
     val isDone: Boolean = false,
-    val isBye: Boolean = false,
     val playerLeft1Id: Long? = null,
     val playerLeft1Name: String? = null,
     val playerLeft1TeamName: String? = null,

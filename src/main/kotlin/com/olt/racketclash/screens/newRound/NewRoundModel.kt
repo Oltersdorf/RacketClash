@@ -2,6 +2,7 @@ package com.olt.racketclash.screens.newRound
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
+import com.olt.racketclash.data.Bye
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Player
@@ -37,7 +38,7 @@ class NewRoundModel(
             val tryUntilWorstPerformanceIsZero: Boolean = true,
             val tryUntilNoMoreThanOneByePerPerson: Boolean = true,
             val maxRepeat: Int = 10,
-            val byeGames: List<Game> = emptyList(),
+            val byeGames: List<Bye> = emptyList(),
             val byePlayer: String = "",
             val games: List<Game> = emptyList(),
             val performance: Int = 0
@@ -148,7 +149,7 @@ class NewRoundModel(
                 if (roundType == null) copy(generating = false)
                 else {
                     val generator = EquallyStrongDoublesGenerator()
-                    val (games, bye, worstPerformance) = generator.getDoubles(
+                    val (games, byes, worstPerformance) = generator.getDoubles(
                         rounds = roundType.rounds,
                         players = players.filter { it.active },
                         differentPartnersEachRound = roundType.differentPartnersEachRound,
@@ -157,19 +158,19 @@ class NewRoundModel(
                         maxRepeat = roundType.maxRepeat
                     )
 
-                    val generatedBye = bye
+                    val generatedBye = byes
                         .flatMap { entry ->
                             entry.value.map {
-                                Game(
+                                Bye(
                                     roundId = entry.key.toLong(),
-                                    playerLeft1Id = it
+                                    playerId = it
                                 )
                             }
                         }
 
                     val generatedByePlayers = generatedBye
-                        .groupingBy { game ->
-                            val player = players.find { it.id == game.playerLeft1Id }
+                        .groupingBy { bye ->
+                            val player = players.find { it.id == bye.playerId }
                             "${player?.name} (${player?.teamName})"
                         }
                         .eachCount()

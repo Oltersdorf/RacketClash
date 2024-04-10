@@ -39,6 +39,7 @@ class Database private constructor(
     private val playersDatabase = PlayersDatabase(queries = database.playerQueries)
     private val roundsDatabase = RoundsDatabase(queries = database.roundQueries)
     private val gamesDatabase = GamesDatabase(queries = database.gameQueries)
+    private val byeDatabase = ByeDatabase(queries = database.byeQueries)
 
     fun teams(): Flow<List<Team>> = teamsDatabase.teams()
     fun players(): Flow<List<Player>> = playersDatabase.players()
@@ -46,9 +47,8 @@ class Database private constructor(
     fun rounds(): Flow<List<Round>> = roundsDatabase.rounds()
     fun round(id: Long) : Flow<Round?> = roundsDatabase.round(id = id)
     fun games() : Flow<List<Game>> = gamesDatabase.games()
-    fun bye() : Flow<List<Game>> = gamesDatabase.bye()
+    fun bye() : Flow<List<Bye>> = byeDatabase.byes()
     fun games(roundId: Long) : Flow<List<Game>> = gamesDatabase.games(roundId = roundId)
-    fun bye(roundId: Long) : Flow<List<Game>> = gamesDatabase.bye(roundId = roundId)
 
     //team functions
     suspend fun addTeam(name: String, strength: Int) {
@@ -150,9 +150,16 @@ class Database private constructor(
         }
     }
 
+    fun deleteBye(id: Long) {
+        database.transaction {
+            byeDatabase.delete(id = id)
+            playersDatabase.deleteBye(playerId = id)
+        }
+    }
+
     fun addRoundsWithGames(
         rounds: Map<String, List<Game>>,
-        bye: List<Game>
+        bye: List<Bye>
     ) {
         database.transaction {
             rounds.onEachIndexed { index, (key, value) ->
@@ -171,9 +178,9 @@ class Database private constructor(
                     playersDatabase.addUndoneGame(game.playerRight2Id)
                 }
 
-                bye.filter { it.roundId == index.toLong() + 1 }.forEach { game ->
-                    gamesDatabase.addBye(roundId = roundId, playerLeft1Id = game.playerLeft1Id)
-                    playersDatabase.addByeGame(id = game.playerLeft1Id)
+                bye.filter { it.roundId == index.toLong() + 1 }.forEach { bye ->
+                    byeDatabase.add(roundId = roundId, playerId = bye.playerId)
+                    playersDatabase.addByeGame(id = bye.playerId)
                 }
             }
         }

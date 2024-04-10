@@ -2,6 +2,7 @@ package com.olt.racketclash.screens.games
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
+import com.olt.racketclash.data.Bye
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.FileHandler
 import com.olt.racketclash.data.Game
@@ -50,7 +51,7 @@ class GamesModel(
         val timeout: Int = 1,
         val rounds: List<Round> = emptyList(),
         val games: Map<Long, List<Game>> = emptyMap(),
-        val bye: Map<Long, List<Game>> = emptyMap(),
+        val bye: Map<Long, List<Bye>> = emptyMap(),
         val active: List<Long> = emptyList()
     )
 

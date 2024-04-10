@@ -16,6 +16,7 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.olt.racketclash.data.Bye
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Round
 import com.olt.racketclash.navigation.Screens
@@ -127,7 +128,7 @@ private fun Graph(
 private fun Round(
     round: Round,
     games: List<Game>,
-    bye: List<Game>,
+    bye: List<Bye>,
     active: List<Long>,
     screenModel: GamesModel
 ) {
@@ -152,7 +153,7 @@ private fun Round(
                 DeleteButton(enabled = games.isEmpty()) { screenModel.deleteRound(id = round.id) }
             }
 
-            if (bye.isNotEmpty()) ByeItem(bye = bye)
+            if (bye.isNotEmpty()) ByeItem(byes = bye)
 
             if (games.isEmpty())
                 Text(
@@ -169,7 +170,7 @@ private fun Round(
 }
 
 @Composable
-private fun ByeItem(bye: List<Game>) {
+private fun ByeItem(byes: List<Bye>) {
     Column(
         modifier = Modifier
             .padding(horizontal = 10.dp, vertical = 5.dp)
@@ -183,11 +184,11 @@ private fun ByeItem(bye: List<Game>) {
             color = MaterialTheme.colorScheme.onSecondary,
             style = MaterialTheme.typography.titleLarge, text = "Bye"
         )
-        bye.forEachIndexed { index, game ->
+        byes.forEachIndexed { index, bye ->
             Text(
-                modifier = Modifier.padding(bottom = if (index + 1 == bye.size) 5.dp else 0.dp),
+                modifier = Modifier.padding(bottom = if (index + 1 == byes.size) 5.dp else 0.dp),
                 color = MaterialTheme.colorScheme.onSecondary,
-                text = "${game.playerLeft1Name} (${game.playerLeft1TeamName})"
+                text = "${bye.playerName} (${bye.playerTeamName})"
             )
         }
     }

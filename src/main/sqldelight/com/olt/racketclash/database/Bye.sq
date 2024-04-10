@@ -1,0 +1,26 @@
+CREATE TABLE IF NOT EXISTS byeTable (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    roundId INTEGER NOT NULL,
+    playerId INTEGER NOT NULL,
+    FOREIGN KEY (roundId) REFERENCES roundTable (id),
+    FOREIGN KEY (playerId) REFERENCES playerTable (id)
+);
+
+selectAll:
+SELECT byeTable.id, roundId,
+playerId, name, teamName
+FROM byeTable
+LEFT JOIN (
+  SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+  FROM teamTable
+  JOIN playerTable
+  ON playerTable.teamId = teamTable.id
+) AS players ON players.id = playerId;
+
+add:
+INSERT INTO byeTable(roundId, playerId)
+VALUES (:roundId, :playerId);
+
+delete:
+DELETE FROM byeTable
+WHERE id = :id;
