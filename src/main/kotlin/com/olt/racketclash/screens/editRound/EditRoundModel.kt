@@ -2,6 +2,7 @@ package com.olt.racketclash.screens.editRound
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
+import com.olt.racketclash.data.Bye
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Round
@@ -28,12 +29,19 @@ class EditRoundModel(
                 updateState { copy(round = it, temporaryRoundName = it?.name ?: "") }
             }
         }
+
+        screenModelScope.launch(context = Dispatchers.IO) {
+            database.bye(roundId = round.id).collect {
+                updateState { copy(byes = it) }
+            }
+        }
     }
 
     data class Model(
         val round: Round? = null,
         val temporaryRoundName: String = "",
-        val games: List<Game> = emptyList()
+        val games: List<Game> = emptyList(),
+        val byes: List<Bye> = emptyList()
     )
 
     fun updateTemporaryRoundName(newRoundName: String) {
@@ -51,6 +59,12 @@ class EditRoundModel(
     fun deleteGame(gameId: Long) {
         screenModelScope.launch(context = Dispatchers.IO) {
             database.deleteGame(id = gameId)
+        }
+    }
+
+    fun deleteBye(byeId: Long) {
+        screenModelScope.launch(context = Dispatchers.IO) {
+            database.deleteBye(id = byeId)
         }
     }
 }

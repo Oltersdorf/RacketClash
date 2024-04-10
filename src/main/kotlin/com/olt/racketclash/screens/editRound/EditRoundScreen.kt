@@ -8,7 +8,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -59,7 +58,6 @@ private fun EditRoundView(
 
     val navigator = LocalNavigator.currentOrThrow
     LazyTableWithScrollScaffold(
-        modifier = Modifier.requiredHeightIn(max = 500.dp),
         topBarTitle = "Games",
         topBarActions = { AddButton { screenModel.navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) } },
         items = model.games,
@@ -119,6 +117,28 @@ private fun EditRoundView(
                 weight = 1.0f,
                 headerTextAlign = TextAlign.Center,
                 onClick = { screenModel.deleteGame(gameId = it.id) },
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete"
+            )
+        )
+    )
+
+    LazyTableWithScrollScaffold(
+        topBarTitle = "Byes",
+        topBarActions = { AddButton { screenModel.navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) } },
+        items = model.byes,
+        columns = listOf(
+            LazyTableColumn.Text(
+                name = "Name",
+                weight = 5.0f
+            ) {
+                "${it.playerName ?: "<Empty>"} (${it.playerTeamName})"
+            },
+            LazyTableColumn.IconButton(
+                name = "Delete",
+                weight = 1.0f,
+                headerTextAlign = TextAlign.Center,
+                onClick = { screenModel.deleteBye(byeId = it.id) },
                 imageVector = Icons.Default.Delete,
                 contentDescription = "Delete"
             )
