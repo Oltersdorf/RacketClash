@@ -17,6 +17,18 @@ LEFT JOIN (
   ON playerTable.teamId = teamTable.id
 ) AS players ON players.id = playerId;
 
+selectAllInRound:
+SELECT byeTable.id, roundId,
+playerId, name, teamName
+FROM byeTable
+LEFT JOIN (
+  SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
+  FROM teamTable
+  JOIN playerTable
+  ON playerTable.teamId = teamTable.id
+) AS players ON players.id = playerId
+WHERE roundId = :roundId;
+
 add:
 INSERT INTO byeTable(roundId, playerId)
 VALUES (:roundId, :playerId);

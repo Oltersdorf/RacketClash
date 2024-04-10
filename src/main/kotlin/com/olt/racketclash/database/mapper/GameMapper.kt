@@ -1,8 +1,8 @@
 package com.olt.racketclash.database.mapper
 
 import com.olt.racketclash.data.Game
-import com.olt.racketclash.database.*
 import com.olt.racketclash.database.game.SelectAll
+import com.olt.racketclash.database.game.SelectAllInRound
 
 fun SelectAll.toGame() =
     Game(

@@ -11,6 +11,11 @@ class ByeDatabase(private val queries: ByeQueries) {
             .selectAll()
             .mapToList { it.toBye() }
 
+    fun byes(roundId: Long): Flow<List<Bye>> =
+        queries
+            .selectAllInRound(roundId = roundId)
+            .mapToList { it.toBye() }
+
     fun add(roundId: Long?, playerId: Long) = roundId?.let { queries.add(roundId = it, playerId = playerId) }
 
     fun delete(id: Long) = queries.delete(id = id)

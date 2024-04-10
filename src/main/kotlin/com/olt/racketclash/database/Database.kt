@@ -49,6 +49,7 @@ class Database private constructor(
     fun games() : Flow<List<Game>> = gamesDatabase.games()
     fun bye() : Flow<List<Bye>> = byeDatabase.byes()
     fun games(roundId: Long) : Flow<List<Game>> = gamesDatabase.games(roundId = roundId)
+    fun bye(roundId: Long) : Flow<List<Bye>> = byeDatabase.byes(roundId = roundId)
 
     //team functions
     suspend fun addTeam(name: String, strength: Int) {
