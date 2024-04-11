@@ -12,9 +12,8 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.olt.racketclash.data.Team
+import com.olt.racketclash.data.Player
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
 
@@ -34,13 +33,7 @@ class EditGameScreen(private val modelBuilder: () -> EditGameModel) : Screen {
             SettingsView {
                 EditGameView(
                     model = stateModel,
-                    selectedPlayer = screenModel::selectPlayer,
-                    removePlayer = screenModel::removePlayer,
-                    changeNameFilter = screenModel::changeNameFilter,
-                    changeTeamFilter = screenModel::changeTeamFilter,
-                    setPlayer = screenModel::setPlayer,
-                    addGame = screenModel::addGame,
-                    navigateTo = screenModel::navigateTo
+                    screenModel = screenModel
                 )
             }
         }
@@ -50,13 +43,7 @@ class EditGameScreen(private val modelBuilder: () -> EditGameModel) : Screen {
 @Composable
 private fun EditGameView(
     model: EditGameModel.Model,
-    selectedPlayer: (EditGameModel.SelectedPlayer) -> Unit,
-    removePlayer: (EditGameModel.SelectedPlayer) -> Unit,
-    changeNameFilter: (String) -> Unit,
-    changeTeamFilter: (Team?) -> Unit,
-    setPlayer: (Long) -> Unit,
-    addGame: () -> Unit,
-    navigateTo: (Screens, Navigator) -> Unit
+    screenModel: EditGameModel
 ) {
     Text(
         text = model.roundName,
@@ -71,9 +58,9 @@ private fun EditGameView(
                     text = model.player1LeftDisplayName
                 )
                 if (model.player1Left == null)
-                    EditButton { selectedPlayer(EditGameModel.SelectedPlayer.Left1) }
+                    EditButton { screenModel.selectPlayer(EditGameModel.SelectedPlayer.Left1) }
                 else
-                    DeleteButton { removePlayer(EditGameModel.SelectedPlayer.Left1) }
+                    DeleteButton { screenModel.removePlayer(EditGameModel.SelectedPlayer.Left1) }
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -82,9 +69,9 @@ private fun EditGameView(
                     text = model.player2LeftDisplayName
                 )
                 if (model.player2Left == null)
-                    EditButton { selectedPlayer(EditGameModel.SelectedPlayer.Left2) }
+                    EditButton { screenModel.selectPlayer(EditGameModel.SelectedPlayer.Left2) }
                 else
-                    DeleteButton{ removePlayer(EditGameModel.SelectedPlayer.Left2) }
+                    DeleteButton{ screenModel.removePlayer(EditGameModel.SelectedPlayer.Left2) }
             }
         }
 
@@ -97,9 +84,9 @@ private fun EditGameView(
                     text = model.player1RightDisplayName
                 )
                 if (model.player1Right == null)
-                    EditButton { selectedPlayer(EditGameModel.SelectedPlayer.Right1) }
+                    EditButton { screenModel.selectPlayer(EditGameModel.SelectedPlayer.Right1) }
                 else
-                    DeleteButton { removePlayer(EditGameModel.SelectedPlayer.Right1) }
+                    DeleteButton { screenModel.removePlayer(EditGameModel.SelectedPlayer.Right1) }
             }
 
             Row(verticalAlignment = Alignment.CenterVertically)  {
@@ -108,28 +95,66 @@ private fun EditGameView(
                     text = model.player2RightDisplayName
                 )
                 if (model.player2Right == null)
-                    EditButton { selectedPlayer(EditGameModel.SelectedPlayer.Right2) }
+                    EditButton { screenModel.selectPlayer(EditGameModel.SelectedPlayer.Right2) }
                 else
-                    DeleteButton { removePlayer(EditGameModel.SelectedPlayer.Right2) }
+                    DeleteButton { screenModel.removePlayer(EditGameModel.SelectedPlayer.Right2) }
             }
         }
     }
 
     val navigator = LocalNavigator.currentOrThrow
     CancelSaveButtonRow(
-        onCancel = { navigateTo(Screens.Pop, navigator) },
-        onSave = { addGame() }
+        onCancel = { screenModel.navigateTo(Screens.Pop, navigator) },
+        onSave = { screenModel.addGame() }
     )
 
     LazyTableWithScrollScaffold(
         modifier = Modifier.requiredHeightIn(max = 500.dp),
         topBarTitle = "Filter",
-        topBarActions = { Filter(model = model, changeNameFilter = changeNameFilter, changeTeamFilter = changeTeamFilter) },
+        topBarActions = { Filter(model = model, screenModel = screenModel) },
         items = model.players,
-        onClick = { setPlayer(it.id) },
+        onClick = { screenModel.setPlayer(it.id) },
         columns = listOf(
-            LazyTableColumn.Text(name = "Name", weight = 5.0f, text = { it.name }),
-            LazyTableColumn.Text(name = "Team", weight = 2.0f, text = { it.teamName })
+            LazyTableColumn.Text(
+                name = "Name",
+                weight = 5.0f,
+                text = { it.name }
+            ),
+            LazyTableColumn.Text(
+                name = "Team",
+                weight = 2.0f,
+                text = { it.teamName }
+            ),
+            LazyTableColumn.Text(
+                name = "pending",
+                weight = 1.0f,
+                text = { it.openGames.toString() }
+            ),
+            LazyTableColumn.Text(
+                name = "played",
+                weight = 1.0f,
+                text = { it.played.toString() }
+            ),
+            LazyTableColumn.Text(
+                name = "bye",
+                weight = 1.0f,
+                text = { it.bye.toString() }
+            ),
+            LazyTableColumn.Text(
+                name = "Games",
+                weight = 1.0f,
+                text = { "${it.wonGames} : ${it.lostGames}" }
+            ),
+            LazyTableColumn.Text(
+                name = "Sets",
+                weight = 1.0f,
+                text = { "${it.wonSets} : ${it.lostSets}" }
+            ),
+            LazyTableColumn.Text(
+                name = "Points",
+                weight = 1.0f,
+                text = { "${it.wonPoints} : ${it.lostPoints}" }
+            )
         )
     )
 }
@@ -150,23 +175,28 @@ private inline fun <reified T: EditGameModel.SelectedPlayer> BorderText(
 @Composable
 private fun Filter(
     model: EditGameModel.Model,
-    changeNameFilter: (String) -> Unit,
-    changeTeamFilter: (Team?) -> Unit
+    screenModel: EditGameModel
 ) {
+    Checkbox(
+        checked = model.filterNotInRound,
+        onCheckedChange = screenModel::changeFilterNotInRound
+    )
+    Text("Filter out already in round")
+
     TextField(
-        modifier = Modifier.width(TextFieldDefaults.MinWidth),
+        modifier = Modifier.padding(horizontal = 5.dp).width(TextFieldDefaults.MinWidth),
         value = model.nameFilter,
-        onValueChange = changeNameFilter,
+        onValueChange = screenModel::changeNameFilter,
         label = { Text("Filter by name") },
         singleLine = true
     )
 
     DropDownMenu(
-        modifier = Modifier.padding(start = 5.dp).width(TextFieldDefaults.MinWidth),
+        modifier = Modifier.width(TextFieldDefaults.MinWidth),
         label = "Team",
-        items = model.teams,
-        value = model.teamFilter,
-        textMapper = { it?.name ?: "<No team selected>" },
-        onClick = changeTeamFilter
+        items = Player.sortingOptions(),
+        value = model.sortedBy,
+        textMapper = Player.Sorting::text,
+        onClick = screenModel::changeSorting
     )
 }

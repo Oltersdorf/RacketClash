@@ -2,9 +2,10 @@ package com.olt.racketclash.screens.editGame
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
+import com.olt.racketclash.data.Game
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Player
-import com.olt.racketclash.data.Team
+import com.olt.racketclash.data.sort
 import com.olt.racketclash.navigation.NavigableStateScreenModel
 import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
@@ -17,6 +18,7 @@ class EditGameModel(
 ) : NavigableStateScreenModel<EditGameModel.Model>(navigateToScreen = navigateToScreen, initialState = Model()) {
 
     private var unfilteredPlayers: List<Player> = emptyList()
+    private var games: List<Game> = emptyList()
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
@@ -32,11 +34,8 @@ class EditGameModel(
         }
 
         screenModelScope.launch(context = Dispatchers.IO) {
-            database.teams().collect {
-                updateState {
-                    copy(teams = listOf(null, *it.toTypedArray())
-                    )
-                }
+            database.games(roundId = roundId).collect {
+                games = it
             }
         }
     }
@@ -60,9 +59,9 @@ class EditGameModel(
         val player2RightDisplayName: String = "<empty>",
         val players: List<Player> = emptyList(),
         val selectedPlayer: SelectedPlayer? = null,
+        val filterNotInRound: Boolean = false,
         val nameFilter: String = "",
-        val teams: List<Team?> = emptyList(),
-        val teamFilter: Team? = null
+        val sortedBy: Player.Sorting = Player.Sorting.NameAscending
     )
 
     fun selectPlayer(selection: SelectedPlayer) {
@@ -70,7 +69,7 @@ class EditGameModel(
             updateState {
                 copy(
                     selectedPlayer = selection,
-                    players = filterPlayer(model = this)
+                    players = filterAndSortPlayer(model = this)
                 )
             }
         }
@@ -131,35 +130,52 @@ class EditGameModel(
                 copy(
                     nameFilter = newNameFilter,
                     players = if (selectedPlayer != null)
-                        filterPlayer(copy(nameFilter = newNameFilter))
+                        filterAndSortPlayer(copy(nameFilter = newNameFilter))
                     else emptyList()
                 )
             }
         }
     }
 
-    fun changeTeamFilter(newTeamFilter: Team?) {
+    fun changeSorting(newSorting: Player.Sorting) {
         screenModelScope.launch(context = Dispatchers.Default) {
             updateState {
                 copy(
-                    teamFilter = newTeamFilter,
+                    sortedBy = newSorting,
                     players = if (selectedPlayer != null)
-                        filterPlayer(copy(teamFilter = newTeamFilter))
+                        filterAndSortPlayer(copy(sortedBy = newSorting))
                     else emptyList()
                 )
             }
         }
     }
 
-    private fun filterPlayer(model: Model): List<Player> =
+    fun changeFilterNotInRound(filterNotInRound: Boolean) {
+        screenModelScope.launch(context = Dispatchers.Default) {
+            updateState {
+                copy(
+                    filterNotInRound = filterNotInRound,
+                    players = if (selectedPlayer != null)
+                        filterAndSortPlayer(copy(filterNotInRound = filterNotInRound))
+                    else emptyList()
+                )
+            }
+        }
+    }
+
+    private fun filterAndSortPlayer(model: Model): List<Player> =
         unfilteredPlayers
             .asSequence()
             .filter { it.active }
-            .filter { if (model.teamFilter != null) it.teamId == model.teamFilter.id else true }
+            .filterNot { player -> if (model.filterNotInRound) games.find { it.playerLeft1Id == player.id } != null else false }
+            .filterNot { player -> if (model.filterNotInRound) games.find { it.playerLeft2Id == player.id } != null else false }
+            .filterNot { player -> if (model.filterNotInRound) games.find { it.playerRight1Id == player.id } != null else false }
+            .filterNot { player -> if (model.filterNotInRound) games.find { it.playerRight2Id == player.id } != null else false }
             .filter { it.name.contains(model.nameFilter, ignoreCase = true) }
             .filterNot { it.id == model.player1Left?.id }
             .filterNot { it.id == model.player2Left?.id }
             .filterNot { it.id == model.player1Right?.id }
             .filterNot { it.id == model.player2Right?.id }
             .toList()
+            .sort(model.sortedBy)
 }
