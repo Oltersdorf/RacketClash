@@ -7,20 +7,66 @@ CREATE TABLE IF NOT EXISTS teamTable (
 );
 
 selectAll:
-SELECT teamTable.id, teamTable.name, strength, COUNT(players.id) AS size,
-SUM(openGames) AS openGames, SUM(players.bye) AS bye, SUM(played) AS played,
-SUM(wonGames) AS wonGames, SUM(lostGames) AS lostGames,
-SUM(wonSets) AS wonSets, SUM(lostSets) AS lostSets,
-SUM(wonPoints) AS wonPoints, SUM(lostPoints) AS lostPoints
-FROM teamTable
-LEFT OUTER JOIN (
-    SELECT playerTable.id, teamId, openGames, played, COUNT(byeTable.id) AS bye,
-    wonGames, lostGames, wonSets, lostSets, wonPoints, lostPoints
-    FROM playerTable
-    LEFT JOIN byeTable
-    ON byeTable.playerId = playerTable.id
-    GROUP BY playerTable.id
-) AS players ON players.teamId = teamTable.id
+SELECT teamTable.id, name, strength, byes, size,
+COUNT(DISTINCT IIF(isDone, NULL, games.id)) AS openGames,
+COUNT(DISTINCT IIF(isDone, games.id, NULL)) AS played,
+SUM(IIF(isDone AND playerLeft1TeamId = teamTable.id, setsLeftWon > setsRightWon, 0)) +
+SUM(IIF(isDone AND playerLeft2TeamId = teamTable.id AND playerLeft1TeamId != playerLeft2TeamId, setsLeftWon > setsRightWon, 0)) +
+SUM(IIF(isDone AND playerRight1TeamId = teamTable.id, setsRightWon > setsLeftWon, 0)) +
+SUM(IIF(isDone AND playerRight2TeamId = teamTable.id AND playerRight1TeamId != playerRight2TeamId, setsRightWon > setsLeftWon, 0))
+AS wonGames,
+SUM(IIF(isDone AND playerLeft1TeamId = teamTable.id, setsRightWon > setsLeftWon, 0)) +
+SUM(IIF(isDone AND playerLeft2TeamId = teamTable.id AND playerLeft1TeamId != playerLeft2TeamId, setsRightWon > setsLeftWon, 0)) +
+SUM(IIF(isDone AND playerRight1TeamId = teamTable.id, setsLeftWon > setsRightWon, 0)) +
+SUM(IIF(isDone AND playerRight2TeamId = teamTable.id AND playerRight1TeamId != playerRight2TeamId, setsLeftWon > setsRightWon, 0))
+AS lostGames,
+SUM(IIF(isDone AND playerLeft1TeamId = teamTable.id, setsLeftWon, 0)) +
+SUM(IIF(isDone AND playerLeft2TeamId = teamTable.id AND playerLeft1TeamId != playerLeft2TeamId, setsLeftWon, 0)) +
+SUM(IIF(isDone AND playerRight1TeamId = teamTable.id, setsRightWon, 0)) +
+SUM(IIF(isDone AND playerRight2TeamId = teamTable.id AND playerRight1TeamId != playerRight2TeamId, setsRightWon, 0))
+AS wonSets,
+SUM(IIF(isDone AND playerLeft1TeamId = teamTable.id, setsRightWon, 0)) +
+SUM(IIF(isDone AND playerLeft2TeamId = teamTable.id AND playerLeft1TeamId != playerLeft2TeamId, setsRightWon, 0)) +
+SUM(IIF(isDone AND playerRight1TeamId = teamTable.id, setsLeftWon, 0)) +
+SUM(IIF(isDone AND playerRight2TeamId = teamTable.id AND playerRight1TeamId != playerRight2TeamId, setsLeftWon, 0))
+AS lostSets,
+SUM(IIF(isDone AND playerLeft1TeamId = teamTable.id, pointsLeft, 0)) +
+SUM(IIF(isDone AND playerLeft2TeamId = teamTable.id AND playerLeft1TeamId != playerLeft2TeamId, pointsLeft, 0)) +
+SUM(IIF(isDone AND playerRight1TeamId = teamTable.id, pointsRight, 0)) +
+SUM(IIF(isDone AND playerRight2TeamId = teamTable.id AND playerRight1TeamId != playerRight2TeamId, pointsRight, 0))
+AS wonPoints,
+SUM(IIF(isDone AND playerLeft1TeamId = teamTable.id, pointsRight, 0)) +
+SUM(IIF(isDone AND playerLeft2TeamId = teamTable.id AND playerLeft1TeamId != playerLeft2TeamId, pointsRight, 0)) +
+SUM(IIF(isDone AND playerRight1TeamId = teamTable.id, pointsLeft, 0)) +
+SUM(IIF(isDone AND playerRight2TeamId = teamTable.id AND playerRight1TeamId != playerRight2TeamId, pointsLeft, 0))
+AS lostPoints
+FROM (
+  SELECT teamTable.id, teamTable.name, strength,
+  COUNT(DISTINCT byes.id) AS byes, COUNT(DISTINCT playerTable.id) AS size
+  FROM teamTable
+  LEFT JOIN (
+    SELECT byeTable.id, p.teamId AS playerTeam
+    FROM byeTable
+    LEFT JOIN playerTable AS p ON p.id = playerId
+  ) AS byes ON byes.playerTeam = teamTable.id
+  LEFT JOIN playerTable
+  ON playerTable.teamId = teamTable.id
+  GROUP BY teamTable.id
+) AS teamTable
+LEFT JOIN (
+  SELECT gameTable.id, isDone,
+  p1L.teamId AS playerLeft1TeamId, p2L.teamId AS playerLeft2TeamId,
+  p1R.teamId AS playerRight1TeamId, p2R.teamId AS playerRight2TeamId,
+  IIF((set1Left > set1Right), 1, 0) + IIF((set2Left > set2Right), 1, 0) + IIF((set3Left > set3Right), 1, 0) + IIF((set4Left > set4Right), 1, 0) + IIF((set5Left > set5Right), 1, 0) AS setsLeftWon,
+  IIF((set1Right > set1Left), 1, 0) + IIF((set2Right > set2Left), 1, 0) + IIF((set3Right > set3Left), 1, 0) + IIF((set4Right > set4Left), 1, 0) + IIF((set5Right > set5Left), 1, 0) AS setsRightWon,
+  set1Left + set2Left + set3Left + set4Left + set5Left AS pointsLeft, set1Right + set2Right + set3Right + set4Right + set5Right AS pointsRight
+  FROM gameTable
+  LEFT JOIN playerTable AS p1L ON p1L.id = playerLeft1Id
+  LEFT JOIN playerTable AS p2L ON p2L.id = playerLeft2Id
+  LEFT JOIN playerTable AS p1R ON p1R.id = playerRight1Id
+  LEFT JOIN playerTable AS p2R ON p2R.id = playerRight2Id
+  GROUP BY gameTable.id
+) AS games ON playerLeft1TeamId = teamTable.id OR playerLeft2TeamId = teamTable.id OR playerRight1TeamId = teamTable.id OR playerRight2TeamId = teamTable.id
 GROUP BY teamTable.id;
 
 add:

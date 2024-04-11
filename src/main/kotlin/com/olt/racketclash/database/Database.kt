@@ -31,8 +31,7 @@ class Database private constructor(
         driver = driver,
         teamTableAdapter = TeamsDatabase.teamAdapter,
         gameTableAdapter = GamesDatabase.gameAdapter,
-        roundTableAdapter = RoundsDatabase.roundAdapter,
-        playerTableAdapter = PlayersDatabase.playerAdapter
+        roundTableAdapter = RoundsDatabase.roundAdapter
     )
 
     private val teamsDatabase = TeamsDatabase(queries = database.teamQueries)
@@ -113,11 +112,6 @@ class Database private constructor(
                 playerLeft1Id = playerLeft1Id, playerLeft2Id = playerLeft2Id,
                 playerRight1Id = playerRight1Id, playerRight2Id = playerRight2Id
             )
-
-            playersDatabase.addUndoneGame(id = playerLeft1Id)
-            playersDatabase.addUndoneGame(id = playerLeft2Id)
-            playersDatabase.addUndoneGame(id = playerRight1Id)
-            playersDatabase.addUndoneGame(id = playerRight2Id)
         }
     }
 
@@ -138,23 +132,18 @@ class Database private constructor(
                 set4Left = set4Left, set4Right = set4Right,
                 set5Left = set5Left, set5Right = set5Right
             )
-
-            gamesDatabase.select(id = id)?.let { playersDatabase.updateDone(game = it) }
         }
     }
 
     fun deleteGame(id: Long) {
         database.transaction {
-            val game = gamesDatabase.select(id = id)
             gamesDatabase.deleteGame(id = id)
-            game?.let { playersDatabase.deleteGame(game = it) }
         }
     }
 
     fun deleteBye(id: Long) {
         database.transaction {
             byeDatabase.delete(id = id)
-            playersDatabase.deleteBye(playerId = id)
         }
     }
 
@@ -173,15 +162,10 @@ class Database private constructor(
                         playerLeft1Id = game.playerLeft1Id, playerLeft2Id = game.playerLeft2Id,
                         playerRight1Id = game.playerRight1Id, playerRight2Id = game.playerRight2Id
                     )
-                    playersDatabase.addUndoneGame(game.playerLeft1Id)
-                    playersDatabase.addUndoneGame(game.playerLeft2Id)
-                    playersDatabase.addUndoneGame(game.playerRight1Id)
-                    playersDatabase.addUndoneGame(game.playerRight2Id)
                 }
 
                 bye.filter { it.roundId == index.toLong() + 1 }.forEach { bye ->
                     byeDatabase.add(roundId = roundId, playerId = bye.playerId)
-                    playersDatabase.addByeGame(id = bye.playerId)
                 }
             }
         }
