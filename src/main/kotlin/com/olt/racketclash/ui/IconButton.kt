@@ -30,28 +30,6 @@ fun SimpleIconButton(
 }
 
 @Composable
-fun SimpleFilledIconButton(
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(),
-    imageVector: ImageVector,
-    contentDescription: String,
-    onClick: () -> Unit
-) {
-    FilledIconButton(
-        modifier = modifier,
-        enabled = enabled,
-        colors = colors,
-        onClick = onClick
-    ) {
-        Icon(
-            imageVector = imageVector,
-            contentDescription = contentDescription
-        )
-    }
-}
-
-@Composable
 fun BackButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -161,40 +139,6 @@ fun ArrowRightButton(
     onClick: () -> Unit
 ) {
     SimpleIconButton(
-        modifier = modifier,
-        enabled = enabled,
-        colors = colors,
-        imageVector = Icons.Default.KeyboardArrowRight,
-        contentDescription = "+",
-        onClick = onClick
-    )
-}
-
-@Composable
-fun FilledArrowLeftButton(
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(),
-    onClick: () -> Unit
-) {
-    SimpleFilledIconButton(
-        modifier = modifier,
-        enabled = enabled,
-        colors = colors,
-        imageVector = Icons.Default.KeyboardArrowLeft,
-        contentDescription = "-",
-        onClick = onClick
-    )
-}
-
-@Composable
-fun FilledArrowRightButton(
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    colors: IconButtonColors = IconButtonDefaults.filledIconButtonColors(),
-    onClick: () -> Unit
-) {
-    SimpleFilledIconButton(
         modifier = modifier,
         enabled = enabled,
         colors = colors,
