@@ -37,6 +37,7 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "RacketClash"
             packageVersion = "1.0.0"
+            modules("java.instrument", "java.sql", "jdk.unsupported")
         }
     }
 }
