@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS playerTable (
     active INTEGER AS Boolean NOT NULL DEFAULT FALSE,
     name TEXT NOT NULL,
     teamId INTEGER NOT NULL,
+    lastPlayed INTEGER,
     FOREIGN KEY (teamId) REFERENCES teamTable (id)
 );
 
@@ -64,6 +65,11 @@ VALUES (:name, :teamId);
 update:
 UPDATE playerTable
 SET name = :name, teamId = :teamId
+WHERE id = :id;
+
+setLastPlayed:
+UPDATE playerTable
+SET lastPlayed = :lastPLayed
 WHERE id = :id;
 
 setActive:

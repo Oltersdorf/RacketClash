@@ -132,6 +132,21 @@ class Database private constructor(
                 set4Left = set4Left, set4Right = set4Right,
                 set5Left = set5Left, set5Right = set5Right
             )
+
+            val game = gamesDatabase.select(id = id)
+
+            if (isDone && game != null) {
+                val lastPlayed = System.currentTimeMillis()
+                playersDatabase.setLastPlayed(id = game.playerLeft1Id, lastPlayed = lastPlayed)
+                playersDatabase.setLastPlayed(id = game.playerLeft2Id, lastPlayed = lastPlayed)
+                playersDatabase.setLastPlayed(id = game.playerRight1Id, lastPlayed = lastPlayed)
+                playersDatabase.setLastPlayed(id = game.playerRight2Id, lastPlayed = lastPlayed)
+            } else if (game != null) {
+                playersDatabase.setLastPlayed(id = game.playerLeft1Id, lastPlayed = null)
+                playersDatabase.setLastPlayed(id = game.playerLeft2Id, lastPlayed = null)
+                playersDatabase.setLastPlayed(id = game.playerRight1Id, lastPlayed = null)
+                playersDatabase.setLastPlayed(id = game.playerRight2Id, lastPlayed = null)
+            }
         }
     }
 

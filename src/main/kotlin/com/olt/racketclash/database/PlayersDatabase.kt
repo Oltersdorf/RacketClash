@@ -35,4 +35,6 @@ class PlayersDatabase(private val queries: PlayerQueries) {
         queries.delete(id = id)
         return size()
     }
+
+    fun setLastPlayed(id: Long?, lastPlayed: Long?) = id?.let { queries.setLastPlayed(id = it, lastPLayed = lastPlayed) }
 }

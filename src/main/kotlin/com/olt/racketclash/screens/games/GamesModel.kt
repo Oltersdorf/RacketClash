@@ -3,13 +3,14 @@ package com.olt.racketclash.screens.games
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.data.Bye
-import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.FileHandler
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Round
+import com.olt.racketclash.database.Database
 import com.olt.racketclash.navigation.NavigableStateScreenModel
 import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class GamesModel(
@@ -26,7 +27,7 @@ class GamesModel(
         }
         screenModelScope.launch(context = Dispatchers.IO) {
             database.games().collect {
-                updateState { copy(games = it.groupBy { it.roundId }) }
+                updateState { copy(games = it.groupBy { it.roundId }, active = activeGames(games = it, timeout = timeout, fields = fields)) }
             }
         }
         screenModelScope.launch(context = Dispatchers.IO) {
@@ -36,12 +37,21 @@ class GamesModel(
         }
         screenModelScope.launch(context = Dispatchers.IO) {
             fileHandler.fields().collect {
-                updateState { copy(fields = it) }
+                updateState { copy(fields = it, active = activeGames(games = games.values.flatten(), timeout = timeout, fields = it)) }
             }
         }
         screenModelScope.launch(context = Dispatchers.IO) {
             fileHandler.timeout().collect {
-                updateState { copy(timeout = it) }
+                updateState { copy(timeout = it, active = activeGames(games = games.values.flatten(), timeout = it, fields = fields)) }
+            }
+        }
+
+        screenModelScope.launch(context = Dispatchers.IO) {
+            while (isActive) {
+                updateState {
+                    copy(active = activeGames(games = games.values.flatten(), timeout = timeout, fields = fields))
+                }
+                Thread.sleep(10_000)
             }
         }
     }
@@ -136,5 +146,38 @@ class GamesModel(
         screenModelScope.launch(context = Dispatchers.IO) {
             if (newTimeout >= 1) fileHandler.setTimeout(newTimeout = newTimeout)
         }
+    }
+
+    private fun activeGames(games: List<Game>, timeout: Int, fields: Int): List<Long> {
+        val timeoutInMillis = System.currentTimeMillis() - (timeout * 60000L)
+        val activeGames = mutableListOf<Long>()
+        val activePlayers = mutableListOf<Long>()
+
+        games
+            .asSequence()
+            .filterNot { it.isDone }
+            .filter { (it.playerLeft1LastPlayed ?: Long.MIN_VALUE) <= timeoutInMillis }
+            .filter { (it.playerLeft2LastPlayed ?: Long.MIN_VALUE) <= timeoutInMillis }
+            .filter { (it.playerRight1LastPlayed ?: Long.MIN_VALUE) <= timeoutInMillis }
+            .filter { (it.playerRight2LastPlayed ?: Long.MIN_VALUE) <= timeoutInMillis }
+            .forEach { game ->
+                if (
+                    !activePlayers.contains(game.playerLeft1Id) &&
+                    !activePlayers.contains(game.playerLeft2Id) &&
+                    !activePlayers.contains(game.playerRight1Id) &&
+                    !activePlayers.contains(game.playerRight2Id)
+                ) {
+                    activeGames.add(game.id)
+                    if (activeGames.size == fields)
+                        return activeGames.toList()
+
+                    game.playerLeft1Id?.let { activePlayers.add(it) }
+                    game.playerLeft2Id?.let { activePlayers.add(it) }
+                    game.playerRight1Id?.let { activePlayers.add(it) }
+                    game.playerRight2Id?.let { activePlayers.add(it) }
+                }
+            }
+
+        return activeGames.toList()
     }
 }
