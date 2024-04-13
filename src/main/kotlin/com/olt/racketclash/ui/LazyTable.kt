@@ -128,7 +128,7 @@ fun <T> LazyTableWithScrollScaffold(
     ) { paddingValues ->
         Surface(tonalElevation = 1.dp) {
             LazyTableWithScroll(
-                modifier = modifier.padding(paddingValues),
+                modifier = modifier.padding(paddingValues).fillMaxWidth(),
                 items = items,
                 itemsSpacedBy = itemsSpacedBy,
                 showHeader = showHeader,
