@@ -122,7 +122,7 @@ private fun EquallyStrongDouble(
             checked = roundType.tryUntilNoMoreThanOneByePerPerson,
             onCheckedChange = screenModel::changeTryUntilNoMoreThanOneByePerPerson
         )
-        Text(model.language.onlyOneByePerPerson)
+        Text(model.language.onlyOneByePerPlayer)
 
         Checkbox(
             enabled = !model.generating,

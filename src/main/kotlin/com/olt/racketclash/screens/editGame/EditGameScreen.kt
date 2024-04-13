@@ -183,7 +183,7 @@ private fun Filter(
         checked = model.filterNotInRound,
         onCheckedChange = screenModel::changeFilterNotInRound
     )
-    Text(model.language.haveNoGameInRound)
+    Text(model.language.hasNoGameInRound)
 
     TextField(
         modifier = Modifier.padding(horizontal = 5.dp).width(TextFieldDefaults.MinWidth),
