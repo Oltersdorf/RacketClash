@@ -2,11 +2,8 @@ package com.olt.racketclash.screens.editGame
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
-import com.olt.racketclash.data.FileHandler
-import com.olt.racketclash.data.Game
+import com.olt.racketclash.data.*
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.data.Player
-import com.olt.racketclash.data.sort
 import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.navigation.NavigableStateScreenModel
 import com.olt.racketclash.navigation.Screens
@@ -26,11 +23,18 @@ class EditGameModel(
 
     private var unfilteredPlayers: List<Player> = emptyList()
     private var games: List<Game> = emptyList()
+    private var byes: List<Bye> = emptyList()
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
             database.round(id = roundId).collect {
                 updateState { copy(roundName = it?.name ?: "") }
+            }
+        }
+
+        screenModelScope.launch(context = Dispatchers.IO) {
+            database.bye(roundId = roundId).collect {
+                byes = it
             }
         }
 
@@ -210,6 +214,7 @@ class EditGameModel(
             .filterNot { player -> if (model.filterNotInRound) games.find { it.playerLeft2Id == player.id } != null else false }
             .filterNot { player -> if (model.filterNotInRound) games.find { it.playerRight1Id == player.id } != null else false }
             .filterNot { player -> if (model.filterNotInRound) games.find { it.playerRight2Id == player.id } != null else false }
+            .filterNot { player -> if (model.filterNotInRound) byes.find { it.playerId == player.id } != null else false }
             .filter { it.name.contains(model.nameFilter, ignoreCase = true) }
             .filterNot { it.id == model.player1Left?.id }
             .filterNot { it.id == model.player2Left?.id }
