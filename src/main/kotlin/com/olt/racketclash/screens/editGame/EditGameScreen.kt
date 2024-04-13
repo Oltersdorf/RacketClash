@@ -25,9 +25,10 @@ class EditGameScreen(private val modelBuilder: () -> EditGameModel) : Screen {
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(
-            topAppBarTitle = "Edit Game",
+            language = stateModel.language,
+            topAppBarTitle = stateModel.language.editGame,
             hasBackPress = true,
-            selectedTab = TournamentTabs.Games,
+            selectedTab = TournamentTabs.Games(language = stateModel.language),
             navigateTo = screenModel::navigateTo
         ) {
             SettingsView {
@@ -75,7 +76,7 @@ private fun EditGameView(
             }
         }
 
-        Text(modifier = Modifier.padding(horizontal = 20.dp), text = "vs")
+        Text(modifier = Modifier.padding(horizontal = 20.dp), text = model.language.vs)
 
         Column {
             Row(verticalAlignment = Alignment.CenterVertically)  {
@@ -104,54 +105,55 @@ private fun EditGameView(
 
     val navigator = LocalNavigator.currentOrThrow
     CancelSaveButtonRow(
+        language = model.language,
         onCancel = { screenModel.navigateTo(Screens.Pop, navigator) },
         onSave = { screenModel.addGame() }
     )
 
     LazyTableWithScrollScaffold(
         modifier = Modifier.requiredHeightIn(max = 500.dp),
-        topBarTitle = "Filter",
+        topBarTitle = model.language.players,
         topBarActions = { Filter(model = model, screenModel = screenModel) },
         items = model.players,
         onClick = { screenModel.setPlayer(it.id) },
         columns = listOf(
             LazyTableColumn.Text(
-                name = "Name",
+                name = model.language.name,
                 weight = 5.0f,
                 text = { it.name }
             ),
             LazyTableColumn.Text(
-                name = "Team",
+                name = model.language.team,
                 weight = 2.0f,
                 text = { it.teamName }
             ),
             LazyTableColumn.Text(
-                name = "pending",
+                name = model.language.pending,
                 weight = 1.0f,
                 text = { it.openGames.toString() }
             ),
             LazyTableColumn.Text(
-                name = "played",
+                name = model.language.played,
                 weight = 1.0f,
                 text = { it.played.toString() }
             ),
             LazyTableColumn.Text(
-                name = "bye",
+                name = model.language.byes,
                 weight = 1.0f,
                 text = { it.bye.toString() }
             ),
             LazyTableColumn.Text(
-                name = "Games",
+                name = model.language.games,
                 weight = 1.0f,
                 text = { "${it.wonGames} : ${it.lostGames}" }
             ),
             LazyTableColumn.Text(
-                name = "Sets",
+                name = model.language.sets,
                 weight = 1.0f,
                 text = { "${it.wonSets} : ${it.lostSets}" }
             ),
             LazyTableColumn.Text(
-                name = "Points",
+                name = model.language.points,
                 weight = 1.0f,
                 text = { "${it.wonPoints} : ${it.lostPoints}" }
             )
@@ -181,22 +183,22 @@ private fun Filter(
         checked = model.filterNotInRound,
         onCheckedChange = screenModel::changeFilterNotInRound
     )
-    Text("Filter out already in round")
+    Text(model.language.haveNoGameInRound)
 
     TextField(
         modifier = Modifier.padding(horizontal = 5.dp).width(TextFieldDefaults.MinWidth),
         value = model.nameFilter,
         onValueChange = screenModel::changeNameFilter,
-        label = { Text("Filter by name") },
+        label = { Text(model.language.filterByName) },
         singleLine = true
     )
 
     DropDownMenu(
         modifier = Modifier.width(TextFieldDefaults.MinWidth),
-        label = "Team",
+        label = model.language.team,
         items = Player.sortingOptions(),
         value = model.sortedBy,
-        textMapper = Player.Sorting::text,
+        textMapper = { it.text(model.language) },
         onClick = screenModel::changeSorting
     )
 }

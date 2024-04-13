@@ -11,6 +11,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Player
+import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
 
@@ -22,9 +23,10 @@ class NewRoundScreen(private val modelBuilder: () -> NewRoundModel) : Screen {
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(
-            topAppBarTitle = "New Round",
+            language = stateModel.language,
+            topAppBarTitle = stateModel.language.newRound,
             hasBackPress = true,
-            selectedTab = TournamentTabs.Games,
+            selectedTab = TournamentTabs.Games(language = stateModel.language),
             navigateTo = screenModel::navigateTo
         ) {
             SettingsView {
@@ -43,17 +45,17 @@ private fun NewRoundView(
         modifier = Modifier.fillMaxWidth(),
         value = model.roundName,
         onValueChange = { screenModel.changeRoundName(newName = it) },
-        label = { Text("Name") },
+        label = { Text(model.language.name) },
         enabled = !model.generating,
         isError = model.roundName.isBlank()
     )
 
     DropDownMenu(
         modifier = Modifier.fillMaxWidth(),
-        label = "Type",
+        label = model.language.type,
         items = model.roundTypes,
         value = model.selectedRoundType,
-        textMapper = ::roundTypeToString,
+        textMapper = { roundTypeToString(language = model.language, roundType = it) },
         onClick = screenModel::changeRoundType
     )
 
@@ -73,11 +75,12 @@ private fun CancelSaveButtonRow(
 ) {
     val navigator = LocalNavigator.currentOrThrow
     CancelSaveButtonRow(
-        onCancel = { screenModel.navigateTo(Screens.Games, navigator) },
+        language = model.language,
+        onCancel = { screenModel.navigateTo(Screens.Games(language = model.language), navigator) },
         canSave = model.canCreate && !model.generating,
         onSave = {
             onSave()
-            screenModel.navigateTo(Screens.Games, navigator)
+            screenModel.navigateTo(Screens.Games(language = model.language), navigator)
         }
     )
 }
@@ -99,7 +102,7 @@ private fun EquallyStrongDouble(
     Row(verticalAlignment = Alignment.CenterVertically) {
         NumberSelector(
             enabled = !model.generating,
-            label = "Rounds:",
+            label = model.language.rounds + ":",
             value = roundType.rounds,
             onValueChange = screenModel::changeEquallyStrongDoublesRounds,
             min = 1
@@ -110,7 +113,7 @@ private fun EquallyStrongDouble(
             checked = roundType.differentPartnersEachRound,
             onCheckedChange = screenModel::changeEquallyStrongDoublesDifferentPartners
         )
-        Text("Different partners each round")
+        Text(model.language.differentPartnersEachRound)
     }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -119,89 +122,89 @@ private fun EquallyStrongDouble(
             checked = roundType.tryUntilNoMoreThanOneByePerPerson,
             onCheckedChange = screenModel::changeTryUntilNoMoreThanOneByePerPerson
         )
-        Text("Only one bye per person")
+        Text(model.language.onlyOneByePerPerson)
 
         Checkbox(
             enabled = !model.generating,
             checked = roundType.tryUntilWorstPerformanceIsZero,
             onCheckedChange = screenModel::changeTryUntilStrengthDifferenceIsZero
         )
-        Text("Worst strength difference is zero")
+        Text(model.language.worstStrengthDifferenceIsZero)
     }
 
     NumberSelector(
         enabled = !model.generating,
-        label = "Max repeats:",
+        label = model.language.maxRepeats + ":",
         value = roundType.maxRepeat,
         onValueChange = screenModel::changeEquallyStrongDoublesMaxRepeats,
         min = 1
     )
 
     LazyTableWithScrollScaffold(
-        topBarTitle = "Players",
+        topBarTitle = model.language.players,
         topBarActions = {
             TextField(
                 modifier = Modifier.width(TextFieldDefaults.MinWidth),
                 value = model.filter,
                 onValueChange = screenModel::changeFilter,
-                label = { Text("Filter by name") },
+                label = { Text(model.language.filterByName) },
                 singleLine = true
             )
 
             DropDownMenu(
                 modifier = Modifier.padding(start = 5.dp).width(TextFieldDefaults.MinWidth),
-                label = "Sort by",
+                label = model.language.sortBy,
                 items = Player.sortingOptions(),
                 value = model.sortedBy,
-                textMapper = Player.Sorting::text,
+                textMapper = { it.text(language = model.language) },
                 onClick = screenModel::changeSorting
             )
         },
         items = model.players,
         columns = listOf(
             LazyTableColumn.Checkbox(
-                name = "Active",
+                name = model.language.active,
                 weight = 1.0f,
                 checked = { it.active },
                 onCheckChanged = { item, checked -> screenModel.updateActive(item.id, checked) }
             ),
             LazyTableColumn.Text(
-                name = "Name",
+                name = model.language.name,
                 weight = 5.0f,
                 text = { it.name }
             ),
             LazyTableColumn.Text(
-                name = "Team",
+                name = model.language.team,
                 weight = 2.0f,
                 text = { it.teamName }
             ),
             LazyTableColumn.Text(
-                name = "pending",
+                name = model.language.pending,
                 weight = 1.0f,
                 text = { it.openGames.toString() }
             ),
             LazyTableColumn.Text(
-                name = "played",
+                name = model.language.played,
                 weight = 1.0f,
                 text = { it.played.toString() }
             ),
             LazyTableColumn.Text(
-                name = "bye",
+                name = model.language.byes,
                 weight = 1.0f,
                 text = { it.bye.toString() }
             ),
             LazyTableColumn.Text(
-                name = "Games",
+                name = model.language.games,
                 weight = 1.0f,
                 text = { "${it.wonGames} : ${it.lostGames}" }
             ),
             LazyTableColumn.Text(
-                name = "Sets",
+                name = model.language.sets,
                 weight = 1.0f,
                 text = { "${it.wonSets} : ${it.lostSets}" }
             ),
             LazyTableColumn.Text(
-                name = "Points",
+                name = model.language.points,
                 weight = 1.0f,
                 text = { "${it.wonPoints} : ${it.lostPoints}" }
             )
@@ -212,9 +215,9 @@ private fun EquallyStrongDouble(
         Loading()
     else if(roundType.games.isNotEmpty()) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("${roundType.games.size} games generated")
-            Text("Worst strength difference is ${roundType.performance}")
-            Text("Bye: ${roundType.byePlayer}")
+            Text("${roundType.games.size} ${model.language.gamesGenerated}")
+            Text("${model.language.worstStrengthDifferenceIs} ${roundType.performance}")
+            Text(if (roundType.byePlayer.isNotBlank()) "${model.language.byes}: ${roundType.byePlayer}" else "")
         }
     }
 
@@ -224,24 +227,24 @@ private fun EquallyStrongDouble(
             onClick = screenModel::generateEquallyStrongDoubles,
             enabled = !model.generating
         ) {
-            Text("Generate")
+            Text(model.language.generate)
         }
 
         val navigator = LocalNavigator.currentOrThrow
         Button(
             onClick = {
                 screenModel.addEquallyStrongDoubles()
-                screenModel.navigateTo(screen = Screens.Games, navigator = navigator)
+                screenModel.navigateTo(screen = Screens.Games(language = model.language), navigator = navigator)
             },
             enabled = roundType.games.isNotEmpty() && model.canCreate
         ) {
-            Text("Save")
+            Text(model.language.save)
         }
     }
 }
 
-private fun roundTypeToString(roundType: NewRoundModel.RoundType) : String =
+private fun roundTypeToString(language: Language, roundType: NewRoundModel.RoundType) : String =
     when (roundType) {
-        NewRoundModel.RoundType.Empty -> "Empty"
-        is NewRoundModel.RoundType.EquallyStrongDouble -> "Equally strong doubles"
+        NewRoundModel.RoundType.Empty -> language.empty
+        is NewRoundModel.RoundType.EquallyStrongDouble -> language.equallyStrongDoubles
     }

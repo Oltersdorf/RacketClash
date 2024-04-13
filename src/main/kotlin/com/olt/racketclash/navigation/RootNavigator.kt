@@ -3,6 +3,8 @@ package com.olt.racketclash.navigation
 import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.data.*
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.language.LanguageHandler
+import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.screens.editGame.EditGameModel
 import com.olt.racketclash.screens.editGame.EditGameScreen
 import com.olt.racketclash.screens.editPlayer.EditPlayerModel
@@ -26,55 +28,56 @@ import com.olt.racketclash.screens.teams.TeamsScreen
 
 class RootNavigator {
     private val fileHandler: FileHandler = FileHandler()
+    private val languageHandler: LanguageHandler = LanguageHandler(fileHandler = fileHandler)
     private var database: Database? = null
 
     fun defaultScreen() : ProjectsScreen =
         ProjectsScreen(::projectsModelBuilder)
 
     private fun projectsModelBuilder(): ProjectsModel =
-        ProjectsModel(navigateToScreen = ::navigateTo, fileHandler = fileHandler)
+        ProjectsModel(navigateToScreen = ::navigateTo, fileHandler = fileHandler, languageHandler = languageHandler)
 
-    private fun newProjectModelBuilder(): NewProjectModel =
-        NewProjectModel(navigateToScreen = ::navigateTo, fileHandler = fileHandler)
+    private fun newProjectModelBuilder(language: Language): NewProjectModel =
+        NewProjectModel(navigateToScreen = ::navigateTo, fileHandler = fileHandler, language = language)
 
-    private fun teamsModelBuilder(): TeamsModel =
-        TeamsModel(navigateToScreen = ::navigateTo, database = database!!)
+    private fun teamsModelBuilder(language: Language): TeamsModel =
+        TeamsModel(navigateToScreen = ::navigateTo, database = database!!, language = language)
 
-    private fun editTeamModelBuilder(team: Team?): EditTeamModel =
-        EditTeamModel(navigateToScreen = ::navigateTo, database = database!!, team = team)
+    private fun editTeamModelBuilder(team: Team?, language: Language): EditTeamModel =
+        EditTeamModel(navigateToScreen = ::navigateTo, database = database!!, team = team, language = language)
 
-    private fun playersModelBuilder(): PlayersModel =
-        PlayersModel(navigateToScreen = ::navigateTo, database = database!!)
+    private fun playersModelBuilder(language: Language): PlayersModel =
+        PlayersModel(navigateToScreen = ::navigateTo, database = database!!, language = language)
 
-    private fun editPlayerModelBuilder(player: Player?): EditPlayerModel =
-        EditPlayerModel(navigateToScreen = ::navigateTo, database = database!!, player = player)
+    private fun editPlayerModelBuilder(player: Player?, language: Language): EditPlayerModel =
+        EditPlayerModel(navigateToScreen = ::navigateTo, database = database!!, player = player, language = language)
 
-    private fun gamesModelBuilder(): GamesModel =
-        GamesModel(navigateToScreen = ::navigateTo, database = database!!, fileHandler = fileHandler)
+    private fun gamesModelBuilder(language: Language): GamesModel =
+        GamesModel(navigateToScreen = ::navigateTo, database = database!!, fileHandler = fileHandler, language = language)
 
-    private fun newRoundModelBuilder(): NewRoundModel =
-        NewRoundModel(navigateToScreen = ::navigateTo, database = database!!)
+    private fun newRoundModelBuilder(language: Language): NewRoundModel =
+        NewRoundModel(navigateToScreen = ::navigateTo, database = database!!, language = language)
 
-    private fun editRoundModelBuilder(round: Round): EditRoundModel =
-        EditRoundModel(navigateToScreen = ::navigateTo, database = database!!, round = round)
+    private fun editRoundModelBuilder(round: Round, language: Language): EditRoundModel =
+        EditRoundModel(navigateToScreen = ::navigateTo, database = database!!, round = round, language = language)
 
-    private fun editGameModelBuilder(roundId: Long): EditGameModel =
-        EditGameModel(navigateToScreen = ::navigateTo, database = database!!, roundId = roundId)
+    private fun editGameModelBuilder(roundId: Long, language: Language): EditGameModel =
+        EditGameModel(navigateToScreen = ::navigateTo, database = database!!, roundId = roundId, language = language)
 
     private fun navigateTo(screens: Screens, navigator: Navigator) {
         when (screens) {
             Screens.Pop -> navigator.pop()
             Screens.Projects -> navigateToProjects(navigator = navigator)
-            Screens.NewProject -> navigateToNewProject(navigator = navigator)
-            is Screens.OpenProject -> openProject(navigator = navigator, project = screens.project)
-            Screens.Teams -> navigateToTeams(navigator = navigator)
-            is Screens.EditTeam -> navigateToEditTeam(navigator = navigator, team = screens.team)
-            Screens.Players -> navigateToPlayers(navigator = navigator)
-            is Screens.EditPlayer -> navigateToEditPlayer(navigator = navigator, player = screens.player)
-            Screens.Games -> navigateToGames(navigator = navigator)
-            Screens.NewRound -> navigateToNewRound(navigator = navigator)
-            is Screens.EditRound -> navigateToEditRound(navigator = navigator, round = screens.round)
-            is Screens.EditGame -> navigateToEditGame(navigator = navigator, roundId = screens.roundId)
+            is Screens.NewProject -> navigateToNewProject(navigator = navigator, language = screens.language)
+            is Screens.OpenProject -> openProject(navigator = navigator, project = screens.project, language = screens.language)
+            is Screens.Teams -> navigateToTeams(navigator = navigator, language = screens.language)
+            is Screens.EditTeam -> navigateToEditTeam(navigator = navigator, team = screens.team, language = screens.language)
+            is Screens.Players -> navigateToPlayers(navigator = navigator, language = screens.language)
+            is Screens.EditPlayer -> navigateToEditPlayer(navigator = navigator, player = screens.player, language = screens.language)
+            is Screens.Games -> navigateToGames(navigator = navigator, language = screens.language)
+            is Screens.NewRound -> navigateToNewRound(navigator = navigator, language = screens.language)
+            is Screens.EditRound -> navigateToEditRound(navigator = navigator, round = screens.round, language = screens.language)
+            is Screens.EditGame -> navigateToEditGame(navigator = navigator, roundId = screens.roundId, language = screens.language)
         }
     }
 
@@ -83,45 +86,45 @@ class RootNavigator {
         navigator.replaceAll(ProjectsScreen(::projectsModelBuilder))
     }
 
-    private fun navigateToNewProject(navigator: Navigator) {
-        navigator.push(NewProjectScreen(::newProjectModelBuilder))
+    private fun navigateToNewProject(navigator: Navigator, language: Language) {
+        navigator.push(NewProjectScreen { newProjectModelBuilder(language = language) })
     }
 
-    private fun openProject(navigator: Navigator, project: Project) {
+    private fun openProject(navigator: Navigator, project: Project, language: Language) {
         fileHandler.setCurrentProject(project = project)
         database = Database(tournamentPath = project.location, fileHandler = fileHandler)
-        navigateToTeams(navigator = navigator)
+        navigateToTeams(navigator = navigator, language = language)
     }
 
-    private fun navigateToTeams(navigator: Navigator) {
-        navigator.replaceAll(TeamsScreen(::teamsModelBuilder))
+    private fun navigateToTeams(navigator: Navigator, language: Language) {
+        navigator.replaceAll(TeamsScreen { teamsModelBuilder(language = language) })
     }
 
-    private fun navigateToEditTeam(navigator: Navigator, team: Team?) {
-        navigator.push(item = EditTeamScreen { editTeamModelBuilder(team = team) })
+    private fun navigateToEditTeam(navigator: Navigator, team: Team?, language: Language) {
+        navigator.push(item = EditTeamScreen { editTeamModelBuilder(team = team, language = language) })
     }
 
-    private fun navigateToPlayers(navigator: Navigator) {
-        navigator.replaceAll(PlayersScreen(::playersModelBuilder))
+    private fun navigateToPlayers(navigator: Navigator, language: Language) {
+        navigator.replaceAll(PlayersScreen { playersModelBuilder(language = language) })
     }
 
-    private fun navigateToEditPlayer(navigator: Navigator, player: Player?) {
-        navigator.push(item = EditPlayerScreen { editPlayerModelBuilder(player = player) })
+    private fun navigateToEditPlayer(navigator: Navigator, player: Player?, language: Language) {
+        navigator.push(item = EditPlayerScreen { editPlayerModelBuilder(player = player, language = language) })
     }
 
-    private fun navigateToGames(navigator: Navigator) {
-        navigator.replaceAll(GamesScreen(::gamesModelBuilder))
+    private fun navigateToGames(navigator: Navigator, language: Language) {
+        navigator.replaceAll(GamesScreen { gamesModelBuilder(language = language) })
     }
 
-    private fun navigateToNewRound(navigator: Navigator) {
-        navigator.push(item = NewRoundScreen(::newRoundModelBuilder))
+    private fun navigateToNewRound(navigator: Navigator, language: Language) {
+        navigator.push(item = NewRoundScreen { newRoundModelBuilder(language = language) })
     }
 
-    private fun navigateToEditRound(navigator: Navigator, round: Round) {
-        navigator.push(item = EditRoundScreen { editRoundModelBuilder(round = round) })
+    private fun navigateToEditRound(navigator: Navigator, round: Round, language: Language) {
+        navigator.push(item = EditRoundScreen { editRoundModelBuilder(round = round, language = language) })
     }
 
-    private fun navigateToEditGame(navigator: Navigator, roundId: Long) {
-        navigator.push(item = EditGameScreen { editGameModelBuilder(roundId = roundId) })
+    private fun navigateToEditGame(navigator: Navigator, roundId: Long, language: Language) {
+        navigator.push(item = EditGameScreen { editGameModelBuilder(roundId = roundId, language = language) })
     }
 }

@@ -7,10 +7,7 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.olt.racketclash.data.Player
-import com.olt.racketclash.data.Team
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
 
@@ -22,19 +19,16 @@ class EditPlayerScreen(private val modelBuilder: () -> EditPlayerModel) : Screen
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(
-            topAppBarTitle = "Edit Player",
+            language = stateModel.language,
+            topAppBarTitle = stateModel.language.editPlayer,
             hasBackPress = true,
-            selectedTab = TournamentTabs.Players,
+            selectedTab = TournamentTabs.Players(language = stateModel.language),
             navigateTo = screenModel::navigateTo
         ) {
             SettingsView {
                 EditPlayerView(
-                    player = stateModel.player,
-                    teams = stateModel.teams,
-                    selectedTeam = stateModel.selectedTeam,
-                    updatePlayer = screenModel::updatePlayer,
-                    selectTeam = screenModel::selectTeam,
-                    navigateTo = screenModel::navigateTo
+                    model = stateModel,
+                    screenModel = screenModel
                 )
             }
         }
@@ -43,40 +37,37 @@ class EditPlayerScreen(private val modelBuilder: () -> EditPlayerModel) : Screen
 
 @Composable
 private fun EditPlayerView(
-    player: Player?,
-    teams: List<Team>,
-    selectedTeam: Team,
-    updatePlayer: (Long?, String, Long) -> Unit,
-    selectTeam: (Long) -> Unit,
-    navigateTo: (Screens, Navigator) -> Unit
+    model: EditPlayerModel.Model,
+    screenModel: EditPlayerModel
 ) {
-    var playerName by remember { mutableStateOf(player?.name ?: "") }
+    var playerName by remember { mutableStateOf(model.player?.name ?: "") }
 
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
         value = playerName,
         onValueChange = { playerName = it },
-        label = { Text("Name") },
+        label = { Text(model.language.name) },
         isError = playerName.isBlank()
     )
 
     DropDownMenu(
         modifier = Modifier.fillMaxWidth(),
-        label = "Team",
-        items = teams,
-        value = selectedTeam,
-        isError = selectedTeam.id == -1L,
+        label = model.language.team,
+        items = model.teams,
+        value = model.selectedTeam,
+        isError = model.selectedTeam.id == -1L,
         textMapper = { it.name },
-        onClick = { selectTeam(it.id) }
+        onClick = { screenModel.selectTeam(it.id) }
     )
 
     val navigator = LocalNavigator.currentOrThrow
     CancelSaveButtonRow(
-        onCancel = { navigateTo(Screens.Pop, navigator) },
+        language = model.language,
+        onCancel = { screenModel.navigateTo(Screens.Pop, navigator) },
         onSave = {
-            updatePlayer(player?.id, playerName, selectedTeam.id)
-            navigateTo(Screens.Pop, navigator)
+            screenModel.updatePlayer(model.player?.id, playerName, model.selectedTeam.id)
+            screenModel.navigateTo(Screens.Pop, navigator)
         },
-        canSave = playerName.isNotBlank() && selectedTeam.id != -1L
+        canSave = playerName.isNotBlank() && model.selectedTeam.id != -1L
     )
 }

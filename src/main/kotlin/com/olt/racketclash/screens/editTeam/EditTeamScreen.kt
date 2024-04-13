@@ -8,9 +8,7 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.olt.racketclash.data.Team
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
 
@@ -22,16 +20,16 @@ class EditTeamScreen(private val modelBuilder: () -> EditTeamModel) : Screen {
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(
-            topAppBarTitle = "Edit Team",
+            language = stateModel.language,
+            topAppBarTitle = stateModel.language.editTeam,
             hasBackPress = true,
-            selectedTab = TournamentTabs.Teams,
+            selectedTab = TournamentTabs.Teams(language = stateModel.language),
             navigateTo = screenModel::navigateTo
         ) {
             SettingsView {
                 EditTeamView(
-                    team = stateModel.team,
-                    updateTeam = screenModel::updateTeam,
-                    navigateTo = screenModel::navigateTo
+                    model = stateModel,
+                    screenModel = screenModel
                 )
             }
         }
@@ -40,23 +38,22 @@ class EditTeamScreen(private val modelBuilder: () -> EditTeamModel) : Screen {
 
 @Composable
 private fun EditTeamView(
-    team: Team?,
-    updateTeam: (Long?, String, Int) -> Unit,
-    navigateTo: (Screens, Navigator) -> Unit
+    model: EditTeamModel.Model,
+    screenModel: EditTeamModel
 ) {
-    var teamName by remember { mutableStateOf(team?.name ?: "") }
-    var teamStrength by remember { mutableStateOf(team?.strength ?: 1) }
+    var teamName by remember { mutableStateOf(model.team?.name ?: "") }
+    var teamStrength by remember { mutableStateOf(model.team?.strength ?: 1) }
 
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
         value = teamName,
         onValueChange = { teamName = it },
-        label = { Text("Name") },
+        label = { Text(model.language.name) },
         isError = teamName.isBlank()
     )
 
     NumberSelector(
-        label = "Difficulty:",
+        label = model.language.strength + ":",
         value = teamStrength,
         onValueChange = { teamStrength = it },
         min = 1
@@ -64,10 +61,11 @@ private fun EditTeamView(
 
     val navigator = LocalNavigator.currentOrThrow
     CancelSaveButtonRow(
-        onCancel = { navigateTo(Screens.Pop, navigator) },
+        language = model.language,
+        onCancel = { screenModel.navigateTo(Screens.Pop, navigator) },
         onSave = {
-            updateTeam(team?.id, teamName, teamStrength)
-            navigateTo(Screens.Pop, navigator)
+            screenModel.updateTeam(model.team?.id, teamName, teamStrength)
+            screenModel.navigateTo(Screens.Pop, navigator)
         },
         canSave = teamName.isNotBlank()
     )

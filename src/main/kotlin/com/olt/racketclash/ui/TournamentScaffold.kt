@@ -13,12 +13,25 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.navigation.Screens
 
 sealed class TournamentTabs(val tab: Tab) {
-    data object Teams : TournamentTabs(tab = Tab(target = Screens.Teams, imageVector = Icons.Default.Person, text = "Teams"))
-    data object Players : TournamentTabs(tab = Tab(target = Screens.Players, imageVector = Icons.Default.Person, text = "Player"))
-    data object Games : TournamentTabs(tab = Tab(target = Screens.Games ,imageVector = Icons.Default.List, text = "Games"))
+    data class Teams(val language: Language) : TournamentTabs(
+        tab = Tab(target = Screens.Teams(language = language),
+            imageVector = Icons.Default.Person,
+            text = language.teams)
+    )
+    data class Players(val language: Language) : TournamentTabs(
+        tab = Tab(target = Screens.Players(language = language),
+            imageVector = Icons.Default.Person,
+            text = language.players)
+    )
+    data class Games(val language: Language) : TournamentTabs(
+        tab = Tab(target = Screens.Games(language = language) ,
+            imageVector = Icons.Default.List,
+            text = language.games)
+    )
 }
 
 data class Tab(
@@ -29,6 +42,7 @@ data class Tab(
 
 @Composable
 fun TournamentScaffold(
+    language: Language,
     topAppBarTitle: String,
     topAppBarActions: @Composable (RowScope.() -> Unit) = {},
     hasBackPress: Boolean = false,
@@ -41,7 +55,11 @@ fun TournamentScaffold(
         topAppBarTitle = topAppBarTitle,
         topAppBarActions = topAppBarActions,
         hasBackPress = hasBackPress,
-        tabs = listOf(TournamentTabs.Teams.tab, TournamentTabs.Players.tab, TournamentTabs.Games.tab),
+        tabs = listOf(
+            TournamentTabs.Teams(language = language).tab,
+            TournamentTabs.Players(language = language).tab,
+            TournamentTabs.Games(language = language).tab
+        ),
         selectedTab = selectedTab?.tab,
         navigateTo = navigateTo,
         content = content

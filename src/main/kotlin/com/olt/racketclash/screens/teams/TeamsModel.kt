@@ -5,6 +5,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Team
 import com.olt.racketclash.data.sort
+import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.navigation.NavigableStateScreenModel
 import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
@@ -12,8 +13,9 @@ import kotlinx.coroutines.launch
 
 class TeamsModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
-    private val database: Database
-) : NavigableStateScreenModel<TeamsModel.Modal>(navigateToScreen, Modal()) {
+    private val database: Database,
+    language: Language
+) : NavigableStateScreenModel<TeamsModel.Modal>(navigateToScreen, Modal(language = language)) {
 
     private var completeTeams: List<Team> = emptyList()
 
@@ -32,6 +34,7 @@ class TeamsModel(
     }
 
     data class Modal(
+        val language: Language,
         val isLoading: Boolean = true,
         val teams: List<Team> = emptyList(),
         val filter: String = "",

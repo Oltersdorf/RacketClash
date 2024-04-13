@@ -28,13 +28,18 @@ class TeamsScreen(private val modelBuilder: () -> TeamsModel) : Screen {
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(
-            topAppBarTitle = "Teams",
+            language = stateModel.language,
+            topAppBarTitle = stateModel.language.teams,
             topAppBarActions = {
                 val navigator = LocalNavigator.currentOrThrow
 
-                AddButton { screenModel.navigateTo(screen = Screens.EditTeam(team = null), navigator = navigator) }
+                AddButton {
+                    screenModel.navigateTo(
+                        screen = Screens.EditTeam(team = null, language = stateModel.language),
+                        navigator = navigator)
+                }
             },
-            selectedTab = TournamentTabs.Teams,
+            selectedTab = TournamentTabs.Teams(language = stateModel.language),
             navigateTo = screenModel::navigateTo
         ) {
             TeamView(model = stateModel, screenModel = screenModel)
@@ -68,76 +73,76 @@ private fun TeamList(
                 modifier = Modifier.width(TextFieldDefaults.MinWidth),
                 value = model.filter,
                 onValueChange = screenModel::changeFilter,
-                label = { Text("Filter by name") },
+                label = { Text(model.language.filterByName) },
                 singleLine = true
             )
 
             DropDownMenu(
                 modifier = Modifier.padding(start = 5.dp).width(TextFieldDefaults.MinWidth),
-                label = "Sort by",
+                label = model.language.sortBy,
                 items = Team.sortingOptions(),
                 value = model.sortedBy,
-                textMapper = Team.Sorting::text,
+                textMapper = { it.text(language = model.language) },
                 onClick = screenModel::changeSorting
             )
         },
         items = model.teams,
         modifier = Modifier.padding(5.dp),
-        onClick = { screenModel.navigateTo(screen = Screens.EditTeam(it), navigator = navigator) },
+        onClick = { screenModel.navigateTo(screen = Screens.EditTeam(team = it, language = model.language), navigator = navigator) },
         columns = listOf(
             LazyTableColumn.Text(
-                name = "Name",
+                name = model.language.name,
                 weight = 5.0f,
                 text = { it.name }
             ),
             LazyTableColumn.Text(
-                name = "Difficulty",
+                name = model.language.strength,
                 weight = 1.0f,
                 text = { it.strength.toString() }
             ),
             LazyTableColumn.Text(
-                name = "Player",
+                name = model.language.players,
                 weight = 1.0f,
                 text = { it.size.toString() }
             ),
             LazyTableColumn.Text(
-                name = "pending",
+                name = model.language.pending,
                 weight = 1.0f,
                 text = { it.openGames.toString() }
             ),
             LazyTableColumn.Text(
-                name = "played",
+                name = model.language.played,
                 weight = 1.0f,
                 text = { it.played.toString() }
             ),
             LazyTableColumn.Text(
-                name = "bye",
+                name = model.language.byes,
                 weight = 1.0f,
                 text = { it.bye.toString() }
             ),
             LazyTableColumn.Text(
-                name = "Games",
+                name = model.language.games,
                 weight = 1.0f,
                 text = { "${it.wonGames} : ${it.lostGames}" }
             ),
             LazyTableColumn.Text(
-                name = "Sets",
+                name = model.language.sets,
                 weight = 1.0f,
                 text = { "${it.wonSets} : ${it.lostSets}" }
             ),
             LazyTableColumn.Text(
-                name = "Points",
+                name = model.language.points,
                 weight = 1.0f,
                 text = { "${it.wonPoints} : ${it.lostPoints}" }
             ),
             LazyTableColumn.IconButton(
-                name = "Delete",
+                name = model.language.delete,
                 weight = 0.5f,
                 headerTextAlign = TextAlign.Center,
                 onClick = { screenModel.deleteTeam(id = it.id) },
                 enabled = { it.size == 0 },
                 imageVector = Icons.Default.Delete,
-                contentDescription = "Delete"
+                contentDescription = model.language.delete
             )
         )
     )

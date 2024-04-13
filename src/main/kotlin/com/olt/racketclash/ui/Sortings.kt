@@ -2,29 +2,30 @@ package com.olt.racketclash.ui
 
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.Team
+import com.olt.racketclash.language.translations.Language
 
-fun Player.Sorting.text() =
+fun Player.Sorting.text(language: Language) =
     when (this) {
-        Player.Sorting.NameAscending -> "Name ascending"
-        Player.Sorting.NameDescending -> "Name descending"
-        Player.Sorting.PointsAscending -> "Points ascending"
-        Player.Sorting.PointsDescending -> "Points descending"
-        Player.Sorting.TeamAscending -> "Team ascending"
-        Player.Sorting.TeamDescending -> "Team descending"
-        Player.Sorting.ByeAscending -> "Bye ascending"
-        Player.Sorting.ByeDescending -> "Bye descending"
-        Player.Sorting.PendingAscending -> "Pending ascending"
-        Player.Sorting.PendingDescending -> "Pending descending"
-        Player.Sorting.PlayedAscending -> "Played ascending"
-        Player.Sorting.PlayedDescending -> "Played descending"
+        Player.Sorting.NameAscending -> language.nameAscending
+        Player.Sorting.NameDescending -> language.nameDescending
+        Player.Sorting.PointsAscending -> language.pointsAscending
+        Player.Sorting.PointsDescending -> language.pointsDescending
+        Player.Sorting.TeamAscending -> language.teamAscending
+        Player.Sorting.TeamDescending -> language.teamDescending
+        Player.Sorting.ByeAscending -> language.byesAscending
+        Player.Sorting.ByeDescending -> language.byesDescending
+        Player.Sorting.PendingAscending -> language.pendingAscending
+        Player.Sorting.PendingDescending -> language.pendingDescending
+        Player.Sorting.PlayedAscending -> language.playedAscending
+        Player.Sorting.PlayedDescending -> language.playedDescending
     }
 
-fun Team.Sorting.text() =
+fun Team.Sorting.text(language: Language) =
     when (this) {
-        Team.Sorting.NameAscending -> "Name ascending"
-        Team.Sorting.NameDescending -> "Name descending"
-        Team.Sorting.PointsAscending -> "Points ascending"
-        Team.Sorting.PointsDescending -> "Points descending"
-        Team.Sorting.StrengthAscending -> "Strength ascending"
-        Team.Sorting.StrengthDescending -> "Strength descending"
+        Team.Sorting.NameAscending -> language.nameAscending
+        Team.Sorting.NameDescending -> language.nameDescending
+        Team.Sorting.PointsAscending -> language.pointsAscending
+        Team.Sorting.PointsDescending -> language.pointsDescending
+        Team.Sorting.StrengthAscending -> language.strengthAscending
+        Team.Sorting.StrengthDescending -> language.strengthDescending
     }

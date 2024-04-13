@@ -28,7 +28,7 @@ class NewProjectScreen(private val modelBuilder: () -> NewProjectModel) : Screen
         ) {
             SettingsView {
                 Text(
-                    text = "New Project",
+                    text = stateModel.language.newProject,
                     style = MaterialTheme.typography.headlineLarge
                 )
 
@@ -36,7 +36,7 @@ class NewProjectScreen(private val modelBuilder: () -> NewProjectModel) : Screen
                     modifier = Modifier.fillMaxWidth(),
                     value = stateModel.projectName,
                     onValueChange = { screenModel.changeProjectName(newName = it) },
-                    label = { Text("Name") },
+                    label = { Text(stateModel.language.name) },
                     isError = !stateModel.canCreate
                 )
 
@@ -46,10 +46,10 @@ class NewProjectScreen(private val modelBuilder: () -> NewProjectModel) : Screen
                 ) {
                     var showDirPicker by remember { mutableStateOf(false) }
 
-                    Text(text = "Location:", fontWeight = FontWeight.Bold)
+                    Text(text = stateModel.language.saveLocation + ":", fontWeight = FontWeight.Bold)
                     Text(text = stateModel.location, modifier = Modifier.weight(1.0f))
                     Button(onClick = { showDirPicker = true }) {
-                        Text("Change")
+                        Text(stateModel.language.change)
                     }
 
                     DirectoryPicker(show = showDirPicker, initialDirectory = System.getProperty("user.home")) { path ->
@@ -60,6 +60,7 @@ class NewProjectScreen(private val modelBuilder: () -> NewProjectModel) : Screen
 
                 val navigator = LocalNavigator.currentOrThrow
                 CancelSaveButtonRow(
+                    language = stateModel.language,
                     onCancel = { screenModel.navigateTo(screen = Screens.Pop, navigator = navigator) },
                     onSave = {
                         screenModel.addProject()

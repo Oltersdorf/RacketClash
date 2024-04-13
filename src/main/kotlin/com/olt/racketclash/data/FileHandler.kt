@@ -3,6 +3,7 @@ package com.olt.racketclash.data
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -24,16 +25,28 @@ class FileHandler {
 
     private var currentProject : Project? = null
 
+    var selectedLanguage: String
+        private set
+
     companion object {
         val defaultProjectLocation: String = Path(System.getProperty("user.home")).absolutePathString()
     }
 
     init {
+        racketClashPath.createDirectories()
+        val settings = loadSettings()
+        selectedLanguage = settings.language
+
         runBlocking(Dispatchers.IO) {
-            racketClashPath.createDirectories()
-            loadProjects()
+            projectsChannel.emit(settings.projects)
         }
     }
+
+    @Serializable
+    private data class RacketClashSettings(
+        val language: String,
+        val projects: List<Project>
+    )
 
     fun projects() : StateFlow<List<Project>> = projectsChannel.asStateFlow()
     fun fields() : StateFlow<Int> = fieldsChannel.asStateFlow()
@@ -49,6 +62,11 @@ class FileHandler {
         }
     }
 
+    fun setLanguage(language: String) {
+        selectedLanguage = language
+        writeSettings(settings = RacketClashSettings(language = language, projects = projectsChannel.value))
+    }
+
     suspend fun addProject(name: String, location: String) {
         val projectPath = Path(location, name)
         projectPath.createDirectories()
@@ -57,7 +75,7 @@ class FileHandler {
             *projectsChannel.value.toTypedArray()
         ).sortedBy { it.lastModified }
 
-        writeProjects(projects = newProjects)
+        writeSettings(settings = RacketClashSettings(language = selectedLanguage, projects = newProjects))
 
         projectsChannel.emit(newProjects)
     }
@@ -68,33 +86,34 @@ class FileHandler {
         if (project != null) {
             val newProjects = projectsChannel.value.toMutableList()
             newProjects.remove(project)
-            writeProjects(newProjects.toList())
+            writeSettings(settings = RacketClashSettings(language = selectedLanguage, projects = newProjects.toList()))
             projectsChannel.emit(newProjects)
         }
     }
 
-    private suspend fun loadProjects() {
-        val projectsFile = File(racketClashPath.absolutePathString(), "Projects.json")
+    private fun loadSettings(): RacketClashSettings {
+        val projectsFile = File(racketClashPath.absolutePathString(), "Settings.json")
 
         if (projectsFile.exists()) {
             val jsonString = projectsFile.readText()
-            val projects: List<Project> = Json.decodeFromString<List<Project>>(jsonString)
-            projectsChannel.emit(projects)
+            return Json.decodeFromString<RacketClashSettings>(jsonString)
         }
+
+        return RacketClashSettings(language = "English", projects = emptyList())
     }
 
     suspend fun updatePlayerCount(playerNumber: Int) {
         val projects = projectsChannel.value.toMutableList()
         projects.replaceAll { if (it.name == currentProject?.name) it.copy(playerNumber = playerNumber, lastModified = currentTime()) else it }
-        writeProjects(projects)
         projectsChannel.emit(projects)
+        writeSettings(settings = RacketClashSettings(language = selectedLanguage, projects = projects))
     }
 
     suspend fun updateTeamCount(teamNumber: Int) {
         val projects = projectsChannel.value.toMutableList()
         projects.replaceAll { if (it.name == currentProject?.name) it.copy(teamNumber = teamNumber, lastModified = currentTime()) else it }
-        writeProjects(projects)
         projectsChannel.emit(projects)
+        writeSettings(settings = RacketClashSettings(language = selectedLanguage, projects = projects))
     }
 
     suspend fun setFields(newFields: Int) {
@@ -102,7 +121,7 @@ class FileHandler {
         val newProjects = projectsChannel.value.toMutableList()
         newProjects.replaceAll { if (it.name == currentProject?.name) it.copy(fields = newFields) else it }
         projectsChannel.emit(newProjects)
-        writeProjects(projects = newProjects)
+        writeSettings(settings = RacketClashSettings(language = selectedLanguage, projects = newProjects))
     }
 
     suspend fun setTimeout(newTimeout: Int) {
@@ -110,11 +129,11 @@ class FileHandler {
         val newProjects = projectsChannel.value.toMutableList()
         newProjects.replaceAll { if (it.name == currentProject?.name) it.copy(timeout = newTimeout) else it }
         projectsChannel.emit(newProjects)
-        writeProjects(projects = newProjects)
+        writeSettings(settings = RacketClashSettings(language = selectedLanguage, projects = newProjects))
     }
 
-    private fun writeProjects(projects: List<Project>) {
-        val jsonString = Json.encodeToString(projects)
-        File(racketClashPath.absolutePathString(), "Projects.json").writeText(jsonString)
+    private fun writeSettings(settings: RacketClashSettings) {
+        val jsonString = Json.encodeToString(settings)
+        File(racketClashPath.absolutePathString(), "Settings.json").writeText(jsonString)
     }
 }

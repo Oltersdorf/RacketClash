@@ -8,9 +8,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.olt.racketclash.language.translations.Language
 
 @Composable
 fun CancelSaveButtonRow(
+    language: Language,
     onCancel: () -> Unit,
     onSave: () -> Unit,
     canSave: Boolean = true
@@ -18,10 +20,10 @@ fun CancelSaveButtonRow(
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Spacer(modifier = Modifier.weight(1.0f))
         Button(onClick = onCancel) {
-            Text("Cancel")
+            Text(language.cancel)
         }
         Button(onClick = onSave, enabled = canSave) {
-            Text("Save")
+            Text(language.save)
         }
     }
 }

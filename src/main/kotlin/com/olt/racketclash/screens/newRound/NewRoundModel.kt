@@ -7,6 +7,7 @@ import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.sort
+import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.navigation.NavigableStateScreenModel
 import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
@@ -14,8 +15,9 @@ import kotlinx.coroutines.launch
 
 class NewRoundModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
-    private val database: Database
-) : NavigableStateScreenModel<NewRoundModel.Model>(navigateToScreen, Model()) {
+    private val database: Database,
+    language: Language
+) : NavigableStateScreenModel<NewRoundModel.Model>(navigateToScreen, Model(language = language)) {
 
     private var completePlayers: List<Player> = emptyList()
 
@@ -46,6 +48,7 @@ class NewRoundModel(
     }
 
     data class Model(
+        val language: Language,
         val canCreate: Boolean = false,
         val roundName: String = "",
         val generating: Boolean = false,

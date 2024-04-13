@@ -19,6 +19,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Bye
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Round
+import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
 
@@ -30,12 +31,15 @@ class GamesScreen(private val modelBuilder: () -> GamesModel) : Screen {
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(
-            topAppBarTitle = "Games",
+            language = stateModel.language,
+            topAppBarTitle = stateModel.language.games,
             topAppBarActions = {
                 val navigator = LocalNavigator.currentOrThrow
-                AddButton { screenModel.navigateTo(screen = Screens.NewRound, navigator = navigator) }
+                AddButton {
+                    screenModel.navigateTo(screen = Screens.NewRound(language = stateModel.language), navigator = navigator)
+                }
             },
-            selectedTab = TournamentTabs.Games,
+            selectedTab = TournamentTabs.Games(language = stateModel.language),
             navigateTo = screenModel::navigateTo
         ) {
             GamesView(model = stateModel, screenModel = screenModel)
@@ -67,15 +71,15 @@ private fun Header(
         ) {
             NumberSelector(
                 modifier = Modifier.padding(start = 10.dp),
-                label = "Fields:",
+                label = model.language.fields + ":",
                 value = model.fields,
                 onValueChange = screenModel::changeFields,
                 min = 1
             )
             NumberSelector(
-                label = "Timeout:",
+                label = model.language.timeout + ":",
                 value = model.timeout,
-                valuePostText = "min",
+                valuePostText = model.language.minutes,
                 onValueChange = screenModel::changeTimeout,
                 min = 1
             )
@@ -100,6 +104,7 @@ private fun Graph(
             ) {
                 items(items = model.rounds) {
                     Round(
+                        language = model.language,
                         round = it,
                         games = model.games[it.id] ?: emptyList(),
                         bye = model.bye[it.id] ?: emptyList(),
@@ -126,6 +131,7 @@ private fun Graph(
 
 @Composable
 private fun Round(
+    language: Language,
     round: Round,
     games: List<Game>,
     bye: List<Bye>,
@@ -149,28 +155,37 @@ private fun Round(
                 Text(round.name)
                 Spacer(modifier = Modifier.weight(1.0f))
                 val navigator = LocalNavigator.currentOrThrow
-                EditButton { screenModel.navigateTo(Screens.EditRound(round = round), navigator) }
+                EditButton { screenModel.navigateTo(Screens.EditRound(round = round, language = language), navigator) }
                 DeleteButton(enabled = games.isEmpty()) { screenModel.deleteRound(id = round.id) }
             }
 
-            if (bye.isNotEmpty()) ByeItem(byes = bye)
+            if (bye.isNotEmpty()) ByeItem(language = language, byes = bye)
 
             if (games.isEmpty())
                 Text(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp).fillMaxWidth(),
-                    text = "No games available",
+                    text = language.noGamesAvailable,
                     textAlign = TextAlign.Center
                 )
             else
                 games.forEachIndexed { index, game ->
-                    GameItem(isFirst = bye.isEmpty() && index == 0, active = active.contains(game.id), game = game, screenModel = screenModel)
+                    GameItem(
+                        language = language,
+                        isFirst = bye.isEmpty() && index == 0,
+                        active = active.contains(game.id),
+                        game = game,
+                        screenModel = screenModel
+                    )
                 }
         }
     }
 }
 
 @Composable
-private fun ByeItem(byes: List<Bye>) {
+private fun ByeItem(
+    language: Language,
+    byes: List<Bye>
+) {
     Column(
         modifier = Modifier
             .padding(horizontal = 10.dp, vertical = 5.dp)
@@ -182,7 +197,7 @@ private fun ByeItem(byes: List<Bye>) {
         Text(
             modifier = Modifier.padding(top = 5.dp),
             color = MaterialTheme.colorScheme.onSecondary,
-            style = MaterialTheme.typography.titleLarge, text = "Bye"
+            style = MaterialTheme.typography.titleLarge, text = language.byes
         )
         byes.forEachIndexed { index, bye ->
             Text(
@@ -196,6 +211,7 @@ private fun ByeItem(byes: List<Bye>) {
 
 @Composable
 private fun GameItem(
+    language: Language,
     isFirst: Boolean,
     active: Boolean,
     game: Game,
@@ -215,8 +231,8 @@ private fun GameItem(
             modifier = Modifier.weight(1.0f).padding(vertical = 5.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(color = textColor, text = "${game.playerLeft1Name ?: "<Empty>"} (${game.playerLeft1TeamName})")
-            Text(color = textColor, text = "${game.playerLeft2Name ?: "<Empty>"} (${game.playerLeft2TeamName})")
+            Text(color = textColor, text = "${game.playerLeft1Name ?: "<${language.empty}>"} (${game.playerLeft1TeamName})")
+            Text(color = textColor, text = "${game.playerLeft2Name ?: "<${language.empty}>"} (${game.playerLeft2TeamName})")
         }
 
         Column(
@@ -242,8 +258,8 @@ private fun GameItem(
             modifier = Modifier.weight(1.0f).padding(vertical = 5.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(color = textColor, text = "${game.playerRight1Name ?: "<Empty>"} (${game.playerRight1TeamName})")
-            Text(color = textColor, text = "${game.playerRight2Name ?: "<Empty>"} (${game.playerRight2TeamName})")
+            Text(color = textColor, text = "${game.playerRight1Name ?: "<${language.empty}>"} (${game.playerRight1TeamName})")
+            Text(color = textColor, text = "${game.playerRight2Name ?: "<${language.empty}>"} (${game.playerRight2TeamName})")
         }
 
         if (game.isDone)

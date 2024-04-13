@@ -6,6 +6,7 @@ import com.olt.racketclash.data.Game
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.sort
+import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.navigation.NavigableStateScreenModel
 import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
@@ -14,8 +15,12 @@ import kotlinx.coroutines.launch
 class EditGameModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
     private val database: Database,
-    private val roundId: Long
-) : NavigableStateScreenModel<EditGameModel.Model>(navigateToScreen = navigateToScreen, initialState = Model()) {
+    private val roundId: Long,
+    language: Language
+) : NavigableStateScreenModel<EditGameModel.Model>(
+    navigateToScreen = navigateToScreen,
+    initialState = Model(language = language)
+) {
 
     private var unfilteredPlayers: List<Player> = emptyList()
     private var games: List<Game> = emptyList()
@@ -48,6 +53,7 @@ class EditGameModel(
     }
 
     data class Model(
+        val language: Language,
         val roundName: String = "",
         val player1Left: Player? = null,
         val player1LeftDisplayName: String = "<empty>",
@@ -65,7 +71,7 @@ class EditGameModel(
     )
 
     fun selectPlayer(selection: SelectedPlayer) {
-        screenModelScope.launch(context = Dispatchers.Default) {
+        screenModelScope.launch(context = Dispatchers.IO) {
             updateState {
                 copy(
                     selectedPlayer = selection,
@@ -76,7 +82,7 @@ class EditGameModel(
     }
 
     fun setPlayer(playerId: Long) {
-        screenModelScope.launch(context = Dispatchers.Default) {
+        screenModelScope.launch(context = Dispatchers.IO) {
             updateState {
                 val player = unfilteredPlayers.find { it.id == playerId }
                 val displayName =
@@ -97,7 +103,7 @@ class EditGameModel(
     }
 
     fun removePlayer(selection: SelectedPlayer) {
-        screenModelScope.launch(context = Dispatchers.Default) {
+        screenModelScope.launch(context = Dispatchers.IO) {
             updateState {
                 when (selection) {
                     SelectedPlayer.Left1 -> copy(player1Left = null, player1LeftDisplayName = "<empty>")
@@ -119,13 +125,13 @@ class EditGameModel(
                     playerRight1Id = player1Right?.id,
                     playerRight2Id = player2Right?.id
                 )
-                Model(roundName = roundName)
+                this
             }
         }
     }
 
     fun changeNameFilter(newNameFilter: String) {
-        screenModelScope.launch(context = Dispatchers.Default) {
+        screenModelScope.launch(context = Dispatchers.IO) {
             updateState {
                 copy(
                     nameFilter = newNameFilter,
@@ -138,7 +144,7 @@ class EditGameModel(
     }
 
     fun changeSorting(newSorting: Player.Sorting) {
-        screenModelScope.launch(context = Dispatchers.Default) {
+        screenModelScope.launch(context = Dispatchers.IO) {
             updateState {
                 copy(
                     sortedBy = newSorting,
@@ -151,7 +157,7 @@ class EditGameModel(
     }
 
     fun changeFilterNotInRound(filterNotInRound: Boolean) {
-        screenModelScope.launch(context = Dispatchers.Default) {
+        screenModelScope.launch(context = Dispatchers.IO) {
             updateState {
                 copy(
                     filterNotInRound = filterNotInRound,

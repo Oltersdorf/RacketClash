@@ -6,6 +6,7 @@ import com.olt.racketclash.data.Bye
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Round
+import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.navigation.NavigableStateScreenModel
 import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
@@ -14,8 +15,12 @@ import kotlinx.coroutines.launch
 class EditRoundModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
     private val database: Database,
-    private val round: Round
-) : NavigableStateScreenModel<EditRoundModel.Model>(navigateToScreen = navigateToScreen, initialState = Model()) {
+    private val round: Round,
+    language: Language
+) : NavigableStateScreenModel<EditRoundModel.Model>(
+    navigateToScreen = navigateToScreen,
+    initialState = Model(language = language)
+) {
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
@@ -38,6 +43,7 @@ class EditRoundModel(
     }
 
     data class Model(
+        val language: Language,
         val round: Round? = null,
         val temporaryRoundName: String = "",
         val games: List<Game> = emptyList(),

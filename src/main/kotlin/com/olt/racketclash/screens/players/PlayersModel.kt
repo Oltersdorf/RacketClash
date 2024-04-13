@@ -5,6 +5,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.sort
+import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.navigation.NavigableStateScreenModel
 import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
@@ -12,8 +13,9 @@ import kotlinx.coroutines.launch
 
 class PlayersModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
-    private val database: Database
-) : NavigableStateScreenModel<PlayersModel.Modal>(navigateToScreen, Modal()) {
+    private val database: Database,
+    language: Language
+) : NavigableStateScreenModel<PlayersModel.Modal>(navigateToScreen, Modal(language = language)) {
 
     private var completePlayers: List<Player> = emptyList()
 
@@ -32,6 +34,7 @@ class PlayersModel(
     }
 
     data class Modal(
+        val language: Language,
         val isLoading: Boolean = true,
         val players: List<Player> = emptyList(),
         val filter: String = "",
@@ -51,7 +54,7 @@ class PlayersModel(
     }
 
     fun changeFilter(newFilter: String) {
-        screenModelScope.launch(context = Dispatchers.Default) {
+        screenModelScope.launch(context = Dispatchers.IO) {
             updateState {
                 copy(
                     filter = newFilter,
@@ -62,7 +65,7 @@ class PlayersModel(
     }
 
     fun changeSorting(newSorting: Player.Sorting) {
-        screenModelScope.launch(context = Dispatchers.Default) {
+        screenModelScope.launch(context = Dispatchers.IO) {
             updateState {
                 copy(
                     sortedBy = newSorting,

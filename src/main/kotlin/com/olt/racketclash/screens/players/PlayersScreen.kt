@@ -28,12 +28,13 @@ class PlayersScreen(private val modelBuilder: () -> PlayersModel) : Screen {
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(
-            topAppBarTitle = "Player",
+            language = stateModel.language,
+            topAppBarTitle = stateModel.language.players,
             topAppBarActions = {
                 val navigator = LocalNavigator.currentOrThrow
-                AddButton { screenModel.navigateTo(Screens.EditPlayer(player = null), navigator) }
+                AddButton { screenModel.navigateTo(Screens.EditPlayer(player = null, language = stateModel.language), navigator) }
             },
-            selectedTab = TournamentTabs.Players,
+            selectedTab = TournamentTabs.Players(stateModel.language),
             navigateTo = screenModel::navigateTo
         ) {
             PlayerView(
@@ -73,77 +74,77 @@ private fun PlayerList(
                 modifier = Modifier.width(TextFieldDefaults.MinWidth),
                 value = model.filter,
                 onValueChange = screenModel::changeFilter,
-                label = { Text("Filter by name") },
+                label = { Text(model.language.filterByName) },
                 singleLine = true
             )
 
             DropDownMenu(
                 modifier = Modifier.padding(start = 5.dp).width(TextFieldDefaults.MinWidth),
-                label = "Sort by",
+                label = model.language.sortBy,
                 items = Player.sortingOptions(),
                 value = model.sortedBy,
-                textMapper = Player.Sorting::text,
+                textMapper = { it.text(language = model.language) },
                 onClick = screenModel::changeSorting
             )
         },
         items = model.players,
         modifier = Modifier.padding(5.dp),
-        onClick = { screenModel.navigateTo(Screens.EditPlayer(it), navigator) },
+        onClick = { screenModel.navigateTo(Screens.EditPlayer(player = it, language = model.language), navigator) },
         columns = listOf(
             LazyTableColumn.Checkbox(
-                name = "Active",
+                name = model.language.active,
                 weight = 1.0f,
                 checked = { it.active },
                 onCheckChanged = { item, checked -> screenModel.updateActive(item.id, checked) }
             ),
             LazyTableColumn.Text(
-                name = "Name",
+                name = model.language.name,
                 weight = 5.0f,
                 text = { it.name }
             ),
             LazyTableColumn.Text(
-                name = "Team",
+                name = model.language.team,
                 weight = 2.0f,
                 text = { it.teamName }
             ),
             LazyTableColumn.Text(
-                name = "pending",
+                name = model.language.pending,
                 weight = 1.0f,
                 text = { it.openGames.toString() }
             ),
             LazyTableColumn.Text(
-                name = "played",
+                name = model.language.played,
                 weight = 1.0f,
                 text = { it.played.toString() }
             ),
             LazyTableColumn.Text(
-                name = "bye",
+                name = model.language.byes,
                 weight = 1.0f,
                 text = { it.bye.toString() }
             ),
             LazyTableColumn.Text(
-                name = "Games",
+                name = model.language.games,
                 weight = 1.0f,
                 text = { "${it.wonGames} : ${it.lostGames}" }
             ),
             LazyTableColumn.Text(
-                name = "Sets",
+                name = model.language.sets,
                 weight = 1.0f,
                 text = { "${it.wonSets} : ${it.lostSets}" }
             ),
             LazyTableColumn.Text(
-                name = "Points",
+                name = model.language.points,
                 weight = 1.0f,
                 text = { "${it.wonPoints} : ${it.lostPoints}" }
             ),
             LazyTableColumn.IconButton(
-                name = "Delete",
+                name = model.language.delete,
                 weight = 0.5f,
                 headerTextAlign = TextAlign.Center,
                 onClick = { screenModel.deletePlayer(it.id) },
                 enabled = { it.openGames == 0 && it.bye == 0 && it.played == 0 },
                 imageVector = Icons.Default.Delete,
-                contentDescription = "Delete"
+                contentDescription = model.language.delete
             )
         )
     )

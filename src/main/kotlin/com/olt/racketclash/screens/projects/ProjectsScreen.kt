@@ -10,13 +10,11 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.olt.racketclash.data.Project
+import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.navigation.Screens
 import com.olt.racketclash.ui.*
-
-internal typealias deleteProject = (name: String) -> Unit
 
 class ProjectsScreen(private val modelBuilder: () -> ProjectsModel) : Screen {
 
@@ -28,12 +26,26 @@ class ProjectsScreen(private val modelBuilder: () -> ProjectsModel) : Screen {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
-            SettingsView {
-                ProjectSelect(
-                    projects = stateModel.projects,
-                    deleteProject = screenModel::deleteProject,
-                    navigateTo = screenModel::navigateTo
-                )
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Row(modifier = Modifier.padding(10.dp)) {
+                    Spacer(modifier = Modifier.weight(1.0f))
+                    DropDownMenu(
+                        label = stateModel.language.language,
+                        items = stateModel.availableLanguages,
+                        value = stateModel.selectedLanguage,
+                        textMapper = { it },
+                        onClick = screenModel::changeLanguage
+                    )
+                }
+
+                SettingsView {
+                    ProjectSelect(
+                        model = stateModel,
+                        screenModel = screenModel
+                    )
+                }
             }
         }
     }
@@ -41,9 +53,8 @@ class ProjectsScreen(private val modelBuilder: () -> ProjectsModel) : Screen {
 
 @Composable
 private fun ProjectSelect(
-    projects: List<Project>,
-    deleteProject: deleteProject,
-    navigateTo: (Screens, Navigator) -> Unit
+    model: ProjectsModel.Model,
+    screenModel: ProjectsModel
 ) {
     Text(
         text = "Racket Clash",
@@ -52,18 +63,18 @@ private fun ProjectSelect(
 
     val navigator = LocalNavigator.currentOrThrow
     LazyTableWithScrollScaffold(
-        topBarTitle = "Select Project",
-        topBarActions = { AddButton { navigateTo(Screens.NewProject, navigator) } },
-        items = projects,
+        topBarTitle = model.language.selectProject,
+        topBarActions = { AddButton { screenModel.navigateTo(Screens.NewProject(language = model.language), navigator) } },
+        items = model.projects,
         itemsSpacedBy = 10.dp,
         showHeader = false,
         drawDividers = false,
         columns = listOf(
             LazyTableColumn.Builder { item, _ ->
                 ProjectItem(
+                    language = model.language,
                     project = item,
-                    deleteProject = deleteProject,
-                    navigateTo = navigateTo
+                    screenModel = screenModel
                 )
             }
         )
@@ -73,15 +84,15 @@ private fun ProjectSelect(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProjectItem(
+    language: Language,
     project: Project,
-    deleteProject: deleteProject,
-    navigateTo: (Screens, Navigator) -> Unit
+    screenModel: ProjectsModel
 ) {
     val navigator = LocalNavigator.currentOrThrow
 
     Card(
         onClick = {
-            navigateTo(Screens.OpenProject(project = project), navigator)
+            screenModel.navigateTo(Screens.OpenProject(project = project, language = language), navigator)
         },
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -94,11 +105,11 @@ private fun ProjectItem(
             }
             Spacer(modifier = Modifier.weight(weight = 1.0f))
             Column {
-                Text("Player: ${project.playerNumber}")
-                Text("Teams: ${project.teamNumber}")
+                Text("${language.players}: ${project.playerNumber}")
+                Text("${language.teams}: ${project.teamNumber}")
             }
             Spacer(modifier = Modifier.weight(weight = 1.0f))
-            DeleteButton { deleteProject(project.name) }
+            DeleteButton { screenModel.deleteProject(project.name) }
         }
     }
 }

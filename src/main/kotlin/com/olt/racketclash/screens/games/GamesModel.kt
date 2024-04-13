@@ -7,6 +7,7 @@ import com.olt.racketclash.data.FileHandler
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Round
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.navigation.NavigableStateScreenModel
 import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
@@ -16,8 +17,9 @@ import kotlinx.coroutines.launch
 class GamesModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
     private val database: Database,
-    private val fileHandler: FileHandler
-) : NavigableStateScreenModel<GamesModel.Model>(navigateToScreen, Model()) {
+    private val fileHandler: FileHandler,
+    language: Language
+) : NavigableStateScreenModel<GamesModel.Model>(navigateToScreen, Model(language = language)) {
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
@@ -57,6 +59,7 @@ class GamesModel(
     }
 
     data class Model(
+        val language: Language,
         val fields: Int = 1,
         val timeout: Int = 1,
         val rounds: List<Round> = emptyList(),

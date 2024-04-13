@@ -23,9 +23,10 @@ class EditRoundScreen(private val modelBuilder: () -> EditRoundModel) : Screen {
         val stateModel by screenModel.state.collectAsState()
 
         TournamentScaffold(
-            topAppBarTitle = "Edit Round",
+            language = stateModel.language,
+            topAppBarTitle = stateModel.language.editRound,
             hasBackPress = true,
-            selectedTab = TournamentTabs.Games,
+            selectedTab = TournamentTabs.Games(language = stateModel.language),
             navigateTo = screenModel::navigateTo
         ) {
             SettingsView {
@@ -47,7 +48,7 @@ private fun EditRoundView(
         modifier = Modifier.fillMaxWidth(),
         value = model.temporaryRoundName,
         onValueChange = screenModel::updateTemporaryRoundName,
-        label = { Text("Name") },
+        label = { Text(model.language.name) },
         trailingIcon = {
             SaveButton(
                 onClick = screenModel::saveRoundName,
@@ -58,12 +59,19 @@ private fun EditRoundView(
 
     val navigator = LocalNavigator.currentOrThrow
     LazyTableWithScrollScaffold(
-        topBarTitle = "Games",
-        topBarActions = { AddButton { screenModel.navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) } },
+        topBarTitle = model.language.games,
+        topBarActions = {
+            AddButton {
+                screenModel.navigateTo(
+                    screen = Screens.EditGame(roundId = model.round?.id ?: -1, language = model.language),
+                    navigator = navigator
+                )
+            }
+        },
         items = model.games,
         columns = listOf(
             LazyTableColumn.Builder(
-                name = "Left",
+                name = model.language.left,
                 weight = 5.0f,
                 headerTextAlign = TextAlign.Center
             ) { item, weight ->
@@ -71,12 +79,12 @@ private fun EditRoundView(
                     modifier = Modifier.weight(weight),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("${item.playerLeft1Name ?: "<Empty>"} (${item.playerLeft1TeamName})")
-                    Text("${item.playerLeft2Name ?: "<Empty>"} (${item.playerLeft2TeamName})")
+                    Text("${item.playerLeft1Name ?: "<${model.language.empty}>"} (${item.playerLeft1TeamName})")
+                    Text("${item.playerLeft2Name ?: "<${model.language.empty}>"} (${item.playerLeft2TeamName})")
                 }
             },
             LazyTableColumn.Builder(
-                name = "Results",
+                name = model.language.results,
                 weight = 1.0f,
                 headerTextAlign = TextAlign.Center
             ) { item, weight ->
@@ -96,11 +104,11 @@ private fun EditRoundView(
                         if (item.set5Left + item.set5Right > 0)
                             Text("${item.set5Left} : ${item.set5Right}")
                     } else
-                        Text("pending")
+                        Text(model.language.pending)
                 }
             },
             LazyTableColumn.Builder(
-                name = "Right",
+                name = model.language.right,
                 weight = 5.0f,
                 headerTextAlign = TextAlign.Center
             ) { item, weight ->
@@ -108,39 +116,46 @@ private fun EditRoundView(
                     modifier = Modifier.weight(weight),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("${item.playerRight1Name ?: "<Empty>"} (${item.playerRight1TeamName})")
-                    Text("${item.playerRight2Name ?: "<Empty>"} (${item.playerRight2TeamName})")
+                    Text("${item.playerRight1Name ?: "<${model.language.empty}>"} (${item.playerRight1TeamName})")
+                    Text("${item.playerRight2Name ?: "<${model.language.empty}>"} (${item.playerRight2TeamName})")
                 }
             },
             LazyTableColumn.IconButton(
-                name = "Delete",
+                name = model.language.delete,
                 weight = 1.0f,
                 headerTextAlign = TextAlign.Center,
                 onClick = { screenModel.deleteGame(gameId = it.id) },
                 imageVector = Icons.Default.Delete,
-                contentDescription = "Delete"
+                contentDescription = model.language.delete
             )
         )
     )
 
     LazyTableWithScrollScaffold(
-        topBarTitle = "Byes",
-        topBarActions = { AddButton { screenModel.navigateTo(Screens.EditGame(roundId = model.round?.id ?: -1), navigator) } },
+        topBarTitle = model.language.byes,
+        topBarActions = {
+            AddButton {
+                screenModel.navigateTo(
+                    screen = Screens.EditGame(roundId = model.round?.id ?: -1, language = model.language),
+                    navigator = navigator
+                )
+            }
+        },
         items = model.byes,
         columns = listOf(
             LazyTableColumn.Text(
-                name = "Name",
+                name = model.language.name,
                 weight = 5.0f
             ) {
-                "${it.playerName ?: "<Empty>"} (${it.playerTeamName})"
+                "${it.playerName ?: "<${model.language.empty}>"} (${it.playerTeamName})"
             },
             LazyTableColumn.IconButton(
-                name = "Delete",
+                name = model.language.delete,
                 weight = 1.0f,
                 headerTextAlign = TextAlign.Center,
                 onClick = { screenModel.deleteBye(byeId = it.id) },
                 imageVector = Icons.Default.Delete,
-                contentDescription = "Delete"
+                contentDescription = model.language.delete
             )
         )
     )

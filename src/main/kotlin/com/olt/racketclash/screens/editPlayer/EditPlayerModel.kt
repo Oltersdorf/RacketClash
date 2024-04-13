@@ -5,6 +5,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.Team
+import com.olt.racketclash.language.translations.Language
 import com.olt.racketclash.navigation.NavigableStateScreenModel
 import com.olt.racketclash.navigation.Screens
 import kotlinx.coroutines.Dispatchers
@@ -13,8 +14,9 @@ import kotlinx.coroutines.launch
 class EditPlayerModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
     private val database: Database,
-    player: Player?
-) : NavigableStateScreenModel<EditPlayerModel.Model>(navigateToScreen, Model(player = player)) {
+    player: Player?,
+    language: Language
+) : NavigableStateScreenModel<EditPlayerModel.Model>(navigateToScreen, Model(player = player, language = language)) {
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
@@ -30,6 +32,7 @@ class EditPlayerModel(
     }
 
     data class Model(
+        val language: Language,
         val player: Player?,
         val teams: List<Team> = emptyList(),
         val selectedTeam: Team = noTeamSelected
