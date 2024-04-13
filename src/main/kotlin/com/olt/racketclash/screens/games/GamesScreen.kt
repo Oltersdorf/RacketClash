@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -231,8 +232,12 @@ private fun GameItem(
             modifier = Modifier.weight(1.0f).padding(vertical = 5.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(color = textColor, text = "${game.playerLeft1Name ?: "<${language.empty}>"} (${game.playerLeft1TeamName})")
-            Text(color = textColor, text = "${game.playerLeft2Name ?: "<${language.empty}>"} (${game.playerLeft2TeamName})")
+            SelectionContainer {
+                Text(color = textColor, text = "${game.playerLeft1Name ?: "<${language.empty}>"} (${game.playerLeft1TeamName})")
+            }
+            SelectionContainer {
+                Text(color = textColor, text = "${game.playerLeft2Name ?: "<${language.empty}>"} (${game.playerLeft2TeamName})")
+            }
         }
 
         Column(
@@ -258,8 +263,12 @@ private fun GameItem(
             modifier = Modifier.weight(1.0f).padding(vertical = 5.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(color = textColor, text = "${game.playerRight1Name ?: "<${language.empty}>"} (${game.playerRight1TeamName})")
-            Text(color = textColor, text = "${game.playerRight2Name ?: "<${language.empty}>"} (${game.playerRight2TeamName})")
+            SelectionContainer {
+                Text(color = textColor, text = "${game.playerRight1Name ?: "<${language.empty}>"} (${game.playerRight1TeamName})")
+            }
+            SelectionContainer {
+                Text(color = textColor, text = "${game.playerRight2Name ?: "<${language.empty}>"} (${game.playerRight2TeamName})")
+            }
         }
 
         if (game.isDone)
