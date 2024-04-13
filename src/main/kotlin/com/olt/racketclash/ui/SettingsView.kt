@@ -10,7 +10,10 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SettingsView(content: @Composable ColumnScope.() -> Unit) {
-    Box(contentAlignment = Alignment.Center) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         val verticalScrollState = rememberScrollState()
 
         Column(
