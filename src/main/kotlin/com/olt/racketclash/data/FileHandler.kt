@@ -20,10 +20,9 @@ class FileHandler {
     private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
 
     private val projectsChannel = MutableStateFlow<List<Project>>(emptyList())
-    private val fieldsChannel = MutableStateFlow(1)
-    private val timeoutChannel = MutableStateFlow(1)
 
-    private var currentProject : Project? = null
+    var currentProject : Project? = null
+        private set
 
     var selectedLanguage: String
         private set
@@ -49,17 +48,11 @@ class FileHandler {
     )
 
     fun projects() : StateFlow<List<Project>> = projectsChannel.asStateFlow()
-    fun fields() : StateFlow<Int> = fieldsChannel.asStateFlow()
-    fun timeout() : StateFlow<Int> = timeoutChannel.asStateFlow()
 
     private fun currentTime(): String = LocalDateTime.now().format(dateTimeFormatter)
 
     fun setCurrentProject(project: Project) {
         currentProject = project
-        runBlocking(Dispatchers.IO) {
-            fieldsChannel.emit(project.fields)
-            timeoutChannel.emit(project.timeout)
-        }
     }
 
     fun setLanguage(language: String) {
@@ -117,7 +110,7 @@ class FileHandler {
     }
 
     suspend fun setFields(newFields: Int) {
-        fieldsChannel.emit(newFields)
+        currentProject = currentProject?.copy(fields = newFields)
         val newProjects = projectsChannel.value.toMutableList()
         newProjects.replaceAll { if (it.name == currentProject?.name) it.copy(fields = newFields) else it }
         projectsChannel.emit(newProjects)
@@ -125,9 +118,33 @@ class FileHandler {
     }
 
     suspend fun setTimeout(newTimeout: Int) {
-        timeoutChannel.emit(newTimeout)
+        currentProject = currentProject?.copy(timeout = newTimeout)
         val newProjects = projectsChannel.value.toMutableList()
         newProjects.replaceAll { if (it.name == currentProject?.name) it.copy(timeout = newTimeout) else it }
+        projectsChannel.emit(newProjects)
+        writeSettings(settings = RacketClashSettings(language = selectedLanguage, projects = newProjects))
+    }
+
+    suspend fun setGamePointsForBye(newGamePointsForBye: Int) {
+        currentProject = currentProject?.copy(gamePointsForBye = newGamePointsForBye)
+        val newProjects = projectsChannel.value.toMutableList()
+        newProjects.replaceAll { if (it.name == currentProject?.name) it.copy(gamePointsForBye = newGamePointsForBye) else it }
+        projectsChannel.emit(newProjects)
+        writeSettings(settings = RacketClashSettings(language = selectedLanguage, projects = newProjects))
+    }
+
+    suspend fun setSetPointsForBye(newSetPointsForBye: Int) {
+        currentProject = currentProject?.copy(setPointsForBye = newSetPointsForBye)
+        val newProjects = projectsChannel.value.toMutableList()
+        newProjects.replaceAll { if (it.name == currentProject?.name) it.copy(setPointsForBye = newSetPointsForBye) else it }
+        projectsChannel.emit(newProjects)
+        writeSettings(settings = RacketClashSettings(language = selectedLanguage, projects = newProjects))
+    }
+
+    suspend fun setPointsForBye(newPointsForBye: Int) {
+        currentProject = currentProject?.copy(pointsForBye = newPointsForBye)
+        val newProjects = projectsChannel.value.toMutableList()
+        newProjects.replaceAll { if (it.name == currentProject?.name) it.copy(pointsForBye = newPointsForBye) else it }
         projectsChannel.emit(newProjects)
         writeSettings(settings = RacketClashSettings(language = selectedLanguage, projects = newProjects))
     }

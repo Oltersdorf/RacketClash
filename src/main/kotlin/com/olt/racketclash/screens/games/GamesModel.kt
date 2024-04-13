@@ -23,28 +23,37 @@ class GamesModel(
 
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
+            updateState {
+                val project = fileHandler.currentProject
+
+                if (project != null)
+                    copy(
+                        fields = project.fields,
+                        timeout = project.timeout,
+                        gamePointsForBye = project.gamePointsForBye,
+                        setPointsForBye = project.setPointsForBye,
+                        pointsForBye = project.pointsForBye
+                    )
+                else
+                    this
+            }
+        }
+
+        screenModelScope.launch(context = Dispatchers.IO) {
             database.rounds().collect {
                 updateState { copy(rounds = it) }
             }
         }
+
         screenModelScope.launch(context = Dispatchers.IO) {
             database.games().collect {
                 updateState { copy(games = it.groupBy { it.roundId }, active = activeGames(games = it, timeout = timeout, fields = fields)) }
             }
         }
+
         screenModelScope.launch(context = Dispatchers.IO) {
             database.bye().collect {
                 updateState { copy(bye = it.groupBy { it.roundId }) }
-            }
-        }
-        screenModelScope.launch(context = Dispatchers.IO) {
-            fileHandler.fields().collect {
-                updateState { copy(fields = it, active = activeGames(games = games.values.flatten(), timeout = timeout, fields = it)) }
-            }
-        }
-        screenModelScope.launch(context = Dispatchers.IO) {
-            fileHandler.timeout().collect {
-                updateState { copy(timeout = it, active = activeGames(games = games.values.flatten(), timeout = it, fields = fields)) }
             }
         }
 
@@ -62,6 +71,9 @@ class GamesModel(
         val language: Language,
         val fields: Int = 1,
         val timeout: Int = 1,
+        val gamePointsForBye: Int = 0,
+        val setPointsForBye: Int = 0,
+        val pointsForBye: Int = 0,
         val rounds: List<Round> = emptyList(),
         val games: Map<Long, List<Game>> = emptyMap(),
         val bye: Map<Long, List<Bye>> = emptyMap(),
@@ -141,13 +153,46 @@ class GamesModel(
 
     fun changeFields(newFields: Int) {
         screenModelScope.launch(context = Dispatchers.IO) {
-            if (newFields >= 1) fileHandler.setFields(newFields = newFields)
+            if (newFields >= 1) {
+                updateState { copy(fields = newFields) }
+                fileHandler.setFields(newFields = newFields)
+            }
         }
     }
 
     fun changeTimeout(newTimeout: Int) {
         screenModelScope.launch(context = Dispatchers.IO) {
-            if (newTimeout >= 1) fileHandler.setTimeout(newTimeout = newTimeout)
+            if (newTimeout >= 1) {
+                updateState { copy(timeout = newTimeout) }
+                fileHandler.setTimeout(newTimeout = newTimeout)
+            }
+        }
+    }
+
+    fun changeGamePointsForBye(newGamePointsForBye: Int) {
+        screenModelScope.launch(context = Dispatchers.IO) {
+            if (newGamePointsForBye >= 0) {
+                updateState { copy(gamePointsForBye = newGamePointsForBye) }
+                fileHandler.setGamePointsForBye(newGamePointsForBye = newGamePointsForBye)
+            }
+        }
+    }
+
+    fun changeSetPointsForBye(newSetPointsForBye: Int) {
+        screenModelScope.launch(context = Dispatchers.IO) {
+            if (newSetPointsForBye >= 0) {
+                updateState { copy(setPointsForBye = newSetPointsForBye) }
+                fileHandler.setSetPointsForBye(newSetPointsForBye = newSetPointsForBye)
+            }
+        }
+    }
+
+    fun changePointsForBye(newPointsForBye: Int) {
+        screenModelScope.launch(context = Dispatchers.IO) {
+            if (newPointsForBye >= 0) {
+                updateState { copy(pointsForBye = newPointsForBye) }
+                fileHandler.setPointsForBye(newPointsForBye = newPointsForBye)
+            }
         }
     }
 

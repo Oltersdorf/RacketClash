@@ -10,5 +10,8 @@ data class Project(
     val playerNumber: Int = 0,
     val teamNumber: Int = 0,
     val fields: Int = 1,
-    val timeout: Int = 1
+    val timeout: Int = 1,
+    val gamePointsForBye: Int = 0,
+    val setPointsForBye: Int = 0,
+    val pointsForBye: Int = 0
 )

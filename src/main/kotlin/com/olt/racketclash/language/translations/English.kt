@@ -63,5 +63,6 @@ data object English : Language(
     playedDescending = "Played descending",
     strengthAscending = "Strength ascending",
     strengthDescending = "Strength descending",
-    bye = "Bye"
+    bye = "Bye",
+    pointsForBye = "Points for bye"
 )

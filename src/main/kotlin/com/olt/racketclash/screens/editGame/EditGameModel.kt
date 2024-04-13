@@ -2,6 +2,7 @@ package com.olt.racketclash.screens.editGame
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
+import com.olt.racketclash.data.FileHandler
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Player
@@ -15,6 +16,7 @@ import kotlinx.coroutines.launch
 class EditGameModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
     private val database: Database,
+    private val fileHandler: FileHandler,
     private val roundId: Long,
     language: Language
 ) : NavigableStateScreenModel<EditGameModel.Model>(
@@ -33,8 +35,20 @@ class EditGameModel(
         }
 
         screenModelScope.launch(context = Dispatchers.IO) {
-            database.players().collect {
-                unfilteredPlayers = it
+            database.players().collect { playerList ->
+                val players = playerList.toMutableList()
+                val project = fileHandler.currentProject
+
+                if (project != null)
+                    players.replaceAll {
+                        it.copy(
+                            wonGames = it.wonGames + (project.gamePointsForBye * it.bye),
+                            wonSets = it.wonSets + (project.setPointsForBye * it.bye),
+                            wonPoints = it.wonPoints + (project.pointsForBye * it.bye)
+                        )
+                    }
+
+                unfilteredPlayers = players.toList()
             }
         }
 

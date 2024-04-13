@@ -2,6 +2,7 @@ package com.olt.racketclash.screens.teams
 
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
+import com.olt.racketclash.data.FileHandler
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.data.Team
 import com.olt.racketclash.data.sort
@@ -14,6 +15,7 @@ import kotlinx.coroutines.launch
 class TeamsModel(
     navigateToScreen: (Screens, Navigator) -> Unit,
     private val database: Database,
+    private val fileHandler: FileHandler,
     language: Language
 ) : NavigableStateScreenModel<TeamsModel.Modal>(navigateToScreen, Modal(language = language)) {
 
@@ -22,11 +24,24 @@ class TeamsModel(
     init {
         screenModelScope.launch(context = Dispatchers.IO) {
             database.teams().collect { teamList ->
+                val teams = teamList.toMutableList()
+                val project = fileHandler.currentProject
+
+                if (project != null)
+                    teams.replaceAll {
+                        it.copy(
+                            wonGames = it.wonGames + (project.gamePointsForBye * it.bye),
+                            wonSets = it.wonSets + (project.setPointsForBye * it.bye),
+                            wonPoints = it.wonPoints + (project.pointsForBye * it.bye)
+                        )
+                    }
+
+                completeTeams = teams.toList()
+
                 updateState {
-                    completeTeams = teamList
                     copy(
                         isLoading = false,
-                        teams = teamList.filter { it.name.contains(filter) }.sort(sortedBy = sortedBy)
+                        teams = teams.toList().filter { it.name.contains(filter) }.sort(sortedBy = sortedBy)
                     )
                 }
             }
@@ -50,7 +65,7 @@ class TeamsModel(
     }
 
     fun changeFilter(newFilter: String) {
-        screenModelScope.launch(context = Dispatchers.Default) {
+        screenModelScope.launch(context = Dispatchers.IO) {
             updateState {
                 copy(
                     filter = newFilter,
@@ -61,7 +76,7 @@ class TeamsModel(
     }
 
     fun changeSorting(newSorting: Team.Sorting) {
-        screenModelScope.launch(context = Dispatchers.Default) {
+        screenModelScope.launch(context = Dispatchers.IO) {
             updateState {
                 copy(
                     sortedBy = newSorting,

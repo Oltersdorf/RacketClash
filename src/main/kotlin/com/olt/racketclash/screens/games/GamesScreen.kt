@@ -84,6 +84,28 @@ private fun Header(
                 onValueChange = screenModel::changeTimeout,
                 min = 1
             )
+
+            Spacer(modifier = Modifier.weight(1.0f))
+
+            Text(model.language.pointsForBye + ":")
+            NumberSelector(
+                label = model.language.games,
+                value = model.gamePointsForBye,
+                onValueChange = screenModel::changeGamePointsForBye,
+                min = 0
+            )
+            NumberSelector(
+                label = model.language.sets,
+                value = model.setPointsForBye,
+                onValueChange = screenModel::changeSetPointsForBye,
+                min = 0
+            )
+            NumberSelector(
+                label = model.language.points,
+                value = model.pointsForBye,
+                onValueChange = screenModel::changePointsForBye,
+                min = 0
+            )
         }
     }
 }

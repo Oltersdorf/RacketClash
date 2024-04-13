@@ -41,13 +41,13 @@ class RootNavigator {
         NewProjectModel(navigateToScreen = ::navigateTo, fileHandler = fileHandler, language = language)
 
     private fun teamsModelBuilder(language: Language): TeamsModel =
-        TeamsModel(navigateToScreen = ::navigateTo, database = database!!, language = language)
+        TeamsModel(navigateToScreen = ::navigateTo, database = database!!, fileHandler = fileHandler, language = language)
 
     private fun editTeamModelBuilder(team: Team?, language: Language): EditTeamModel =
         EditTeamModel(navigateToScreen = ::navigateTo, database = database!!, team = team, language = language)
 
     private fun playersModelBuilder(language: Language): PlayersModel =
-        PlayersModel(navigateToScreen = ::navigateTo, database = database!!, language = language)
+        PlayersModel(navigateToScreen = ::navigateTo, database = database!!, fileHandler = fileHandler, language = language)
 
     private fun editPlayerModelBuilder(player: Player?, language: Language): EditPlayerModel =
         EditPlayerModel(navigateToScreen = ::navigateTo, database = database!!, player = player, language = language)
@@ -62,7 +62,7 @@ class RootNavigator {
         EditRoundModel(navigateToScreen = ::navigateTo, database = database!!, round = round, language = language)
 
     private fun editGameModelBuilder(roundId: Long, language: Language): EditGameModel =
-        EditGameModel(navigateToScreen = ::navigateTo, database = database!!, roundId = roundId, language = language)
+        EditGameModel(navigateToScreen = ::navigateTo, database = database!!, roundId = roundId, fileHandler = fileHandler, language = language)
 
     private fun navigateTo(screens: Screens, navigator: Navigator) {
         when (screens) {

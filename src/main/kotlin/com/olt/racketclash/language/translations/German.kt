@@ -63,5 +63,6 @@ data object German : Language(
     playedDescending = "Gespielt absteigend",
     strengthAscending = "Stärke aufsteigend",
     strengthDescending = "Stärke absteigend",
-    bye = "Freilos"
+    bye = "Freilos",
+    pointsForBye = "Punkte für Freilos"
 )
