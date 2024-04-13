@@ -67,7 +67,8 @@ class EditGameModel(
         val selectedPlayer: SelectedPlayer? = null,
         val filterNotInRound: Boolean = false,
         val nameFilter: String = "",
-        val sortedBy: Player.Sorting = Player.Sorting.NameAscending
+        val sortedBy: Player.Sorting = Player.Sorting.NameAscending,
+        val isBye: Boolean = false
     )
 
     fun selectPlayer(selection: SelectedPlayer) {
@@ -78,6 +79,12 @@ class EditGameModel(
                     players = filterAndSortPlayer(model = this)
                 )
             }
+        }
+    }
+
+    fun setIsBye(newIsBye: Boolean) {
+        screenModelScope.launch(context = Dispatchers.IO) {
+            updateState { copy(isBye = newIsBye) }
         }
     }
 
@@ -118,14 +125,26 @@ class EditGameModel(
     fun addGame() {
         screenModelScope.launch(context = Dispatchers.IO) {
             updateState {
-                database.addGame(
-                    roundId = roundId,
-                    playerLeft1Id = player1Left?.id,
-                    playerLeft2Id = player2Left?.id,
-                    playerRight1Id = player1Right?.id,
-                    playerRight2Id = player2Right?.id
+                if (isBye)
+                    database.addBye(roundId = roundId, playerId = player1Left?.id)
+                else
+                    database.addGame(
+                        roundId = roundId,
+                        playerLeft1Id = player1Left?.id,
+                        playerLeft2Id = player2Left?.id,
+                        playerRight1Id = player1Right?.id,
+                        playerRight2Id = player2Right?.id
+                    )
+                copy(
+                    player1Left = null,
+                    player1LeftDisplayName = "<empty>",
+                    player2Left = null,
+                    player2LeftDisplayName = "<empty>",
+                    player1Right = null,
+                    player1RightDisplayName = "<empty>",
+                    player2Right = null,
+                    player2RightDisplayName = "<empty>"
                 )
-                this
             }
         }
     }

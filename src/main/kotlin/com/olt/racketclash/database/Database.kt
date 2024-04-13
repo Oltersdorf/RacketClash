@@ -162,6 +162,10 @@ class Database private constructor(
         }
     }
 
+    fun addBye(roundId: Long, playerId: Long?) {
+        playerId?.let { database.byeQueries.add(roundId = roundId, playerId = it) }
+    }
+
     fun addRoundsWithGames(
         rounds: Map<String, List<Game>>,
         bye: List<Bye>

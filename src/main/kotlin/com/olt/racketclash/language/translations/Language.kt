@@ -62,5 +62,6 @@ sealed class Language(
     val playedAscending: String,
     val playedDescending: String,
     val strengthAscending: String,
-    val strengthDescending: String
+    val strengthDescending: String,
+    val bye: String
 )

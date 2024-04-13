@@ -101,6 +101,13 @@ private fun EditGameView(
                     DeleteButton { screenModel.removePlayer(EditGameModel.SelectedPlayer.Right2) }
             }
         }
+
+        Checkbox(
+            modifier = Modifier.padding(start = 20.dp),
+            checked = model.isBye,
+            onCheckedChange = screenModel::setIsBye
+        )
+        Text(model.language.bye)
     }
 
     val navigator = LocalNavigator.currentOrThrow
