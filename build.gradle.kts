@@ -22,7 +22,7 @@ dependencies {
     implementation(libs.coroutines)
     implementation(libs.bundles.sqlite)
     implementation(libs.json)
-    implementation(libs.bundles.voyager)
+    implementation(libs.compose.navigation)
     implementation(libs.mpfilepicker)
 
     testImplementation(compose.desktop.uiTestJUnit4)

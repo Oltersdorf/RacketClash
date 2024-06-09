@@ -33,6 +33,31 @@ LEFT JOIN (
 ) AS games ON games.playerLeft1Id = playerTable.id OR games.playerLeft2Id = playerTable.id OR games.playerRight1Id = playerTable.id OR games.playerRight2Id = playerTable.id
 GROUP BY playerTable.id;
 
+select:
+SELECT playerTable.id, active, playerTable.name,
+COUNT(DISTINCT IIF(isDone, NULL, games.id)) AS openGames, COUNT(DISTINCT IIF(isDone, games.id, NULL)) AS played, COUNT(DISTINCT byeTable.id) AS bye,
+SUM(IIF(games.isDone AND (games.playerLeft1Id = playerTable.id OR games.playerLeft2Id = playerTable.id), setsLeftWon, setsRightWon)) AS wonSets,
+SUM(IIF(games.isDone AND (games.playerLeft1Id = playerTable.id OR games.playerLeft2Id = playerTable.id), setsRightWon, setsLeftWon)) AS lostSets,
+SUM(IIF(games.isDone AND (games.playerLeft1Id = playerTable.id OR games.playerLeft2Id = playerTable.id), setsLeftWon > setsRightWon, setsRightWon > setsLeftWon)) AS wonGames,
+SUM(IIF(games.isDone AND (games.playerLeft1Id = playerTable.id OR games.playerLeft2Id = playerTable.id), setsRightWon > setsLeftWon, setsLeftWon > setsRightWon)) AS lostGames,
+SUM(IIF(games.isDone AND (games.playerLeft1Id = playerTable.id OR games.playerLeft2Id = playerTable.id), pointsLeft, pointsRight)) AS wonPoints,
+SUM(IIF(games.isDone AND (games.playerLeft1Id = playerTable.id OR games.playerLeft2Id = playerTable.id), pointsRight, pointsLeft)) AS lostPoints,
+teamId, teamTable.name AS teamName, teamTable.strength AS teamStrength
+FROM teamTable
+JOIN playerTable
+ON playerTable.teamId = teamTable.id
+LEFT JOIN byeTable
+ON byeTable.playerId = playerTable.id
+LEFT JOIN (
+  SELECT gameTable.id, playerLeft1Id, playerLeft2Id, playerRight1Id, playerRight2Id, isDone,
+  IIF((set1Left > set1Right), 1, 0) + IIF((set2Left > set2Right), 1, 0) + IIF((set3Left > set3Right), 1, 0) + IIF((set4Left > set4Right), 1, 0) + IIF((set5Left > set5Right), 1, 0) AS setsLeftWon,
+  IIF((set1Right > set1Left), 1, 0) + IIF((set2Right > set2Left), 1, 0) + IIF((set3Right > set3Left), 1, 0) + IIF((set4Right > set4Left), 1, 0) + IIF((set5Right > set5Left), 1, 0) AS setsRightWon,
+  set1Left + set2Left + set3Left + set4Left + set5Left AS pointsLeft, set1Right + set2Right + set3Right + set4Right + set5Right AS pointsRight
+  FROM gameTable
+) AS games ON games.playerLeft1Id = playerTable.id OR games.playerLeft2Id = playerTable.id OR games.playerRight1Id = playerTable.id OR games.playerRight2Id = playerTable.id
+WHERE playerTable.id = :id
+GROUP BY playerTable.id;
+
 selectActive:
 SELECT playerTable.id, active, playerTable.name,
 COUNT(DISTINCT IIF(isDone, NULL, games.id)) AS openGames, COUNT(DISTINCT IIF(isDone, games.id, NULL)) AS played, COUNT(DISTINCT byeTable.id) AS bye,

@@ -2,7 +2,7 @@ package com.olt.racketclash.ui
 
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.Team
-import com.olt.racketclash.language.translations.Language
+import com.olt.racketclash.language.Language
 
 fun Player.Sorting.text(language: Language) =
     when (this) {

@@ -10,27 +10,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import com.olt.racketclash.language.translations.Language
-import com.olt.racketclash.navigation.Screens
+import com.olt.racketclash.language.Language
+import com.olt.racketclash.app.Screens
 
 sealed class TournamentTabs(val tab: Tab) {
     data class Teams(val language: Language) : TournamentTabs(
-        tab = Tab(target = Screens.Teams(language = language),
+        tab = Tab(
+            target = Screens.Teams(),
             imageVector = Icons.Default.Person,
-            text = language.teams)
+            text = language.teams
+        )
     )
     data class Players(val language: Language) : TournamentTabs(
-        tab = Tab(target = Screens.Players(language = language),
+        tab = Tab(
+            target = Screens.Players(),
             imageVector = Icons.Default.Person,
-            text = language.players)
+            text = language.players
+        )
     )
     data class Games(val language: Language) : TournamentTabs(
-        tab = Tab(target = Screens.Games(language = language) ,
+        tab = Tab(
+            target = Screens.Games() ,
             imageVector = Icons.Default.List,
-            text = language.games)
+            text = language.games
+        )
     )
 }
 
@@ -47,7 +50,7 @@ fun TournamentScaffold(
     topAppBarActions: @Composable (RowScope.() -> Unit) = {},
     hasBackPress: Boolean = false,
     selectedTab: TournamentTabs?,
-    navigateTo: (Screens, Navigator) -> Unit,
+    navigateTo: (Screens) -> Unit,
     content: @Composable () -> Unit
 ) {
 
@@ -74,7 +77,7 @@ private fun NavigationScaffold(
     hasBackPress: Boolean = false,
     tabs: List<Tab>,
     selectedTab: Tab?,
-    navigateTo: (Screens, Navigator) -> Unit,
+    navigateTo: (Screens) -> Unit,
     content: @Composable () -> Unit
 ) {
     Scaffold(
@@ -85,12 +88,7 @@ private fun NavigationScaffold(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 ),
                 actions = topAppBarActions,
-                navigationIcon = {
-                    val navigator = LocalNavigator.currentOrThrow
-
-                    if (hasBackPress)
-                        BackButton { navigator.pop() }
-                }
+                navigationIcon = { if (hasBackPress) BackButton { navigateTo(Screens.Pop) } }
             )
         },
         bottomBar = {
@@ -118,12 +116,10 @@ private fun NavigationScaffold(
 private fun RowScope.NavigationScaffoldButton(
     tab: Tab,
     selected: Boolean,
-    navigateTo: (Screens, Navigator) -> Unit
+    navigateTo: (Screens) -> Unit
 ) {
-    val navigator = LocalNavigator.currentOrThrow
-
     Button(
-        onClick = { navigateTo(tab.target, navigator) },
+        onClick = { navigateTo(tab.target) },
         enabled = !selected,
         modifier = Modifier.weight(1.0f),
         shape = RectangleShape

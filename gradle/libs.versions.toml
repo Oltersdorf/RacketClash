@@ -1,10 +1,10 @@
 [versions]
 kotlin = "1.9.21"
 compose = "1.5.11"
+compose-navigation-version = "2.7.0-alpha07"
 coroutines = "1.7.3"
 sqldelight = "2.0.1"
 json = "1.6.0"
-voyager = "1.0.0"
 mpfilepicker = "3.0.0"
 
 [libraries]
@@ -12,15 +12,12 @@ coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", versio
 sqlite-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
 sqlite-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
 sqlite-primitive-adapters = { module = "app.cash.sqldelight:primitive-adapters", version.ref = "sqldelight" }
+compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "compose-navigation-version" }
 json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "json" }
-voyager-navigation = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
-voyager-screenmodel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager" }
-voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
 mpfilepicker = { module = "com.darkrockstudios:mpfilepicker", version.ref = "mpfilepicker" }
 
 [bundles]
 sqlite = ["sqlite-driver", "sqlite-coroutines", "sqlite-primitive-adapters"]
-voyager = ["voyager-navigation", "voyager-transitions", "voyager-screenmodel"]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
