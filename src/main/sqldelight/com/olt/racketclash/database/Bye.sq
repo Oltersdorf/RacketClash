@@ -40,9 +40,13 @@ WHERE
     roundId = :roundId;
 
 add:
-INSERT INTO byeTable(roundId, playerId)
-VALUES (:roundId, :playerId);
+INSERT INTO
+    byeTable(roundId, playerId)
+VALUES
+    (:roundId, :playerId);
 
 delete:
-DELETE FROM byeTable
-WHERE id = :id;
+DELETE FROM
+    byeTable
+WHERE
+    id = :id;
