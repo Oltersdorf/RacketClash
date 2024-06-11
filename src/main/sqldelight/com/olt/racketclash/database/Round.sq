@@ -6,26 +6,42 @@ CREATE TABLE IF NOT EXISTS roundTable (
     orderNumber INTEGER AS Int UNIQUE NOT NULL
 );
 
+CREATE INDEX IF NOT EXISTS idx_roundTable_orderNumber ON roundTable (orderNumber);
+
 selectAll:
-SELECT * FROM roundTable;
+SELECT
+    *
+FROM
+    roundTable;
 
 select:
-SELECT *
-FROM roundTable
-WHERE id = :id;
+SELECT
+    *
+FROM
+    roundTable
+WHERE
+    id = :id;
 
 add:
-INSERT INTO roundTable(name, orderNumber)
-VALUES (:name, (SELECT COALESCE(MAX(orderNumber), 0) FROM roundTable) + 1);
+INSERT INTO
+    roundTable(name, orderNumber)
+VALUES
+    (:name, (SELECT COALESCE(MAX(orderNumber), 0) FROM roundTable) + 1);
 
 updateName:
-UPDATE roundTable
-SET name = :name
-WHERE id = :id;
+UPDATE
+    roundTable
+SET
+    name = :name
+WHERE
+    id = :id;
 
 delete:
-DELETE FROM roundTable
-WHERE id = :id;
+DELETE FROM
+    roundTable
+WHERE
+    id = :id;
 
 lastInsertRowId:
-SELECT last_insert_rowid();
+SELECT
+    last_insert_rowid();
