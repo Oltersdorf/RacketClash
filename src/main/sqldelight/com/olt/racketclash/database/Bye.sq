@@ -6,28 +6,38 @@ CREATE TABLE IF NOT EXISTS byeTable (
     FOREIGN KEY (playerId) REFERENCES playerTable (id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_byeTable_roundId ON byeTable (roundId);
+CREATE INDEX IF NOT EXISTS idx_byeTable_playerId ON byeTable (playerId);
+
 selectAll:
-SELECT byeTable.id, roundId,
-playerId, name, teamName
-FROM byeTable
-LEFT JOIN (
-  SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
-  FROM teamTable
-  JOIN playerTable
-  ON playerTable.teamId = teamTable.id
-) AS players ON players.id = playerId;
+SELECT
+    byeTable.id,
+    byeTable.roundId,
+    byeTable.playerId,
+    playerTable.name,
+    teamTable.name AS teamName
+FROM
+    byeTable
+LEFT JOIN
+    playerTable ON byeTable.playerId = playerTable.id
+LEFT JOIN
+    teamTable ON playerTable.teamId = teamTable.id;
 
 selectAllInRound:
-SELECT byeTable.id, roundId,
-playerId, name, teamName
-FROM byeTable
-LEFT JOIN (
-  SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
-  FROM teamTable
-  JOIN playerTable
-  ON playerTable.teamId = teamTable.id
-) AS players ON players.id = playerId
-WHERE roundId = :roundId;
+SELECT
+    byeTable.id,
+    byeTable.roundId,
+    byeTable.playerId,
+    playerTable.name,
+    teamTable.name AS teamName
+FROM
+    byeTable
+LEFT JOIN
+    playerTable ON byeTable.playerId = playerTable.id
+LEFT JOIN
+    teamTable ON playerTable.teamId = teamTable.id
+WHERE
+    roundId = :roundId;
 
 add:
 INSERT INTO byeTable(roundId, playerId)
