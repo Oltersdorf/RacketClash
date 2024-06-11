@@ -1,6 +1,9 @@
 package com.olt.racketclash.ui
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -40,7 +43,7 @@ fun BackButton(
         modifier = modifier,
         enabled = enabled,
         colors = colors,
-        imageVector = Icons.Default.ArrowBack,
+        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
         contentDescription = "Back",
         onClick = onClick
     )
@@ -125,7 +128,7 @@ fun ArrowLeftButton(
         modifier = modifier,
         enabled = enabled,
         colors = colors,
-        imageVector = Icons.Default.KeyboardArrowLeft,
+        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
         contentDescription = "-",
         onClick = onClick
     )
@@ -142,7 +145,7 @@ fun ArrowRightButton(
         modifier = modifier,
         enabled = enabled,
         colors = colors,
-        imageVector = Icons.Default.KeyboardArrowRight,
+        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
         contentDescription = "+",
         onClick = onClick
     )
