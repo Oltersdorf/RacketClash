@@ -106,24 +106,34 @@ WHERE
     gameTable.roundId = :roundId;
 
 select:
-SELECT *
-FROM gameTable
-WHERE id = :id;
+SELECT
+    *
+FROM
+    gameTable
+WHERE
+    id = :id;
 
 add:
-INSERT INTO gameTable(roundId, playerLeft1Id, playerLeft2Id, playerRight1Id, playerRight2Id)
-VALUES (:roundId, :playerLeft1Id, :playerLeft2Id, :playerRight1Id, :playerRight2Id);
+INSERT INTO
+    gameTable(roundId, playerLeft1Id, playerLeft2Id, playerRight1Id, playerRight2Id)
+VALUES
+    (:roundId, :playerLeft1Id, :playerLeft2Id, :playerRight1Id, :playerRight2Id);
 
 update:
-UPDATE gameTable
-SET set1Left = :set1Left, set1Right = :set1Right,
-set2Left = :set2Left, set2Right = :set2Right,
-set3Left = :set3Left, set3Right = :set3Right,
-set4Left = :set4Left, set4Right = :set4Right,
-set5Left = :set5Left, set5Right = :set5Right,
-isDone = :isDone
-WHERE id = :id;
+UPDATE
+    gameTable
+SET
+    set1Left = :set1Left, set1Right = :set1Right,
+    set2Left = :set2Left, set2Right = :set2Right,
+    set3Left = :set3Left, set3Right = :set3Right,
+    set4Left = :set4Left, set4Right = :set4Right,
+    set5Left = :set5Left, set5Right = :set5Right,
+    isDone = :isDone
+WHERE
+    id = :id;
 
 delete:
-DELETE FROM gameTable
-WHERE id = :id;
+DELETE FROM
+    gameTable
+WHERE
+    id = :id;
