@@ -4,7 +4,7 @@ import kotlin.Int;
 CREATE TABLE IF NOT EXISTS gameTable (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     roundId INTEGER NOT NULL,
-    isDone INTEGER AS Boolean NOT NULL DEFAULT FALSE,
+    isDone INTEGER AS Boolean NOT NULL DEFAULT FALSE CHECK (isDone IN (0, 1)),
     playerLeft1Id INTEGER DEFAULT NULL,
     playerLeft2Id INTEGER DEFAULT NULL,
     playerRight1Id INTEGER DEFAULT NULL,
@@ -26,90 +26,84 @@ CREATE TABLE IF NOT EXISTS gameTable (
     FOREIGN KEY (playerRight2Id) REFERENCES playerTable (id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_gameTable_roundId ON gameTable (roundId);
+CREATE INDEX IF NOT EXISTS idx_gameTable_playerLeft1Id ON gameTable (playerLeft1Id);
+CREATE INDEX IF NOT EXISTS idx_gameTable_playerLeft2Id ON gameTable (playerLeft2Id);
+CREATE INDEX IF NOT EXISTS idx_gameTable_playerRight1Id ON gameTable (playerRight1Id);
+CREATE INDEX IF NOT EXISTS idx_gameTable_playerRight2Id ON gameTable (playerRight2Id);
+
 selectAll:
-SELECT gameTable.id, roundId, isDone,
-playerLeft1Id, p1L.name AS playerLeft1Name, p1L.teamName AS playerLeft1TeamName, p1L.lastPlayed AS playerLeft1LastPlayed,
-playerLeft2Id, p2L.name AS playerLeft2Name, p2L.teamName AS playerLeft2TeamName, p2L.lastPlayed AS playerLeft2LastPlayed,
-playerRight1Id, p1R.name AS playerRight1Name, p1R.teamName AS playerRight1TeamName, p1R.lastPlayed AS playerRight1LastPlayed,
-playerRight2Id, p2R.name AS playerRight2Name, p2R.teamName AS playerRight2TeamName, p2R.lastPlayed AS playerRight2LastPlayed,
-set1Left, set1Right,
-set2Left, set2Right,
-set3Left, set3Right,
-set4Left, set4Right,
-set5Left, set5Right
-FROM gameTable
-LEFT JOIN (
-    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName, lastPlayed
-    FROM teamTable
-    JOIN playerTable
-    ON playerTable.teamId = teamTable.id
-    GROUP BY playerTable.id
-) AS p1L ON p1L.id = gameTable.playerLeft1Id
-LEFT JOIN (
-    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName, lastPlayed
-    FROM teamTable
-    JOIN playerTable
-    ON playerTable.teamId = teamTable.id
-    GROUP BY playerTable.id
-) AS p2L ON p2L.id = gameTable.playerLeft2Id
-LEFT JOIN (
-    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName, lastPlayed
-    FROM teamTable
-    JOIN playerTable
-    ON playerTable.teamId = teamTable.id
-    GROUP BY playerTable.id
-) AS p1R ON p1R.id = gameTable.playerRight1Id
-LEFT JOIN (
-    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName, lastPlayed
-    FROM teamTable
-    JOIN playerTable
-    ON playerTable.teamId = teamTable.id
-    GROUP BY playerTable.id
-) AS p2R ON p2R.id = gameTable.playerRight2Id
-GROUP BY gameTable.id;
+WITH PlayerTeams AS (
+    SELECT
+        playerTable.id AS playerId,
+        playerTable.name,
+        teamTable.name AS teamName,
+        playerTable.lastPlayed
+    FROM
+        playerTable
+    JOIN
+        teamTable ON playerTable.teamId = teamTable.id
+)
+SELECT
+    gameTable.id,
+    gameTable.roundId,
+    gameTable.isDone,
+    gameTable.playerLeft1Id, p1L.name AS playerLeft1Name, p1L.teamName AS playerLeft1TeamName, p1L.lastPlayed AS playerLeft1LastPlayed,
+    gameTable.playerLeft2Id, p2L.name AS playerLeft2Name, p2L.teamName AS playerLeft2TeamName, p2L.lastPlayed AS playerLeft2LastPlayed,
+    gameTable.playerRight1Id, p1R.name AS playerRight1Name, p1R.teamName AS playerRight1TeamName, p1R.lastPlayed AS playerRight1LastPlayed,
+    gameTable.playerRight2Id, p2R.name AS playerRight2Name, p2R.teamName AS playerRight2TeamName, p2R.lastPlayed AS playerRight2LastPlayed,
+    gameTable.set1Left, gameTable.set1Right,
+    gameTable.set2Left, gameTable.set2Right,
+    gameTable.set3Left, gameTable.set3Right,
+    gameTable.set4Left, gameTable.set4Right,
+    gameTable.set5Left, gameTable.set5Right
+FROM
+    gameTable
+LEFT JOIN
+    PlayerTeams AS p1L ON p1L.playerId = gameTable.playerLeft1Id
+LEFT JOIN
+    PlayerTeams AS p2L ON p2L.playerId = gameTable.playerLeft2Id
+LEFT JOIN
+    PlayerTeams AS p1R ON p1R.playerId = gameTable.playerRight1Id
+LEFT JOIN
+    PlayerTeams AS p2R ON p2R.playerId = gameTable.playerRight2Id;
 
 selectAllInRound:
-SELECT gameTable.id, roundId, isDone,
-playerLeft1Id, p1L.name AS playerLeft1Name, p1L.teamName AS playerLeft1TeamName,
-playerLeft2Id, p2L.name AS playerLeft2Name, p2L.teamName AS playerLeft2TeamName,
-playerRight1Id, p1R.name AS playerRight1Name, p1R.teamName AS playerRight1TeamName,
-playerRight2Id, p2R.name AS playerRight2Name, p2R.teamName AS playerRight2TeamName,
-set1Left, set1Right,
-set2Left, set2Right,
-set3Left, set3Right,
-set4Left, set4Right,
-set5Left, set5Right
-FROM gameTable
-LEFT JOIN (
-    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
-    FROM teamTable
-    JOIN playerTable
-    ON playerTable.teamId = teamTable.id
-    GROUP BY playerTable.id
-) AS p1L ON p1L.id = gameTable.playerLeft1Id
-LEFT JOIN (
-    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
-    FROM teamTable
-    JOIN playerTable
-    ON playerTable.teamId = teamTable.id
-    GROUP BY playerTable.id
-) AS p2L ON p2L.id = gameTable.playerLeft2Id
-LEFT JOIN (
-    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
-    FROM teamTable
-    JOIN playerTable
-    ON playerTable.teamId = teamTable.id
-    GROUP BY playerTable.id
-) AS p1R ON p1R.id = gameTable.playerRight1Id
-LEFT JOIN (
-    SELECT playerTable.id, playerTable.name, teamTable.name AS teamName
-    FROM teamTable
-    JOIN playerTable
-    ON playerTable.teamId = teamTable.id
-    GROUP BY playerTable.id
-) AS p2R ON p2R.id = gameTable.playerRight2Id
-WHERE roundId = :roundId
-GROUP BY gameTable.id;
+WITH PlayerTeams AS (
+    SELECT
+        playerTable.id AS playerId,
+        playerTable.name,
+        teamTable.name AS teamName
+    FROM
+        playerTable
+    JOIN
+        teamTable ON playerTable.teamId = teamTable.id
+)
+SELECT
+    gameTable.id,
+    gameTable.roundId,
+    gameTable.isDone,
+    gameTable.playerLeft1Id, p1L.name AS playerLeft1Name, p1L.teamName AS playerLeft1TeamName,
+    gameTable.playerLeft2Id, p2L.name AS playerLeft2Name, p2L.teamName AS playerLeft2TeamName,
+    gameTable.playerRight1Id, p1R.name AS playerRight1Name, p1R.teamName AS playerRight1TeamName,
+    gameTable.playerRight2Id, p2R.name AS playerRight2Name, p2R.teamName AS playerRight2TeamName,
+    gameTable.set1Left, gameTable.set1Right,
+    gameTable.set2Left, gameTable.set2Right,
+    gameTable.set3Left, gameTable.set3Right,
+    gameTable.set4Left, gameTable.set4Right,
+    gameTable.set5Left, gameTable.set5Right
+FROM
+    gameTable
+LEFT JOIN
+    PlayerTeams AS p1L ON p1L.playerId = gameTable.playerLeft1Id
+LEFT JOIN
+    PlayerTeams AS p2L ON p2L.playerId = gameTable.playerLeft2Id
+LEFT JOIN
+    PlayerTeams AS p1R ON p1R.playerId = gameTable.playerRight1Id
+LEFT JOIN
+    PlayerTeams AS p2R ON p2R.playerId = gameTable.playerRight2Id
+WHERE
+    gameTable.roundId = :roundId;
 
 select:
 SELECT *
