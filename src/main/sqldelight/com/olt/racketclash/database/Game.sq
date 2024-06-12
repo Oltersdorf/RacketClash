@@ -132,20 +132,30 @@ SET
     set3Left = :set3Left, set3Right = :set3Right,
     set4Left = :set4Left, set4Right = :set4Right,
     set5Left = :set5Left, set5Right = :set5Right,
-    pointsLeft = set1Left + set2Left + set3Left + set4Left + set5Left,
-    pointsRight = set1Right + set2Right + set3Right + set4Right + set5Right,
+    pointsLeft =
+        CAST(:set1Left AS INTEGER) +
+        CAST(:set2Left AS INTEGER) +
+        CAST(:set3Left AS INTEGER) +
+        CAST(:set4Left AS INTEGER) +
+        CAST(:set5Left AS INTEGER),
+    pointsRight =
+        CAST(:set1Right AS INTEGER) +
+        CAST(:set2Right AS INTEGER) +
+        CAST(:set3Right AS INTEGER) +
+        CAST(:set4Right AS INTEGER) +
+        CAST(:set5Right AS INTEGER),
     setsLeftWon =
-        IIF(set1Left > set1Right, 1, 0) +
-        IIF(set2Left > set2Right, 1, 0) +
-        IIF(set3Left > set3Right, 1, 0) +
-        IIF(set4Left > set4Right, 1, 0) +
-        IIF(set5Left > set5Right, 1, 0),
+        IIF(CAST(:set1Left AS INTEGER) > :set1Right, 1, 0) +
+        IIF(CAST(:set2Left AS INTEGER) > :set2Right, 1, 0) +
+        IIF(CAST(:set3Left AS INTEGER) > :set3Right, 1, 0) +
+        IIF(CAST(:set4Left AS INTEGER) > :set4Right, 1, 0) +
+        IIF(CAST(:set5Left AS INTEGER) > :set5Right, 1, 0),
     setsRightWon =
-        IIF(set1Right > set1Left, 1, 0) +
-        IIF(set2Right > set2Left, 1, 0) +
-        IIF(set3Right > set3Left, 1, 0) +
-        IIF(set4Right > set4Left, 1, 0) +
-        IIF(set5Right > set5Left, 1, 0),
+        IIF(CAST(:set1Right AS INTEGER) > :set1Left, 1, 0) +
+        IIF(CAST(:set2Right AS INTEGER) > :set2Left, 1, 0) +
+        IIF(CAST(:set3Right AS INTEGER) > :set3Left, 1, 0) +
+        IIF(CAST(:set4Right AS INTEGER) > :set4Left, 1, 0) +
+        IIF(CAST(:set5Right AS INTEGER) > :set5Left, 1, 0),
     isDone = :isDone
 WHERE
     id = :id;
