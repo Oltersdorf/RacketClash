@@ -19,6 +19,10 @@ CREATE TABLE IF NOT EXISTS gameTable (
     set4Right INTEGER AS Int NOT NULL DEFAULT 0,
     set5Left INTEGER AS Int NOT NULL DEFAULT 0,
     set5Right INTEGER AS Int NOT NULL DEFAULT 0,
+    pointsLeft INTEGER AS Int NOT NULL DEFAULT 0,
+    pointsRight INTEGER AS Int NOT NULL DEFAULT 0,
+    setsLeftWon INTEGER AS Int NOT NULL DEFAULT 0,
+    setsRightWon INTEGER AS Int NOT NULL DEFAULT 0,
     FOREIGN KEY (roundId) REFERENCES roundTable (id),
     FOREIGN KEY (playerLeft1Id) REFERENCES playerTable (id),
     FOREIGN KEY (playerLeft2Id) REFERENCES playerTable (id),
@@ -128,6 +132,20 @@ SET
     set3Left = :set3Left, set3Right = :set3Right,
     set4Left = :set4Left, set4Right = :set4Right,
     set5Left = :set5Left, set5Right = :set5Right,
+    pointsLeft = set1Left + set2Left + set3Left + set4Left + set5Left,
+    pointsRight = set1Right + set2Right + set3Right + set4Right + set5Right,
+    setsLeftWon =
+        IIF(set1Left > set1Right, 1, 0) +
+        IIF(set2Left > set2Right, 1, 0) +
+        IIF(set3Left > set3Right, 1, 0) +
+        IIF(set4Left > set4Right, 1, 0) +
+        IIF(set5Left > set5Right, 1, 0),
+    setsRightWon =
+        IIF(set1Right > set1Left, 1, 0) +
+        IIF(set2Right > set2Left, 1, 0) +
+        IIF(set3Right > set3Left, 1, 0) +
+        IIF(set4Right > set4Left, 1, 0) +
+        IIF(set5Right > set5Left, 1, 0),
     isDone = :isDone
 WHERE
     id = :id;

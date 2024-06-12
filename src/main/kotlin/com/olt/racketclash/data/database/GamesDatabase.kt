@@ -16,7 +16,9 @@ class GamesDatabase(private val queries: GameQueries) {
                 set2LeftAdapter = IntColumnAdapter, set2RightAdapter = IntColumnAdapter,
                 set3LeftAdapter = IntColumnAdapter, set3RightAdapter = IntColumnAdapter,
                 set4LeftAdapter = IntColumnAdapter, set4RightAdapter = IntColumnAdapter,
-                set5LeftAdapter = IntColumnAdapter, set5RightAdapter = IntColumnAdapter
+                set5LeftAdapter = IntColumnAdapter, set5RightAdapter = IntColumnAdapter,
+                pointsLeftAdapter = IntColumnAdapter, pointsRightAdapter = IntColumnAdapter,
+                setsLeftWonAdapter = IntColumnAdapter, setsRightWonAdapter = IntColumnAdapter
             )
         }
     }
