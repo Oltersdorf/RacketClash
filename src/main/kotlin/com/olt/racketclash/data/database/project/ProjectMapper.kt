@@ -1,4 +1,4 @@
-package com.olt.racketclash.data.database.mapper
+package com.olt.racketclash.data.database.project
 
 import com.olt.racketclash.data.Project
 import com.olt.racketclash.database.project.SelectAll

@@ -44,7 +44,7 @@ fun RacketClashNavigator(database: Database) {
     ) {
         composable(route = "Projects") {
             ProjectsScreen(
-                model = viewModel { ProjectsModel(database = database) },
+                model = viewModel { ProjectsModel(projectDatabase = database.projectDatabase) },
                 language = state.language,
                 availableLanguages = state.availableLanguages.toList(),
                 navigateTo = { navigateTo(navController = navController, screen = it) },
@@ -53,14 +53,20 @@ fun RacketClashNavigator(database: Database) {
         }
         composable(route = "NewProject") {
             NewProjectScreen(
-                model = viewModel { NewProjectModel(database = database) },
+                model = viewModel { NewProjectModel(projectDatabase = database.projectDatabase) },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
         }
         composable(route = "Teams/{projectId}") {
             TeamsScreen(
-                model = viewModel { TeamsModel(database = database, projectId = it.getNullableLong("projectId")!!) },
+                model = viewModel {
+                    TeamsModel(
+                        projectDatabase = database.projectDatabase,
+                        teamDatabase = database.teamDatabase,
+                        projectId = it.getNullableLong("projectId")!!
+                    )
+                },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
@@ -70,14 +76,25 @@ fun RacketClashNavigator(database: Database) {
             arguments = listOf(nullableLong(name = "teamId"))
         ) {
             EditTeamScreen(
-                model = viewModel { EditTeamModel(database = database, teamId = it.getNullableLong(key = "teamId"), projectId = it.getNullableLong(key = "projectId")!!) },
+                model = viewModel {
+                    EditTeamModel(
+                        teamDatabase = database.teamDatabase,
+                        teamId = it.getNullableLong(key = "teamId"),
+                        projectId = it.getNullableLong(key = "projectId")!!
+                    )
+                },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
         }
         composable(route = "Players/{projectId}") {
             PlayersScreen(
-                model = viewModel { PlayersModel(database = database, projectId = it.getNullableLong("projectId")!!) },
+                model = viewModel {
+                    PlayersModel(
+                        projectDatabase = database.projectDatabase,
+                        playerDatabase = database.playerDatabase,
+                        projectId = it.getNullableLong("projectId")!!)
+                },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
@@ -87,21 +104,43 @@ fun RacketClashNavigator(database: Database) {
             arguments = listOf(nullableLong(name = "playerId"))
         ) {
             EditPlayerScreen(
-                model = viewModel { EditPlayerModel(database = database, playerId = it.getNullableLong(key = "playerId"), projectId = it.getNullableLong(key = "projectId")!!) },
+                model = viewModel {
+                    EditPlayerModel(
+                        teamDatabase = database.teamDatabase,
+                        playerDatabase = database.playerDatabase,
+                        playerId = it.getNullableLong(key = "playerId"),
+                        projectId = it.getNullableLong(key = "projectId")!!
+                    )
+                },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
         }
         composable(route = "Games/{projectId}") {
             GamesScreen(
-                model = viewModel { GamesModel(database = database, projectId = it.getNullableLong(key = "projectId")!!) },
+                model = viewModel {
+                    GamesModel(
+                        projectDatabase = database.projectDatabase,
+                        roundDatabase = database.roundDatabase,
+                        byeDatabase = database.byeDatabase,
+                        gameDatabase = database.gameDatabase,
+                        projectId = it.getNullableLong(key = "projectId")!!
+                    )
+                },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
         }
         composable(route = "NewRound/{projectId}") {
             NewRoundScreen(
-                model = viewModel { NewRoundModel(database = database, projectId = it.getNullableLong(key = "projectId")!!) },
+                model = viewModel {
+                    NewRoundModel(
+                        playerDatabase = database.playerDatabase,
+                        roundDatabase = database.roundDatabase,
+                        gameDatabase = database.gameDatabase,
+                        projectId = it.getNullableLong(key = "projectId")!!
+                    )
+                },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
@@ -111,7 +150,17 @@ fun RacketClashNavigator(database: Database) {
             arguments = listOf(nullableLong(name = "roundId"))
         ) {
             EditGameScreen(
-                model = viewModel { EditGameModel(database = database, projectId = it.getNullableLong(key = "projectId")!!, roundId = it.getNullableLong(key = "roundId")!!) },
+                model = viewModel {
+                    EditGameModel(
+                        projectDatabase = database.projectDatabase,
+                        roundDatabase = database.roundDatabase,
+                        byeDatabase = database.byeDatabase,
+                        playerDatabase = database.playerDatabase,
+                        gameDatabase = database.gameDatabase,
+                        projectId = it.getNullableLong(key = "projectId")!!,
+                        roundId = it.getNullableLong(key = "roundId")!!
+                    )
+                },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
@@ -121,7 +170,15 @@ fun RacketClashNavigator(database: Database) {
             arguments = listOf(nullableLong(name = "roundId"))
         ) {
             EditRoundScreen(
-                model = viewModel { EditRoundModel(database = database, roundId = it.getNullableLong(key = "roundId")!!, projectId = it.getNullableLong(key = "projectId")!!) },
+                model = viewModel {
+                    EditRoundModel(
+                        roundDatabase = database.roundDatabase,
+                        byeDatabase = database.byeDatabase,
+                        gameDatabase = database.gameDatabase,
+                        roundId = it.getNullableLong(key = "roundId")!!,
+                        projectId = it.getNullableLong(key = "projectId")!!
+                    )
+                },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )

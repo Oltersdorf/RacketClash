@@ -1,4 +1,4 @@
-package com.olt.racketclash.data.database.mapper
+package com.olt.racketclash.data.database.bye
 
 import com.olt.racketclash.data.Bye
 import com.olt.racketclash.database.bye.SelectAll

@@ -1,10 +1,10 @@
 package com.olt.racketclash.app.screens.editTeam
 
-import com.olt.racketclash.data.database.Database
+import com.olt.racketclash.data.database.ITeamDatabase
 import com.olt.racketclash.state.ViewModelState
 
 class EditTeamModel(
-    private val database: Database,
+    private val teamDatabase: ITeamDatabase,
     private val teamId: Long?,
     private val projectId: Long
 ) : ViewModelState<EditTeamModel.State>(initialState = State(projectId = projectId)) {
@@ -12,7 +12,7 @@ class EditTeamModel(
     init {
         onIO {
             if (teamId != null) {
-                database.team(id = teamId).collect {
+                teamDatabase.team(id = teamId).collect {
                     if (it != null)
                         updateState { copy(name = it.name, strength = it.strength) }
                 }
@@ -39,8 +39,8 @@ class EditTeamModel(
     fun updateTeam() =
         onIO {
             if (teamId == null)
-                database.addTeam(name = state.value.name, strength = state.value.strength, projectId = projectId)
+                teamDatabase.add(name = state.value.name, strength = state.value.strength, projectId = projectId)
             else
-                database.updateTeam(id = teamId, name = state.value.name, strength = state.value.strength, projectId = projectId)
+                teamDatabase.update(id = teamId, name = state.value.name, strength = state.value.strength, projectId = projectId)
         }
 }

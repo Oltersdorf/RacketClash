@@ -1,4 +1,4 @@
-package com.olt.racketclash.data.database.mapper
+package com.olt.racketclash.data.database.team
 
 import com.olt.racketclash.data.Team
 import com.olt.racketclash.database.team.Select

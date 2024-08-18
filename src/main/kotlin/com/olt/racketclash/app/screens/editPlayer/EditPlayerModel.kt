@@ -1,24 +1,26 @@
 package com.olt.racketclash.app.screens.editPlayer
 
-import com.olt.racketclash.data.database.Database
 import com.olt.racketclash.data.Team
+import com.olt.racketclash.data.database.IPlayerDatabase
+import com.olt.racketclash.data.database.ITeamDatabase
 import com.olt.racketclash.state.ViewModelState
 
 class EditPlayerModel(
-    private val database: Database,
+    private val teamDatabase: ITeamDatabase,
+    private val playerDatabase: IPlayerDatabase,
     private val playerId: Long?,
     private val projectId: Long
 ) : ViewModelState<EditPlayerModel.State>(initialState = State(projectId = projectId)) {
 
     init {
         onIO {
-            database.teams().collect {
+            teamDatabase.teams().collect {
                 updateState { copy(teams = it, selectedTeam = it.find { it.id == teamId } ?: noTeamSelected) }
             }
         }
         onIO {
             if (playerId != null) {
-                database.player(id = playerId).collect { player ->
+                playerDatabase.player(id = playerId).collect { player ->
                     if (player != null)
                         updateState {
                             copy(
@@ -48,9 +50,9 @@ class EditPlayerModel(
     fun updatePlayer() =
         onIO {
             if (playerId == null)
-                database.addPlayer(name = state.value.name, teamId = state.value.selectedTeam.id, projectId = projectId)
+                playerDatabase.add(name = state.value.name, teamId = state.value.selectedTeam.id, projectId = projectId)
             else
-                database.updatePlayer(id = playerId, name = state.value.name, teamId = state.value.selectedTeam.id, projectId = projectId)
+                playerDatabase.update(id = playerId, name = state.value.name, teamId = state.value.selectedTeam.id, projectId = projectId)
         }
 
     fun selectTeam(id: Long) =

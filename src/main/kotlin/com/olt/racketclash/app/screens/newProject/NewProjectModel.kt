@@ -1,16 +1,15 @@
 package com.olt.racketclash.app.screens.newProject
 
-import com.olt.racketclash.data.database.Database
-import com.olt.racketclash.language.LanguageModel
+import com.olt.racketclash.data.database.IProjectDatabase
 import com.olt.racketclash.state.ViewModelState
 
 class NewProjectModel(
-    private val database: Database
+    private val projectDatabase: IProjectDatabase
 ) : ViewModelState<NewProjectModel.State>(initialState = State()) {
 
     init {
         onIO {
-            database.projects().collect {
+            projectDatabase.projects().collect {
                 updateState { copy(projectNames = it.map { it.name }) }
             }
         }
@@ -24,7 +23,7 @@ class NewProjectModel(
 
     fun addProject() =
         onIO {
-            database.addProject(name = state.value.projectName)
+            projectDatabase.addProject(name = state.value.projectName)
         }
 
     fun changeProjectName(newName: String) {

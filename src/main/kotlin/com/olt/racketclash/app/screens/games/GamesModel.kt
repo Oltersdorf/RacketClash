@@ -3,18 +3,21 @@ package com.olt.racketclash.app.screens.games
 import com.olt.racketclash.data.Bye
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Round
-import com.olt.racketclash.data.database.Database
+import com.olt.racketclash.data.database.*
 import com.olt.racketclash.state.ViewModelState
 import kotlinx.coroutines.isActive
 
 class GamesModel(
-    private val database: Database,
+    private val projectDatabase: IProjectDatabase,
+    private val roundDatabase: IRoundDatabase,
+    private val byeDatabase: IByeDatabase,
+    private val gameDatabase: IGameDatabase,
     private val projectId: Long
 ) : ViewModelState<GamesModel.State>(initialState = State(projectId = projectId)) {
 
     init {
         onIO {
-            database.projectSettings(id = projectId).collect {
+            projectDatabase.projectSettings(id = projectId).collect {
                 if (it != null)
                     updateState {
                         copy(
@@ -29,19 +32,19 @@ class GamesModel(
         }
 
         onIO {
-            database.rounds().collect {
+            roundDatabase.rounds().collect {
                 updateState { copy(rounds = it) }
             }
         }
 
         onIO {
-            database.games().collect {
+            gameDatabase.games().collect {
                 updateState { copy(games = it.groupBy { it.roundId }, active = activeGames(games = it, timeout = timeout, fields = fields)) }
             }
         }
 
         onIO {
-            database.bye().collect {
+            byeDatabase.byes().collect {
                 updateState { copy(bye = it.groupBy { it.roundId }) }
             }
         }
@@ -71,7 +74,7 @@ class GamesModel(
 
     fun deleteRound(id: Long) =
         onIO {
-            database.deleteRound(id = id, projectId = projectId)
+            roundDatabase.delete(id = id, projectId = projectId)
         }
 
     fun setDone(
@@ -79,7 +82,7 @@ class GamesModel(
         isDone: Boolean
     ) =
         onIO {
-            database.updateGame(
+            gameDatabase.update(
                 id = game.id,
                 set1Left = game.set1Left,
                 set1Right = game.set1Right,
@@ -139,38 +142,33 @@ class GamesModel(
         }
 
     fun changeFields(newFields: Int) =
-        onDefault {
-            if (newFields >= 1) {
-                onIO { database.updateFields(id = projectId, fields = newFields) }
-            }
+        onIO {
+            if (newFields >= 1)
+                projectDatabase.updateFields(id = projectId, fields = newFields)
         }
 
     fun changeTimeout(newTimeout: Int) =
-        onDefault {
-            if (newTimeout >= 1) {
-                onIO { database.updateTimeout(id = projectId, timeout = newTimeout) }
-            }
+        onIO {
+            if (newTimeout >= 1)
+                projectDatabase.updateTimeout(id = projectId, timeout = newTimeout)
         }
 
     fun changeGamePointsForBye(newGamePointsForBye: Int) =
-        onDefault {
-            if (newGamePointsForBye >= 0) {
-                onIO { database.updateGamePointsForBye(id = projectId, gamePointsForBye = newGamePointsForBye) }
-            }
+        onIO {
+            if (newGamePointsForBye >= 0)
+                projectDatabase.updateGamePointsForBye(id = projectId, gamePointsForBye = newGamePointsForBye)
         }
 
     fun changeSetPointsForBye(newSetPointsForBye: Int) =
-        onDefault {
-            if (newSetPointsForBye >= 0) {
-                onIO { database.updateSetPointsForBye(id = projectId, setPointsForBye = newSetPointsForBye) }
-            }
+        onIO {
+            if (newSetPointsForBye >= 0)
+                projectDatabase.updateSetPointsForBye(id = projectId, setPointsForBye = newSetPointsForBye)
         }
 
     fun changePointsForBye(newPointsForBye: Int) =
-        onDefault {
-            if (newPointsForBye >= 0) {
-                onIO { database.updatePointsForBye(id = projectId, pointsForBye = newPointsForBye) }
-            }
+        onIO {
+            if (newPointsForBye >= 0)
+                projectDatabase.updatePointsForBye(id = projectId, pointsForBye = newPointsForBye)
         }
 
     private fun activeGames(games: List<Game>, timeout: Int, fields: Int): List<Long> {

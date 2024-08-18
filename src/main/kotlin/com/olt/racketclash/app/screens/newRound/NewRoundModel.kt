@@ -1,14 +1,18 @@
 package com.olt.racketclash.app.screens.newRound
 
 import com.olt.racketclash.data.Bye
-import com.olt.racketclash.data.database.Database
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Player
+import com.olt.racketclash.data.database.IGameDatabase
+import com.olt.racketclash.data.database.IPlayerDatabase
+import com.olt.racketclash.data.database.IRoundDatabase
 import com.olt.racketclash.data.sort
 import com.olt.racketclash.state.ViewModelState
 
 class NewRoundModel(
-    private val database: Database,
+    private val playerDatabase: IPlayerDatabase,
+    private val roundDatabase: IRoundDatabase,
+    private val gameDatabase: IGameDatabase,
     private val projectId: Long
 ) : ViewModelState<NewRoundModel.State>(initialState = State(projectId = projectId)) {
 
@@ -16,7 +20,7 @@ class NewRoundModel(
 
     init {
         onIO {
-            database.activePlayers().collect {
+            playerDatabase.activePlayers().collect {
                 updateState {
                     completePlayers = it
                     copy(players = it.filter { it.name.contains(filter) }.sort(sortedBy = sortedBy))
@@ -74,7 +78,7 @@ class NewRoundModel(
 
     fun addEmptyRound() =
         onIO {
-            database.addRound(name = state.value.roundName, projectId = projectId)
+            roundDatabase.add(name = state.value.roundName, projectId = projectId)
         }
 
     fun changeEquallyStrongDoublesRounds(newRounds: Int) =
@@ -198,7 +202,7 @@ class NewRoundModel(
                 val games = roundType.games.groupBy { it.roundId }
                 val rounds = games.mapKeys { "${model.roundName} ${it.key}" }
 
-                database.addRoundsWithGames(rounds = rounds, bye = roundType.byeGames, projectId = projectId)
+                gameDatabase.addRoundsWithGames(rounds = rounds, bye = roundType.byeGames, projectId = projectId)
             }
         }
 

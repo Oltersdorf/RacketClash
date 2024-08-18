@@ -1,11 +1,15 @@
 package com.olt.racketclash.app.screens.editGame
 
 import com.olt.racketclash.data.*
-import com.olt.racketclash.data.database.Database
+import com.olt.racketclash.data.database.*
 import com.olt.racketclash.state.ViewModelState
 
 class EditGameModel(
-    private val database: Database,
+    private val projectDatabase: IProjectDatabase,
+    private val roundDatabase: IRoundDatabase,
+    private val byeDatabase: IByeDatabase,
+    private val playerDatabase: IPlayerDatabase,
+    private val gameDatabase: IGameDatabase,
     private val projectId: Long,
     private val roundId: Long
 ) : ViewModelState<EditGameModel.State>(initialState = State(projectId = projectId)) {
@@ -17,7 +21,7 @@ class EditGameModel(
 
     init {
         onIO {
-            database.projectSettings(id = projectId).collect { settings ->
+            projectDatabase.projectSettings(id = projectId).collect { settings ->
                 projectSettings = settings
 
                 if (settings != null) {
@@ -35,19 +39,19 @@ class EditGameModel(
         }
 
         onIO {
-            database.round(id = roundId).collect {
+            roundDatabase.round(id = roundId).collect {
                 updateState { copy(roundName = it?.name ?: "") }
             }
         }
 
         onIO {
-            database.bye(roundId = roundId).collect {
+            byeDatabase.byes(roundId = roundId).collect {
                 byes = it
             }
         }
 
         onIO {
-            database.players().collect { playerList ->
+            playerDatabase.players().collect { playerList ->
                 val players = playerList.toMutableList()
                 val settings = projectSettings
 
@@ -65,7 +69,7 @@ class EditGameModel(
         }
 
         onIO {
-            database.games(roundId = roundId).collect {
+            gameDatabase.games(roundId = roundId).collect {
                 games = it
             }
         }
@@ -145,12 +149,12 @@ class EditGameModel(
         }
 
     fun addGame() =
-        onDefault {
+        onIO {
             updateState {
                 if (isBye)
-                    database.addBye(roundId = roundId, playerId = player1Left?.id, projectId = projectId)
+                    player1Left?.id?.let { byeDatabase.add(roundId = roundId, playerId = it, projectId = projectId) }
                 else
-                    database.addGame(
+                    gameDatabase.add(
                         roundId = roundId,
                         playerLeft1Id = player1Left?.id,
                         playerLeft2Id = player2Left?.id,

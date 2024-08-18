@@ -1,13 +1,15 @@
 package com.olt.racketclash.app.screens.teams
 
 import com.olt.racketclash.data.ProjectSettings
-import com.olt.racketclash.data.database.Database
 import com.olt.racketclash.data.Team
+import com.olt.racketclash.data.database.IProjectDatabase
+import com.olt.racketclash.data.database.ITeamDatabase
 import com.olt.racketclash.data.sort
 import com.olt.racketclash.state.ViewModelState
 
 class TeamsModel(
-    private val database: Database,
+    private val projectDatabase: IProjectDatabase,
+    private val teamDatabase: ITeamDatabase,
     private val projectId: Long
 ) : ViewModelState<TeamsModel.State>(initialState = State(projectId = projectId)) {
 
@@ -16,7 +18,7 @@ class TeamsModel(
 
     init {
         onIO {
-            database.projectSettings(id = projectId).collect { settings ->
+            projectDatabase.projectSettings(id = projectId).collect { settings ->
                 projectSettings = settings
 
                 if (settings != null) {
@@ -34,7 +36,7 @@ class TeamsModel(
         }
 
         onIO {
-            database.teams().collect { teamList ->
+            teamDatabase.teams().collect { teamList ->
                 val teams = teamList.toMutableList()
 
                 val settings = projectSettings
@@ -71,7 +73,7 @@ class TeamsModel(
     fun deleteTeam(id: Long) =
         onIO {
             if (state.value.teams.find { it.id == id }?.size == 0) {
-                database.deleteTeam(id = id, projectId = projectId)
+                teamDatabase.delete(id = id, projectId = projectId)
             }
         }
 

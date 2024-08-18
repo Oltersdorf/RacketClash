@@ -1,13 +1,15 @@
 package com.olt.racketclash.app.screens.players
 
-import com.olt.racketclash.data.database.Database
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.data.ProjectSettings
+import com.olt.racketclash.data.database.IPlayerDatabase
+import com.olt.racketclash.data.database.IProjectDatabase
 import com.olt.racketclash.data.sort
 import com.olt.racketclash.state.ViewModelState
 
 class PlayersModel(
-    private val database: Database,
+    private val projectDatabase: IProjectDatabase,
+    private val playerDatabase: IPlayerDatabase,
     private val projectId: Long
 ) : ViewModelState<PlayersModel.State>(initialState = State(projectId = projectId)) {
 
@@ -16,7 +18,7 @@ class PlayersModel(
 
     init {
         onIO {
-            database.projectSettings(id = projectId).collect { settings ->
+            projectDatabase.projectSettings(id = projectId).collect { settings ->
                 projectSettings = settings
 
                 if (settings != null) {
@@ -34,7 +36,7 @@ class PlayersModel(
         }
 
         onIO {
-            database.players().collect { playerList ->
+            playerDatabase.players().collect { playerList ->
                 updateState {
                     val players = playerList.toMutableList()
 
@@ -69,12 +71,12 @@ class PlayersModel(
 
     fun updateActive(id: Long, active: Boolean) =
         onIO {
-            database.playerSetActive(id = id, active = active, projectId = projectId)
+            playerDatabase.setActive(id = id, active = active, projectId = projectId)
         }
 
     fun deletePlayer(id: Long) =
         onIO {
-            database.deletePlayer(id = id, projectId = projectId)
+            playerDatabase.delete(id = id, projectId = projectId)
         }
 
     fun changeFilter(newFilter: String) =

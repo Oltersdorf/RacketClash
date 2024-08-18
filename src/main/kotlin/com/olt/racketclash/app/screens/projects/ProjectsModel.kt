@@ -1,16 +1,16 @@
 package com.olt.racketclash.app.screens.projects
 
 import com.olt.racketclash.data.Project
-import com.olt.racketclash.data.database.Database
+import com.olt.racketclash.data.database.IProjectDatabase
 import com.olt.racketclash.state.ViewModelState
 
 class ProjectsModel(
-    private val database: Database
+    private val projectDatabase: IProjectDatabase
 ): ViewModelState<ProjectsModel.State>(initialState = State()) {
 
     init {
         onIO {
-            database.projects().collect {
+            projectDatabase.projects().collect {
                 updateState {
                     copy(projects = it)
                 }
@@ -24,6 +24,6 @@ class ProjectsModel(
 
     fun deleteProject(id: Long) =
         onIO {
-            database.deleteProject(id = id)
+            projectDatabase.deleteProject(id = id)
         }
 }

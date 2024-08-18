@@ -1,4 +1,4 @@
-package com.olt.racketclash.data.database.mapper
+package com.olt.racketclash.data.database.player
 
 import com.olt.racketclash.data.Player
 import com.olt.racketclash.database.SelectActive

@@ -120,7 +120,7 @@ setLastPlayed:
 UPDATE
     playerTable
 SET
-    lastPlayed = :lastPLayed
+    lastPlayed = :lastPlayed
 WHERE
     id = :id;
 

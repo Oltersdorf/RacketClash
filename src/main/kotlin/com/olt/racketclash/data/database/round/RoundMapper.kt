@@ -1,4 +1,4 @@
-package com.olt.racketclash.data.database.mapper
+package com.olt.racketclash.data.database.round
 
 import com.olt.racketclash.data.Round
 import com.olt.racketclash.database.RoundTable
