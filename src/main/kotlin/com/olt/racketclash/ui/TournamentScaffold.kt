@@ -14,23 +14,23 @@ import com.olt.racketclash.language.Language
 import com.olt.racketclash.app.Screens
 
 sealed class TournamentTabs(val tab: Tab) {
-    data class Teams(val language: Language) : TournamentTabs(
+    data class Teams(val language: Language, val projectId: Long) : TournamentTabs(
         tab = Tab(
-            target = Screens.Teams(),
+            target = Screens.Teams(projectId = projectId),
             imageVector = Icons.Default.Person,
             text = language.teams
         )
     )
-    data class Players(val language: Language) : TournamentTabs(
+    data class Players(val language: Language, val projectId: Long) : TournamentTabs(
         tab = Tab(
-            target = Screens.Players(),
+            target = Screens.Players(projectId = projectId),
             imageVector = Icons.Default.Person,
             text = language.players
         )
     )
-    data class Games(val language: Language) : TournamentTabs(
+    data class Games(val language: Language, val projectId: Long) : TournamentTabs(
         tab = Tab(
-            target = Screens.Games() ,
+            target = Screens.Games(projectId = projectId) ,
             imageVector = Icons.Default.List,
             text = language.games
         )
@@ -46,6 +46,7 @@ data class Tab(
 @Composable
 fun TournamentScaffold(
     language: Language,
+    projectId: Long,
     topAppBarTitle: String,
     topAppBarActions: @Composable (RowScope.() -> Unit) = {},
     hasBackPress: Boolean = false,
@@ -59,9 +60,9 @@ fun TournamentScaffold(
         topAppBarActions = topAppBarActions,
         hasBackPress = hasBackPress,
         tabs = listOf(
-            TournamentTabs.Teams(language = language).tab,
-            TournamentTabs.Players(language = language).tab,
-            TournamentTabs.Games(language = language).tab
+            TournamentTabs.Teams(language = language, projectId = projectId).tab,
+            TournamentTabs.Players(language = language, projectId = projectId).tab,
+            TournamentTabs.Games(language = language, projectId = projectId).tab
         ),
         selectedTab = selectedTab?.tab,
         navigateTo = navigateTo,

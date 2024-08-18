@@ -27,11 +27,12 @@ fun PlayersScreen(
 
     TournamentScaffold(
         language = language,
+        projectId = state.projectId,
         topAppBarTitle = language.players,
         topAppBarActions = {
-            AddButton { navigateTo(Screens.EditPlayer(playerId = null)) }
+            AddButton { navigateTo(Screens.EditPlayer(playerId = null, projectId = state.projectId)) }
         },
-        selectedTab = TournamentTabs.Players(language = language),
+        selectedTab = TournamentTabs.Players(language = language, projectId = state.projectId),
         navigateTo = { navigateTo(it) }
     ) {
         PlayerView(
@@ -91,7 +92,7 @@ private fun PlayerList(
         },
         items = state.players,
         modifier = Modifier.padding(5.dp),
-        onClick = { navigateTo(Screens.EditPlayer(playerId = it.id)) },
+        onClick = { navigateTo(Screens.EditPlayer(playerId = it.id, projectId = state.projectId)) },
         columns = listOf(
             LazyTableColumn.Checkbox(
                 name = language.active,

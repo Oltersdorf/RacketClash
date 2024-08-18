@@ -3,7 +3,9 @@ import kotlin.Int;
 CREATE TABLE IF NOT EXISTS teamTable (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     name TEXT NOT NULL,
-    strength INTEGER AS Int NOT NULL
+    strength INTEGER AS Int NOT NULL,
+    projectId INTEGER NOT NULL,
+    FOREIGN KEY (projectId) REFERENCES projectTable (id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_teamTable_strength ON teamTable (strength);
@@ -130,9 +132,9 @@ GROUP BY
 
 add:
 INSERT INTO
-    teamTable(name, strength)
+    teamTable(name, strength, projectId)
 VALUES
-    (:name, :strength);
+    (:name, :strength, :projectId);
 
 update:
 UPDATE
@@ -148,9 +150,3 @@ DELETE FROM
     teamTable
 WHERE
     id = :id;
-
-size:
-SELECT
-    COUNT(*)
-FROM
-    teamTable;

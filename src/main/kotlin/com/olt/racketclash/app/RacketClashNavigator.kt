@@ -24,14 +24,16 @@ import com.olt.racketclash.app.screens.newRound.NewRoundModel
 import com.olt.racketclash.app.screens.newRound.NewRoundScreen
 import com.olt.racketclash.app.screens.players.PlayersModel
 import com.olt.racketclash.app.screens.players.PlayersScreen
-import com.olt.racketclash.data.Project
+import com.olt.racketclash.app.screens.projects.ProjectsModel
 import com.olt.racketclash.app.screens.projects.ProjectsScreen
 import com.olt.racketclash.app.screens.teams.TeamsModel
 import com.olt.racketclash.app.screens.teams.TeamsScreen
+import com.olt.racketclash.data.database.Database
+import com.olt.racketclash.language.LanguageModel
 
 @Composable
-fun RacketClashNavigator() {
-    val model = viewModel { RacketClashModel() }
+fun RacketClashNavigator(database: Database) {
+    val model = viewModel { LanguageModel() }
     val state by model.state.collectAsState()
 
     val navController: NavHostController = rememberNavController()
@@ -42,85 +44,84 @@ fun RacketClashNavigator() {
     ) {
         composable(route = "Projects") {
             ProjectsScreen(
+                model = viewModel { ProjectsModel(database = database) },
                 language = state.language,
                 availableLanguages = state.availableLanguages.toList(),
-                projects = state.projects,
-                navigateTo = { navigateTo(navController = navController, screen = it, setCurrentProject = model::setCurrentProject) },
-                changeLanguage = model::setLanguage,
-                deleteProject = model::deleteProject
+                navigateTo = { navigateTo(navController = navController, screen = it) },
+                changeLanguage = model::setLanguage
             )
         }
         composable(route = "NewProject") {
             NewProjectScreen(
-                model = viewModel { NewProjectModel(addProject = model::addProject, projectNames = state.projects.map { it.name }) },
+                model = viewModel { NewProjectModel(database = database) },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
         }
-        composable(route = "Teams") {
+        composable(route = "Teams/{projectId}") {
             TeamsScreen(
-                model = viewModel { TeamsModel(database = state.database!!, project = state.currentProject!!) },
+                model = viewModel { TeamsModel(database = database, projectId = it.getNullableLong("projectId")!!) },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
         }
         composable(
-            route = "EditTeam/{teamId}",
+            route = "EditTeam/{teamId}/{projectId}",
             arguments = listOf(nullableLong(name = "teamId"))
         ) {
             EditTeamScreen(
-                model = viewModel { EditTeamModel(database = state.database!!, teamId = it.getNullableLong(key = "teamId")) },
+                model = viewModel { EditTeamModel(database = database, teamId = it.getNullableLong(key = "teamId"), projectId = it.getNullableLong(key = "projectId")!!) },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
         }
-        composable(route = "Players") {
+        composable(route = "Players/{projectId}") {
             PlayersScreen(
-                model = viewModel { PlayersModel(database = state.database!!, project = state.currentProject) },
+                model = viewModel { PlayersModel(database = database, projectId = it.getNullableLong("projectId")!!) },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
         }
         composable(
-            route = "EditPlayer/{playerId}",
+            route = "EditPlayer/{playerId}/{projectId}",
             arguments = listOf(nullableLong(name = "playerId"))
         ) {
             EditPlayerScreen(
-                model = viewModel { EditPlayerModel(database = state.database!!, playerId = it.getNullableLong(key = "playerId")) },
+                model = viewModel { EditPlayerModel(database = database, playerId = it.getNullableLong(key = "playerId"), projectId = it.getNullableLong(key = "projectId")!!) },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
         }
-        composable(route = "Games") {
+        composable(route = "Games/{projectId}") {
             GamesScreen(
-                model = viewModel { GamesModel(database = state.database!!, appModel = model) },
+                model = viewModel { GamesModel(database = database, projectId = it.getNullableLong(key = "projectId")!!) },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
         }
-        composable(route = "NewRound") {
+        composable(route = "NewRound/{projectId}") {
             NewRoundScreen(
-                model = viewModel { NewRoundModel(database = state.database!!) },
+                model = viewModel { NewRoundModel(database = database, projectId = it.getNullableLong(key = "projectId")!!) },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
         }
         composable(
-            route = "EditGame/{roundId}",
+            route = "EditGame/{roundId}/{projectId}",
             arguments = listOf(nullableLong(name = "roundId"))
         ) {
             EditGameScreen(
-                model = viewModel { EditGameModel(database = state.database!!, project = state.currentProject, roundId = it.getNullableLong(key = "roundId")!!) },
+                model = viewModel { EditGameModel(database = database, projectId = it.getNullableLong(key = "projectId")!!, roundId = it.getNullableLong(key = "roundId")!!) },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
         }
         composable(
-            route = "EditRound/{roundId}",
+            route = "EditRound/{roundId}/{projectId}",
             arguments = listOf(nullableLong(name = "roundId"))
         ) {
             EditRoundScreen(
-                model = viewModel { EditRoundModel(database = state.database!!, roundId = it.getNullableLong(key = "roundId")!!) },
+                model = viewModel { EditRoundModel(database = database, roundId = it.getNullableLong(key = "roundId")!!, projectId = it.getNullableLong(key = "projectId")!!) },
                 language = state.language,
                 navigateTo = { navigateTo(navController = navController, screen = it) }
             )
@@ -130,28 +131,20 @@ fun RacketClashNavigator() {
 
 private fun navigateTo(
     navController: NavController,
-    screen: Screens,
-    setCurrentProject: (Project?) -> Unit = {}
+    screen: Screens
 ) {
     when (screen) {
-        is Screens.EditGame -> navController.navigate(route = "${screen.name}/${screen.roundId}")
-        is Screens.EditPlayer -> navController.navigate(route = "${screen.name}/${screen.playerId}")
-        is Screens.EditRound -> navController.navigate(route = "${screen.name}/${screen.roundId}")
-        is Screens.EditTeam -> navController.navigate(route = "${screen.name}/${screen.teamId}")
-        is Screens.Games -> navController.navigate(route = screen.name) { popUpTo(route = Screens.Projects().name) }
+        is Screens.EditGame -> navController.navigate(route = "${screen.name}/${screen.roundId}/${screen.projectId}")
+        is Screens.EditPlayer -> navController.navigate(route = "${screen.name}/${screen.playerId}/${screen.projectId}")
+        is Screens.EditRound -> navController.navigate(route = "${screen.name}/${screen.roundId}/${screen.projectId}")
+        is Screens.EditTeam -> navController.navigate(route = "${screen.name}/${screen.teamId}/${screen.projectId}")
+        is Screens.Games -> navController.navigate(route = "${screen.name}/${screen.projectId}") { popUpTo(route = Screens.Projects().name) }
         is Screens.NewProject -> navController.navigate(route = screen.name)
-        is Screens.NewRound -> navController.navigate(route = screen.name)
-        is Screens.OpenProject -> {
-            setCurrentProject(screen.project)
-            navController.navigate(route = Screens.Teams().name)
-        }
-        is Screens.Players -> navController.navigate(route = screen.name) { popUpTo(route = Screens.Projects().name) }
+        is Screens.NewRound -> navController.navigate(route = "${screen.name}/${screen.projectId}")
+        is Screens.Players -> navController.navigate(route = "${screen.name}/${screen.projectId}") { popUpTo(route = Screens.Projects().name) }
         Screens.Pop -> navController.popBackStack()
-        is Screens.Projects -> {
-            setCurrentProject(null)
-            navController.popBackStack(route = screen.name, inclusive = false)
-        }
-        is Screens.Teams -> navController.navigate(route = screen.name) { popUpTo(route = Screens.Projects().name) }
+        is Screens.Projects -> navController.popBackStack(route = screen.name, inclusive = false)
+        is Screens.Teams -> navController.navigate(route = "${screen.name}/${screen.projectId}") { popUpTo(route = Screens.Projects().name) }
     }
 }
 

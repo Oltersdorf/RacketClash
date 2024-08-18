@@ -1,7 +1,6 @@
 package com.olt.racketclash.app.screens.games
 
 import com.olt.racketclash.data.Bye
-import com.olt.racketclash.app.RacketClashModel
 import com.olt.racketclash.data.Game
 import com.olt.racketclash.data.Round
 import com.olt.racketclash.data.database.Database
@@ -10,26 +9,22 @@ import kotlinx.coroutines.isActive
 
 class GamesModel(
     private val database: Database,
-    private val appModel: RacketClashModel
-) : ViewModelState<GamesModel.State>(initialState = State()) {
+    private val projectId: Long
+) : ViewModelState<GamesModel.State>(initialState = State(projectId = projectId)) {
 
     init {
         onIO {
-            appModel.state.collect {
-                val project = it.currentProject
-
-                updateState {
-                    if (project != null)
+            database.projectSettings(id = projectId).collect {
+                if (it != null)
+                    updateState {
                         copy(
-                            fields = project.fields,
-                            timeout = project.timeout,
-                            gamePointsForBye = project.gamePointsForBye,
-                            setPointsForBye = project.setPointsForBye,
-                            pointsForBye = project.pointsForBye
+                            fields = it.fields,
+                            timeout = it.timeout,
+                            gamePointsForBye = it.gamePointsForBye,
+                            setPointsForBye = it.setPointsForBye,
+                            pointsForBye = it.pointsForBye
                         )
-                    else
-                        this
-                }
+                    }
             }
         }
 
@@ -62,6 +57,7 @@ class GamesModel(
     }
 
     data class State(
+        val projectId: Long,
         val fields: Int = 1,
         val timeout: Int = 1,
         val gamePointsForBye: Int = 0,
@@ -75,7 +71,7 @@ class GamesModel(
 
     fun deleteRound(id: Long) =
         onIO {
-            database.deleteRound(id = id)
+            database.deleteRound(id = id, projectId = projectId)
         }
 
     fun setDone(
@@ -95,7 +91,8 @@ class GamesModel(
                 set4Right = game.set4Right,
                 set5Left = game.set5Left,
                 set5Right = game.set5Right,
-                isDone = isDone
+                isDone = isDone,
+                projectId = projectId
             )
         }
 
@@ -144,35 +141,35 @@ class GamesModel(
     fun changeFields(newFields: Int) =
         onDefault {
             if (newFields >= 1) {
-                onIO { appModel.setFields(newFields = newFields) }
+                onIO { database.updateFields(id = projectId, fields = newFields) }
             }
         }
 
     fun changeTimeout(newTimeout: Int) =
         onDefault {
             if (newTimeout >= 1) {
-                onIO { appModel.setTimeout(newTimeout = newTimeout) }
+                onIO { database.updateTimeout(id = projectId, timeout = newTimeout) }
             }
         }
 
     fun changeGamePointsForBye(newGamePointsForBye: Int) =
         onDefault {
             if (newGamePointsForBye >= 0) {
-                onIO { appModel.setGamePointsForBye(newGamePointsForBye = newGamePointsForBye) }
+                onIO { database.updateGamePointsForBye(id = projectId, gamePointsForBye = newGamePointsForBye) }
             }
         }
 
     fun changeSetPointsForBye(newSetPointsForBye: Int) =
         onDefault {
             if (newSetPointsForBye >= 0) {
-                onIO { appModel.setSetPointsForBye(newSetPointsForBye = newSetPointsForBye) }
+                onIO { database.updateSetPointsForBye(id = projectId, setPointsForBye = newSetPointsForBye) }
             }
         }
 
     fun changePointsForBye(newPointsForBye: Int) =
         onDefault {
             if (newPointsForBye >= 0) {
-                onIO { appModel.setPointsForBye(newPointsForBye = newPointsForBye) }
+                onIO { database.updatePointsForBye(id = projectId, pointsForBye = newPointsForBye) }
             }
         }
 

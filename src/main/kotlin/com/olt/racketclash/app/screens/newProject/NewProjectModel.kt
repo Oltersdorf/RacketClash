@@ -1,23 +1,30 @@
 package com.olt.racketclash.app.screens.newProject
 
-import com.olt.racketclash.app.RacketClashModel
+import com.olt.racketclash.data.database.Database
+import com.olt.racketclash.language.LanguageModel
 import com.olt.racketclash.state.ViewModelState
 
 class NewProjectModel(
-    private val addProject: (name: String, location: String) -> Unit,
-    projectNames: List<String>
-) : ViewModelState<NewProjectModel.State>(initialState = State(projectNames = projectNames)) {
+    private val database: Database
+) : ViewModelState<NewProjectModel.State>(initialState = State()) {
+
+    init {
+        onIO {
+            database.projects().collect {
+                updateState { copy(projectNames = it.map { it.name }) }
+            }
+        }
+    }
 
     data class State(
         val canCreate: Boolean = false,
         val projectName: String = "",
-        val location: String = RacketClashModel.defaultProjectLocation,
-        val projectNames: List<String>
+        val projectNames: List<String> = emptyList()
     )
 
     fun addProject() =
         onIO {
-            addProject(state.value.projectName, state.value.location)
+            database.addProject(name = state.value.projectName)
         }
 
     fun changeProjectName(newName: String) {
@@ -28,10 +35,4 @@ class NewProjectModel(
                 updateState { copy(canCreate = true, projectName = newName) }
         }
     }
-
-    fun changeLocation(newLocation: String?) =
-        onDefault {
-            if (newLocation != null)
-                updateState { copy(location = newLocation) }
-        }
 }

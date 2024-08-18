@@ -24,9 +24,10 @@ fun EditGameScreen(
 
     TournamentScaffold(
         language = language,
+        projectId = state.projectId,
         topAppBarTitle = language.editGame,
         hasBackPress = true,
-        selectedTab = TournamentTabs.Games(language = language),
+        selectedTab = TournamentTabs.Games(language = language, projectId = state.projectId),
         navigateTo = { navigateTo(it) }
     ) {
         SettingsView {

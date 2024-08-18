@@ -6,8 +6,9 @@ import com.olt.racketclash.state.ViewModelState
 
 class EditPlayerModel(
     private val database: Database,
-    private val playerId: Long?
-) : ViewModelState<EditPlayerModel.State>(initialState = State()) {
+    private val playerId: Long?,
+    private val projectId: Long
+) : ViewModelState<EditPlayerModel.State>(initialState = State(projectId = projectId)) {
 
     init {
         onIO {
@@ -37,6 +38,7 @@ class EditPlayerModel(
     }
 
     data class State(
+        val projectId: Long,
         val name: String = "",
         val teamId: Long? = null,
         val teams: List<Team> = emptyList(),
@@ -46,9 +48,9 @@ class EditPlayerModel(
     fun updatePlayer() =
         onIO {
             if (playerId == null)
-                database.addPlayer(name = state.value.name, teamId = state.value.selectedTeam.id)
+                database.addPlayer(name = state.value.name, teamId = state.value.selectedTeam.id, projectId = projectId)
             else
-                database.updatePlayer(id = playerId, name = state.value.name, teamId = state.value.selectedTeam.id)
+                database.updatePlayer(id = playerId, name = state.value.name, teamId = state.value.selectedTeam.id, projectId = projectId)
         }
 
     fun selectTeam(id: Long) =

@@ -3,6 +3,8 @@ package com.olt.racketclash.app.screens.projects
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.data.Project
@@ -12,13 +14,14 @@ import com.olt.racketclash.ui.*
 
 @Composable
 fun ProjectsScreen(
+    model: ProjectsModel,
     language: Language,
     availableLanguages: List<String>,
-    projects: List<Project>,
     navigateTo: (Screens) -> Unit,
-    changeLanguage: (String) -> Unit,
-    deleteProject: (Project) -> Unit
+    changeLanguage: (String) -> Unit
 ) {
+    val state by model.state.collectAsState()
+
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -39,9 +42,9 @@ fun ProjectsScreen(
             SettingsView {
                 ProjectSelect(
                     language = language,
-                    projects = projects,
+                    projects = state.projects,
                     navigateTo = navigateTo,
-                    deleteProject = deleteProject
+                    deleteProject = model::deleteProject
                 )
             }
         }
@@ -53,7 +56,7 @@ private fun ProjectSelect(
     language: Language,
     projects: List<Project>,
     navigateTo: (Screens) -> Unit,
-    deleteProject: (Project) -> Unit
+    deleteProject: (Long) -> Unit
 ) {
     Text(
         text = "Racket Clash",
@@ -80,17 +83,16 @@ private fun ProjectSelect(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProjectItem(
     language: Language,
     project: Project,
     navigateTo: (Screens) -> Unit,
-    deleteProject: (Project) -> Unit
+    deleteProject: (Long) -> Unit
 ) {
     Card(
         onClick = {
-            navigateTo(Screens.OpenProject(project = project))
+            navigateTo(Screens.Teams(projectId = project.id))
         },
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -103,11 +105,11 @@ private fun ProjectItem(
             }
             Spacer(modifier = Modifier.weight(weight = 1.0f))
             Column {
-                Text("${language.players}: ${project.playerNumber}")
-                Text("${language.teams}: ${project.teamNumber}")
+                Text("${language.players}: ${project.numberOfPlayers}")
+                Text("${language.teams}: ${project.numberOfTeams}")
             }
             Spacer(modifier = Modifier.weight(weight = 1.0f))
-            DeleteButton { deleteProject(project) }
+            DeleteButton { deleteProject(project.id) }
         }
     }
 }

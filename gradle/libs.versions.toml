@@ -4,8 +4,6 @@ compose = "1.6.11"
 compose-navigation-version = "2.7.0-alpha07"
 coroutines = "1.7.3"
 sqldelight = "2.0.2"
-json = "1.7.0"
-mpfilepicker = "3.0.0"
 
 [libraries]
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
@@ -13,8 +11,6 @@ sqlite-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "s
 sqlite-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
 sqlite-primitive-adapters = { module = "app.cash.sqldelight:primitive-adapters", version.ref = "sqldelight" }
 compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "compose-navigation-version" }
-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "json" }
-mpfilepicker = { module = "com.darkrockstudios:mpfilepicker", version.ref = "mpfilepicker" }
 
 [bundles]
 sqlite = ["sqlite-driver", "sqlite-coroutines", "sqlite-primitive-adapters"]

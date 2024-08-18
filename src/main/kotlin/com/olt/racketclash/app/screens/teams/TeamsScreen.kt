@@ -27,11 +27,12 @@ fun TeamsScreen(
 
     TournamentScaffold(
         language = language,
+        projectId = state.projectId,
         topAppBarTitle = language.teams,
         topAppBarActions = {
-            AddButton { navigateTo(Screens.EditTeam(teamId = null)) }
+            AddButton { navigateTo(Screens.EditTeam(teamId = null, projectId = state.projectId)) }
         },
-        selectedTab = TournamentTabs.Teams(language = language),
+        selectedTab = TournamentTabs.Teams(language = language, projectId = state.projectId),
         navigateTo = { navigateTo(it) }
     ) {
         TeamView(state = state, model = model, language = language, navigateTo = navigateTo)
@@ -81,7 +82,7 @@ private fun TeamList(
         },
         items = state.teams,
         modifier = Modifier.padding(5.dp),
-        onClick = { navigateTo(Screens.EditTeam(teamId = it.id)) },
+        onClick = { navigateTo(Screens.EditTeam(teamId = it.id, projectId = state.projectId)) },
         columns = listOf(
             LazyTableColumn.Text(
                 name = language.name,

@@ -22,25 +22,18 @@ class PlayersDatabase(private val queries: PlayerQueries) {
             .selectActive()
             .mapToList { it.toPlayer() }
 
-    private fun size(): Int =
-        queries
-            .size()
-            .executeAsOneOrNull()
-            ?.toInt() ?: 0
+    fun addPlayer(name: String, teamId: Long, projectId: Long) =
+        queries.add(name = name, teamId = teamId, projectId = projectId)
 
-    fun addPlayer(name: String, teamId: Long): Int {
-        queries.add(name = name, teamId = teamId)
-        return size()
-    }
+    fun updatePlayer(id: Long, name: String, teamId: Long) =
+        queries.update(id = id, name = name, teamId = teamId)
 
-    fun updatePlayer(id: Long, name: String, teamId: Long) = queries.update(id = id, name = name, teamId = teamId)
+    fun setActive(id: Long, active: Boolean) =
+        queries.setActive(id = id, active = active)
 
-    fun setActive(id: Long, active: Boolean) = queries.setActive(id = id, active = active)
-
-    fun deletePlayer(id: Long): Int {
+    fun deletePlayer(id: Long) =
         queries.delete(id = id)
-        return size()
-    }
 
-    fun setLastPlayed(id: Long?, lastPlayed: Long?) = id?.let { queries.setLastPlayed(id = it, lastPLayed = lastPlayed) }
+    fun setLastPlayed(id: Long?, lastPlayed: Long?) =
+        id?.let { queries.setLastPlayed(id = it, lastPLayed = lastPlayed) }
 }

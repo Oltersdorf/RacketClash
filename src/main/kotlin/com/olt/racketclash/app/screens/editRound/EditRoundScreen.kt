@@ -22,9 +22,10 @@ fun EditRoundScreen(
 
     TournamentScaffold(
         language = language,
+        projectId = state.projectId,
         topAppBarTitle = language.editRound,
         hasBackPress = true,
-        selectedTab = TournamentTabs.Games(language = language),
+        selectedTab = TournamentTabs.Games(language = language, projectId = state.projectId),
         navigateTo = { navigateTo(it) }
     ) {
         SettingsView {
@@ -62,7 +63,7 @@ private fun EditRoundView(
         topBarTitle = language.games,
         topBarActions = {
             AddButton {
-                navigateTo(Screens.EditGame(roundId = state.round?.id ?: -1))
+                navigateTo(Screens.EditGame(roundId = state.round?.id ?: -1, projectId = state.projectId))
             }
         },
         items = state.games,
@@ -132,7 +133,7 @@ private fun EditRoundView(
         topBarTitle = language.byes,
         topBarActions = {
             AddButton {
-                navigateTo(Screens.EditGame(roundId = state.round?.id ?: -1))
+                navigateTo(Screens.EditGame(roundId = state.round?.id ?: -1, projectId = state.projectId))
             }
         },
         items = state.byes,

@@ -8,8 +8,9 @@ import com.olt.racketclash.state.ViewModelState
 
 class EditRoundModel(
     private val database: Database,
-    private val roundId: Long
-) : ViewModelState<EditRoundModel.State>(initialState = State()) {
+    private val roundId: Long,
+    private val projectId: Long
+) : ViewModelState<EditRoundModel.State>(initialState = State(projectId = projectId)) {
 
     init {
         onIO {
@@ -32,6 +33,7 @@ class EditRoundModel(
     }
 
     data class State(
+        val projectId: Long,
         val round: Round? = null,
         val temporaryRoundName: String = "",
         val games: List<Game> = emptyList(),
@@ -45,16 +47,16 @@ class EditRoundModel(
 
     fun saveRoundName() =
         onIO {
-            database.updateRoundName(id = roundId, name = state.value.temporaryRoundName)
+            database.updateRoundName(id = roundId, name = state.value.temporaryRoundName, projectId = projectId)
         }
 
     fun deleteGame(gameId: Long) =
         onIO {
-            database.deleteGame(id = gameId)
+            database.deleteGame(id = gameId, projectId = projectId)
         }
 
     fun deleteBye(byeId: Long) =
         onIO {
-            database.deleteBye(id = byeId)
+            database.deleteBye(id = byeId, projectId = projectId)
         }
 }

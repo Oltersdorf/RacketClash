@@ -1,6 +1,6 @@
 package com.olt.racketclash.app.screens.teams
 
-import com.olt.racketclash.data.Project
+import com.olt.racketclash.data.ProjectSettings
 import com.olt.racketclash.data.database.Database
 import com.olt.racketclash.data.Team
 import com.olt.racketclash.data.sort
@@ -8,22 +8,44 @@ import com.olt.racketclash.state.ViewModelState
 
 class TeamsModel(
     private val database: Database,
-    private val project: Project
-) : ViewModelState<TeamsModel.State>(initialState = State()) {
+    private val projectId: Long
+) : ViewModelState<TeamsModel.State>(initialState = State(projectId = projectId)) {
 
     private var completeTeams: List<Team> = emptyList()
+    private var projectSettings: ProjectSettings? = null
 
     init {
+        onIO {
+            database.projectSettings(id = projectId).collect { settings ->
+                projectSettings = settings
+
+                if (settings != null) {
+                    val teams = completeTeams.toMutableList()
+                    teams.replaceAll {
+                        it.copy(
+                            wonGames = it.wonGames + (settings.gamePointsForBye * it.bye),
+                            wonSets = it.wonSets + (settings.setPointsForBye * it.bye),
+                            wonPoints = it.wonPoints + (settings.pointsForBye * it.bye)
+                        )
+                    }
+                    completeTeams = teams.toList()
+                }
+            }
+        }
+
         onIO {
             database.teams().collect { teamList ->
                 val teams = teamList.toMutableList()
 
-                teams.replaceAll {
-                    it.copy(
-                        wonGames = it.wonGames + (project.gamePointsForBye * it.bye),
-                        wonSets = it.wonSets + (project.setPointsForBye * it.bye),
-                        wonPoints = it.wonPoints + (project.pointsForBye * it.bye)
-                    )
+                val settings = projectSettings
+                if (settings != null) {
+                    teams.replaceAll {
+                        it.copy(
+                            wonGames = it.wonGames + (settings.gamePointsForBye * it.bye),
+                            wonSets = it.wonSets + (settings.setPointsForBye * it.bye),
+                            wonPoints = it.wonPoints + (settings.pointsForBye * it.bye)
+                        )
+                    }
                 }
 
                 completeTeams = teams.toList()
@@ -39,6 +61,7 @@ class TeamsModel(
     }
 
     data class State(
+        val projectId: Long,
         val isLoading: Boolean = true,
         val teams: List<Team> = emptyList(),
         val filter: String = "",
@@ -48,7 +71,7 @@ class TeamsModel(
     fun deleteTeam(id: Long) =
         onIO {
             if (state.value.teams.find { it.id == id }?.size == 0) {
-                database.deleteTeam(id = id)
+                database.deleteTeam(id = id, projectId = projectId)
             }
         }
 

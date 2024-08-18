@@ -6,15 +6,34 @@ import com.olt.racketclash.state.ViewModelState
 
 class EditGameModel(
     private val database: Database,
-    project: Project?,
+    private val projectId: Long,
     private val roundId: Long
-) : ViewModelState<EditGameModel.State>(initialState = State()) {
+) : ViewModelState<EditGameModel.State>(initialState = State(projectId = projectId)) {
 
     private var unfilteredPlayers: List<Player> = emptyList()
     private var games: List<Game> = emptyList()
     private var byes: List<Bye> = emptyList()
+    private var projectSettings: ProjectSettings? = null
 
     init {
+        onIO {
+            database.projectSettings(id = projectId).collect { settings ->
+                projectSettings = settings
+
+                if (settings != null) {
+                    val players = unfilteredPlayers.toMutableList()
+                    players.replaceAll {
+                        it.copy(
+                            wonGames = it.wonGames + (settings.gamePointsForBye * it.bye),
+                            wonSets = it.wonSets + (settings.setPointsForBye * it.bye),
+                            wonPoints = it.wonPoints + (settings.pointsForBye * it.bye)
+                        )
+                    }
+                    unfilteredPlayers = players.toList()
+                }
+            }
+        }
+
         onIO {
             database.round(id = roundId).collect {
                 updateState { copy(roundName = it?.name ?: "") }
@@ -30,13 +49,14 @@ class EditGameModel(
         onIO {
             database.players().collect { playerList ->
                 val players = playerList.toMutableList()
+                val settings = projectSettings
 
-                if (project != null)
+                if (settings != null)
                     players.replaceAll {
                         it.copy(
-                            wonGames = it.wonGames + (project.gamePointsForBye * it.bye),
-                            wonSets = it.wonSets + (project.setPointsForBye * it.bye),
-                            wonPoints = it.wonPoints + (project.pointsForBye * it.bye)
+                            wonGames = it.wonGames + (settings.gamePointsForBye * it.bye),
+                            wonSets = it.wonSets + (settings.setPointsForBye * it.bye),
+                            wonPoints = it.wonPoints + (settings.pointsForBye * it.bye)
                         )
                     }
 
@@ -59,6 +79,7 @@ class EditGameModel(
     }
 
     data class State(
+        val projectId: Long,
         val roundName: String = "",
         val player1Left: Player? = null,
         val player1LeftDisplayName: String = "<empty>",
@@ -127,14 +148,15 @@ class EditGameModel(
         onDefault {
             updateState {
                 if (isBye)
-                    database.addBye(roundId = roundId, playerId = player1Left?.id)
+                    database.addBye(roundId = roundId, playerId = player1Left?.id, projectId = projectId)
                 else
                     database.addGame(
                         roundId = roundId,
                         playerLeft1Id = player1Left?.id,
                         playerLeft2Id = player2Left?.id,
                         playerRight1Id = player1Right?.id,
-                        playerRight2Id = player2Right?.id
+                        playerRight2Id = player2Right?.id,
+                        projectId = projectId
                     )
                 copy(
                     player1Left = null,

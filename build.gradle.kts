@@ -22,9 +22,7 @@ dependencies {
     implementation(compose.material3)
     implementation(libs.coroutines)
     implementation(libs.bundles.sqlite)
-    implementation(libs.json)
     implementation(libs.compose.navigation)
-    implementation(libs.mpfilepicker)
 
     testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation(compose.desktop.currentOs)

@@ -30,13 +30,14 @@ fun GamesScreen(
 
     TournamentScaffold(
         language = language,
+        projectId = state.projectId,
         topAppBarTitle = language.games,
         topAppBarActions = {
             AddButton {
-                navigateTo(Screens.NewRound())
+                navigateTo(Screens.NewRound(projectId = state.projectId))
             }
         },
-        selectedTab = TournamentTabs.Games(language = language),
+        selectedTab = TournamentTabs.Games(language = language, projectId = state.projectId),
         navigateTo = { navigateTo(it) }
     ) {
         GamesView(state = state, model = model, language = language, navigateTo = navigateTo)
@@ -128,6 +129,7 @@ private fun Graph(
                 items(items = state.rounds) {
                     Round(
                         language = language,
+                        projectId = state.projectId,
                         round = it,
                         games = state.games[it.id] ?: emptyList(),
                         bye = state.bye[it.id] ?: emptyList(),
@@ -156,6 +158,7 @@ private fun Graph(
 @Composable
 private fun Round(
     language: Language,
+    projectId: Long,
     round: Round,
     games: List<Game>,
     bye: List<Bye>,
@@ -179,7 +182,7 @@ private fun Round(
             ) {
                 Text(round.name)
                 Spacer(modifier = Modifier.weight(1.0f))
-                EditButton { navigateTo(Screens.EditRound(roundId = round.id)) }
+                EditButton { navigateTo(Screens.EditRound(roundId = round.id, projectId = projectId)) }
                 DeleteButton(enabled = games.isEmpty() && bye.isEmpty()) { model.deleteRound(id = round.id) }
             }
 

@@ -8,8 +8,9 @@ import com.olt.racketclash.data.sort
 import com.olt.racketclash.state.ViewModelState
 
 class NewRoundModel(
-    private val database: Database
-) : ViewModelState<NewRoundModel.State>(initialState = State()) {
+    private val database: Database,
+    private val projectId: Long
+) : ViewModelState<NewRoundModel.State>(initialState = State(projectId = projectId)) {
 
     private var completePlayers: List<Player> = emptyList()
 
@@ -40,6 +41,7 @@ class NewRoundModel(
     }
 
     data class State(
+        val projectId: Long,
         val canCreate: Boolean = false,
         val roundName: String = "",
         val generating: Boolean = false,
@@ -72,7 +74,7 @@ class NewRoundModel(
 
     fun addEmptyRound() =
         onIO {
-            database.addRound(name = state.value.roundName)
+            database.addRound(name = state.value.roundName, projectId = projectId)
         }
 
     fun changeEquallyStrongDoublesRounds(newRounds: Int) =
@@ -196,7 +198,7 @@ class NewRoundModel(
                 val games = roundType.games.groupBy { it.roundId }
                 val rounds = games.mapKeys { "${model.roundName} ${it.key}" }
 
-                database.addRoundsWithGames(rounds = rounds, bye = roundType.byeGames)
+                database.addRoundsWithGames(rounds = rounds, bye = roundType.byeGames, projectId = projectId)
             }
         }
 

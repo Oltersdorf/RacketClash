@@ -21,9 +21,10 @@ fun NewRoundScreen(
 
     TournamentScaffold(
         language = language,
+        projectId = state.projectId,
         topAppBarTitle = language.newRound,
         hasBackPress = true,
-        selectedTab = TournamentTabs.Games(language = language),
+        selectedTab = TournamentTabs.Games(language = language, projectId = state.projectId),
         navigateTo = { navigateTo(it) }
     ) {
         SettingsView {
@@ -80,11 +81,11 @@ private fun CancelSaveButtonRow(
 ) {
     CancelSaveButtonRow(
         language = language,
-        onCancel = { navigateTo(Screens.Games()) },
+        onCancel = { navigateTo(Screens.Games(projectId = state.projectId)) },
         canSave = state.canCreate && !state.generating,
         onSave = {
             onSave()
-            navigateTo(Screens.Games())
+            navigateTo(Screens.Games(projectId = state.projectId))
         }
     )
 }
@@ -246,7 +247,7 @@ private fun EquallyStrongDouble(
         Button(
             onClick = {
                 model.addEquallyStrongDoubles()
-                navigateTo(Screens.Games())
+                navigateTo(Screens.Games(projectId = state.projectId))
             },
             enabled = roundType.games.isNotEmpty() && state.canCreate
         ) {
