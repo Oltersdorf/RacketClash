@@ -2,7 +2,7 @@ package com.olt.racketclash
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -32,7 +32,7 @@ sealed class TournamentTabs(val tab: Tab) {
     data class Games(val language: Language, val projectId: Long) : TournamentTabs(
         tab = Tab(
             target = Screens.Games(projectId = projectId) ,
-            imageVector = Icons.Default.List,
+            imageVector = Icons.AutoMirrored.Default.List,
             text = language.games
         )
     )
