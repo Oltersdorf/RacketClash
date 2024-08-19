@@ -8,8 +8,6 @@ sealed class Language(
     val teams: String,
     val newProject: String,
     val name: String,
-    val saveLocation: String,
-    val change: String,
     val filterByName: String,
     val sortBy: String,
     val active: String,

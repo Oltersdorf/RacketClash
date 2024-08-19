@@ -8,8 +8,6 @@ data object German : Language(
     teams = "Teams",
     newProject = "Neues Projekt",
     name = "Name",
-    saveLocation = "Speicherort",
-    change = "Ändern",
     filterByName = "Filtern bei Namen",
     sortBy = "Sortieren bei",
     active = "Aktiv",

@@ -8,8 +8,6 @@ data object English : Language(
     teams = "Teams",
     newProject = "New Project",
     name = "Name",
-    saveLocation = "Save location",
-    change = "Change",
     filterByName = "Filter by name",
     sortBy = "Sort by",
     active = "Active",
