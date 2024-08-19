@@ -34,7 +34,7 @@ private val md_theme_dark_outlineVariant = Color(0xFF51443B)
 private val md_theme_dark_scrim = Color(0xFF000000)
 
 //https://m3.material.io/theme-builder#/custom
-private val seed = Color(0xFF924C00)
+//seed: 0xFF924C00
 
 val DarkColors = darkColorScheme(
     primary = md_theme_dark_primary,
