@@ -27,7 +27,7 @@ class CacheTest {
     @Test
     fun `find returns Cache Hit`() {
         val listValue = 1
-        val cacheList = mutableListOf(listValue)
+        val cacheList = ArrayDeque(listOf(1))
         val cache = Cache(size = 1, cache = cacheList)
         val result = cache.find { it == listValue }
         assertIs<Cache.Result.Hit<Int>>(value = result, message = "Cache Result is not a Hit")
@@ -37,7 +37,7 @@ class CacheTest {
     @Test
     fun `find returns Cache Miss`() {
         val listValue = 1
-        val cacheList = mutableListOf<Int>()
+        val cacheList = ArrayDeque<Int>()
         val cache = Cache(size = 1, cache = cacheList)
         val result = cache.find { it == listValue }
         assertIs<Cache.Result.Miss>(value = result, message = "Cache Result is not a Miss")
@@ -46,17 +46,17 @@ class CacheTest {
     @Test
     fun `add value to Cache`() {
         val valueToAdd = 2
-        val cacheList = mutableListOf(1)
+        val cacheList = ArrayDeque(listOf(1))
         val cache = Cache(size = 2, cache = cacheList)
         cache.add(valueToAdd)
-        val expected = mutableListOf(1, valueToAdd)
+        val expected = mutableListOf(valueToAdd, 1)
         assertContentEquals(expected = expected, actual = cacheList, message = "Cache did not contain the expected values after add")
     }
 
     @Test
     fun `add value to Cache does not exceed initial size`() {
         val valueToAdd = 2
-        val cacheList = mutableListOf(1)
+        val cacheList = ArrayDeque(listOf(1))
         val cache = Cache(size = 1, cache = cacheList)
         cache.add(valueToAdd)
         val expected = mutableListOf(valueToAdd)
@@ -66,7 +66,7 @@ class CacheTest {
     @Test
     fun `findOrAdd returns value on Hit`() {
         val valueToFind = 1
-        val cacheList = mutableListOf(valueToFind)
+        val cacheList = ArrayDeque(listOf(valueToFind))
         val cache = Cache(size = 1, cache = cacheList)
         val result = cache.findOrAdd(selector = { it == valueToFind }) { 2 }
         assertEquals(expected = valueToFind, actual = result, message = "findOrAdd did return $result, expected was $valueToFind")
@@ -77,11 +77,11 @@ class CacheTest {
     @Test
     fun `findOrAdd adds value on Miss`() {
         val valueToFind = 1
-        val cacheList = mutableListOf(2)
+        val cacheList = ArrayDeque(listOf(2))
         val cache = Cache(size = 2, cache = cacheList)
         val result = cache.findOrAdd(selector = { it == valueToFind }) { valueToFind }
         assertEquals(expected = valueToFind, actual = result, message = "findOrAdd did return $result, expected was $valueToFind")
-        val expectedList = mutableListOf(2, valueToFind)
+        val expectedList = mutableListOf(valueToFind, 2)
         assertContentEquals(expected = expectedList, actual = cacheList, message = "Cache did not contain the expected values after findOrAdd")
     }
 }

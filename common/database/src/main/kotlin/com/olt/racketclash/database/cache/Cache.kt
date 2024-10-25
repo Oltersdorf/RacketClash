@@ -2,7 +2,7 @@ package com.olt.racketclash.database.cache
 
 internal class Cache<T>(
     private val size: Int,
-    private val cache: MutableList<T> = mutableListOf()
+    private val cache: ArrayDeque<T> = ArrayDeque()
 ) {
     init {
         require(size > 0) { "Size must be greater than 0" }
@@ -18,9 +18,9 @@ internal class Cache<T>(
 
     fun add(value: T) {
         if (cache.size == size)
-            cache.removeFirst()
+            cache.removeLast()
 
-        cache.add(value)
+        cache.addFirst(value)
     }
 
     fun findOrAdd(selector: (T) -> Boolean, valueFactory: () -> T): T {
