@@ -1,16 +1,17 @@
-package com.olt.racketclash
+package com.olt.racketclash.desktop
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import com.olt.racketclash.theme.DarkColors
-import com.olt.racketclash.navigate.RacketClashNavigator
-import com.olt.racketclash.data.database.Database
+import com.olt.racketclash.database.Database
+import com.olt.racketclash.ui.theme.DarkColors
+import com.olt.racketclash.ui.navigate.Navigator
+import com.olt.racketclash.ui.navigate.Screens
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
 
-internal fun main() {
+fun main() {
     val racketClashPath = Path(System.getProperty("user.home"), ".racketClash")
     racketClashPath.createDirectories()
 
@@ -24,7 +25,12 @@ internal fun main() {
             MaterialTheme(
                 colorScheme = DarkColors
             ) {
-                RacketClashNavigator(database = database)
+                Navigator(
+                    navLinks = mapOf("test1" to Screens.Test, "test2" to Screens.Test),
+                    changeToScreen = { println(it) }
+                ) {
+
+                }
             }
         }
     }

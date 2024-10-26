@@ -13,8 +13,8 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":database"))
-    implementation(project(":app:ui"))
+    implementation(project(":common:database"))
+    implementation(project(":common:ui"))
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
 }
