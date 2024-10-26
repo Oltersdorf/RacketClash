@@ -25,7 +25,11 @@ fun Navigator(
                 }
 
                 if (index + 1 < navLinks.size)
-                    Text(text = "/", modifier = Modifier.padding(horizontal = 5.dp))
+                    Text(
+                        text = "/",
+                        modifier = Modifier.padding(horizontal = 5.dp),
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize
+                    )
             }
         }
 
