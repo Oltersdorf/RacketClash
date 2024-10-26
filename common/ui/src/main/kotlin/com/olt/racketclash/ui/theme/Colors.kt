@@ -1,4 +1,4 @@
-package com.olt.racketclash.theme
+package com.olt.racketclash.ui.theme
 
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.ui.graphics.Color
