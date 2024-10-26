@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.ui.util.Link
+import com.olt.racketclash.ui.component.Link
 
 @Composable
 fun Navigator(

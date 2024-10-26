@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.util
+package com.olt.racketclash.ui.component
 
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable
