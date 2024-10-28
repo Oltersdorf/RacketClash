@@ -1,24 +1,25 @@
 package com.olt.racketclash.ui.navigate
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.ui.component.Link
+import com.olt.racketclash.ui.component.DropDownIconButton
 
 @Composable
 fun Navigator(database: Database) {
-    Column {
-        var navLinks by remember { mutableStateOf(listOf<Screens>(Screens.RacketClash)) }
+    var navLinks by remember { mutableStateOf(listOf<Screens>(Screens.RacketClash)) }
 
-        LinkRow(navLinks = navLinks) { navLinks = navLinks.subList(0, it + 1) }
-
+    Scaffold(
+        topBar = {
+            TopBar(navLinks = navLinks) {
+                val index = navLinks.indexOf(it)
+                if (index + 1 != navLinks.size && index > -1)
+                    navLinks = navLinks.subList(0, index + 1)
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        contentColor = MaterialTheme.colorScheme.onSurface
+    ) {
         when (navLinks.lastOrNull()) {
             is Screens.AddOrUpdateCategory -> TODO()
             is Screens.AddOrUpdateGameRule -> TODO()
@@ -30,7 +31,7 @@ fun Navigator(database: Database) {
             is Screens.Category -> TODO()
             is Screens.GamRules -> TODO()
             is Screens.Players -> TODO()
-            Screens.RacketClash -> TODO()
+            Screens.RacketClash -> {}
             is Screens.Team -> TODO()
             is Screens.Teams -> TODO()
             is Screens.Tournament -> TODO()
@@ -41,22 +42,23 @@ fun Navigator(database: Database) {
 }
 
 @Composable
-private fun LinkRow(
+@OptIn(ExperimentalMaterial3Api::class)
+private fun TopBar(
     navLinks: List<Screens>,
-    onLinkClicked: (Int) -> Unit
+    onClick: (Screens) -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        navLinks.forEachIndexed { index, screen ->
-            Link(text = screen.name, fontSize = MaterialTheme.typography.titleLarge.fontSize) {
-                onLinkClicked(index)
-            }
-
-            if (index + 1 < navLinks.size)
-                Text(
-                    text = "/",
-                    modifier = Modifier.padding(horizontal = 5.dp),
-                    fontSize = MaterialTheme.typography.titleLarge.fontSize
-                )
-        }
-    }
+    TopAppBar(
+        colors = TopAppBarDefaults.largeTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        ),
+        navigationIcon = {
+            DropDownIconButton(
+                items = navLinks.dropLast(1),
+                textMapper = { it.name },
+                onClick = onClick
+            )
+        },
+        title = { Text(navLinks.last().name) }
+    )
 }
