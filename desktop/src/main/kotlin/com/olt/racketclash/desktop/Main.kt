@@ -6,7 +6,6 @@ import androidx.compose.ui.window.application
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.theme.DarkColors
 import com.olt.racketclash.ui.navigate.Navigator
-import com.olt.racketclash.ui.navigate.Screens
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
@@ -25,12 +24,7 @@ fun main() {
             MaterialTheme(
                 colorScheme = DarkColors
             ) {
-                Navigator(
-                    navLinks = mapOf("test1" to Screens.Test, "test2" to Screens.Test),
-                    changeToScreen = { println(it) }
-                ) {
-
-                }
+                Navigator(database = database)
             }
         }
     }
