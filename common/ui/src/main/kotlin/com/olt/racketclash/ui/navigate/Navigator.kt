@@ -38,13 +38,13 @@ fun Navigator(
             is Screens.AddOrUpdateTournament -> TODO()
             is Screens.Categories -> TODO()
             is Screens.Category -> TODO()
-            is Screens.GamRules -> TODO()
-            is Screens.Players -> TODO()
+            Screens.GamRules -> TODO()
+            Screens.Players -> TODO()
             Screens.RacketClash -> {}
             is Screens.Team -> TODO()
             is Screens.Teams -> TODO()
             is Screens.Tournament -> TODO()
-            is Screens.Tournaments -> TODO()
+            Screens.Tournaments -> TODO()
             null -> { navLinks = listOf(Screens.RacketClash) }
         }
     }
