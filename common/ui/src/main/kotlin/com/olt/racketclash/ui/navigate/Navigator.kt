@@ -2,16 +2,25 @@ package com.olt.racketclash.ui.navigate
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.res.painterResource
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.DropDownIconButton
 
 @Composable
-fun Navigator(database: Database) {
+fun Navigator(
+    isDarkMode: Boolean,
+    switchDarkMode: () -> Unit,
+    database: Database
+) {
     var navLinks by remember { mutableStateOf(listOf<Screens>(Screens.RacketClash)) }
 
     Scaffold(
         topBar = {
-            TopBar(navLinks = navLinks) {
+            TopBar(
+                navLinks = navLinks,
+                isDarkMode = isDarkMode,
+                switchDarkMode = switchDarkMode
+            ) {
                 val index = navLinks.indexOf(it)
                 if (index + 1 != navLinks.size && index > -1)
                     navLinks = navLinks.subList(0, index + 1)
@@ -45,7 +54,9 @@ fun Navigator(database: Database) {
 @OptIn(ExperimentalMaterial3Api::class)
 private fun TopBar(
     navLinks: List<Screens>,
-    onClick: (Screens) -> Unit
+    isDarkMode: Boolean,
+    switchDarkMode: () -> Unit,
+    onClick: (Screens) -> Unit,
 ) {
     TopAppBar(
         colors = TopAppBarDefaults.largeTopAppBarColors(
@@ -59,6 +70,23 @@ private fun TopBar(
                 onClick = onClick
             )
         },
-        title = { Text(navLinks.last().name) }
+        title = { Text(navLinks.last().name) },
+        actions = {
+            IconButton(
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                onClick = switchDarkMode
+            ) {
+                Icon(
+                    painter = if (isDarkMode)
+                        painterResource(resourcePath = "dark_mode.svg")
+                    else
+                        painterResource("light_mode.svg"),
+                    contentDescription = null
+                )
+            }
+        }
     )
 }

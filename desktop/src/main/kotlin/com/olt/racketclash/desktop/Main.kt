@@ -1,11 +1,10 @@
 package com.olt.racketclash.desktop
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.navigate.Navigator
-import com.olt.racketclash.ui.theme.LightColorSchema
+import com.olt.racketclash.ui.theme.RacketClashMaterialTheme
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
@@ -21,10 +20,8 @@ fun main() {
             title = "Racket Clash",
             onCloseRequest = ::exitApplication
         ) {
-            MaterialTheme(
-                colorScheme = LightColorSchema
-            ) {
-                Navigator(database = database)
+            RacketClashMaterialTheme { isDarkMode, switchDarkMode ->
+                Navigator(isDarkMode = isDarkMode, switchDarkMode = switchDarkMode, database = database)
             }
         }
     }

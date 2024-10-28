@@ -22,8 +22,8 @@ fun <T> DropDownIconButton(
         IconButton(
             modifier = Modifier.menuAnchor(),
             colors = IconButtonDefaults.iconButtonColors(
-                containerColor = MaterialTheme.colorScheme.inverseSurface,
-                contentColor = MaterialTheme.colorScheme.inverseOnSurface
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             onClick = {  }
         ) {
