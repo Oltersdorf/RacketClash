@@ -4,8 +4,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.ui.theme.DarkColors
 import com.olt.racketclash.ui.navigate.Navigator
+import com.olt.racketclash.ui.theme.LightColorSchema
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
@@ -22,7 +22,7 @@ fun main() {
             onCloseRequest = ::exitApplication
         ) {
             MaterialTheme(
-                colorScheme = DarkColors
+                colorScheme = LightColorSchema
             ) {
                 Navigator(database = database)
             }
