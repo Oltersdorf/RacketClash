@@ -1,10 +1,15 @@
 package com.olt.racketclash.ui.navigate
 
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.DropDownIconButton
+import com.olt.racketclash.ui.screen.RacketClash
 
 @Composable
 fun Navigator(
@@ -29,23 +34,30 @@ fun Navigator(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
-        when (navLinks.lastOrNull()) {
-            is Screens.AddOrUpdateCategory -> TODO()
-            is Screens.AddOrUpdateGameRule -> TODO()
-            is Screens.AddOrUpdateGames -> TODO()
-            is Screens.AddOrUpdatePlayer -> TODO()
-            is Screens.AddOrUpdateTeam -> TODO()
-            is Screens.AddOrUpdateTournament -> TODO()
-            is Screens.Categories -> TODO()
-            is Screens.Category -> TODO()
-            Screens.GamRules -> TODO()
-            Screens.Players -> TODO()
-            Screens.RacketClash -> {}
-            is Screens.Team -> TODO()
-            is Screens.Teams -> TODO()
-            is Screens.Tournament -> TODO()
-            Screens.Tournaments -> TODO()
-            null -> { navLinks = listOf(Screens.RacketClash) }
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(it)
+            .padding(10.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            when (navLinks.lastOrNull()) {
+                is Screens.AddOrUpdateCategory -> TODO()
+                is Screens.AddOrUpdateGameRule -> TODO()
+                is Screens.AddOrUpdateGames -> TODO()
+                is Screens.AddOrUpdatePlayer -> TODO()
+                is Screens.AddOrUpdateTeam -> TODO()
+                is Screens.AddOrUpdateTournament -> TODO()
+                is Screens.Categories -> TODO()
+                is Screens.Category -> TODO()
+                Screens.GamRules -> TODO()
+                Screens.Players -> TODO()
+                Screens.RacketClash -> { RacketClash { screen -> navLinks += screen } }
+                is Screens.Team -> TODO()
+                is Screens.Teams -> TODO()
+                is Screens.Tournament -> TODO()
+                Screens.Tournaments -> TODO()
+                null -> { navLinks = listOf(Screens.RacketClash) }
+            }
         }
     }
 }
