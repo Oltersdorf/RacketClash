@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,8 +21,9 @@ fun <T> DropDownIconButton(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded }
     ) {
+
         IconButton(
-            modifier = Modifier.menuAnchor(),
+            modifier = Modifier.menuAnchor().pointerHoverIcon(icon = PointerIcon.Hand),
             colors = IconButtonDefaults.iconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary

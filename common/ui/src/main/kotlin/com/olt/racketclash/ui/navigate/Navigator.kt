@@ -9,6 +9,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.DropDownIconButton
+import com.olt.racketclash.ui.component.SimpleIconButton
+import com.olt.racketclash.ui.screen.GameRules
 import com.olt.racketclash.ui.screen.RacketClash
 
 @Composable
@@ -49,9 +51,9 @@ fun Navigator(
                 is Screens.AddOrUpdateTournament -> TODO()
                 is Screens.Categories -> TODO()
                 is Screens.Category -> TODO()
-                Screens.GamRules -> TODO()
+                Screens.GamRules -> GameRules(database = database) { screen -> navLinks += screen }
                 Screens.Players -> TODO()
-                Screens.RacketClash -> { RacketClash { screen -> navLinks += screen } }
+                Screens.RacketClash -> RacketClash { screen -> navLinks += screen }
                 is Screens.Team -> TODO()
                 is Screens.Teams -> TODO()
                 is Screens.Tournament -> TODO()
@@ -84,21 +86,14 @@ private fun TopBar(
         },
         title = { Text(navLinks.last().name) },
         actions = {
-            IconButton(
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
+            SimpleIconButton(
+                painter = if (isDarkMode)
+                    painterResource(resourcePath = "dark_mode.svg")
+                else
+                    painterResource("light_mode.svg"),
+                contentDescription = "Light/Dark mode",
                 onClick = switchDarkMode
-            ) {
-                Icon(
-                    painter = if (isDarkMode)
-                        painterResource(resourcePath = "dark_mode.svg")
-                    else
-                        painterResource("light_mode.svg"),
-                    contentDescription = null
-                )
-            }
+            )
         }
     )
 }
