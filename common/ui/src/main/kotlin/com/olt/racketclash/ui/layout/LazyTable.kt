@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.olt.racketclash.ui.component.Loading
 import com.olt.racketclash.ui.component.SimpleIconButton
 
 sealed class LazyTableColumn<T>(
@@ -66,7 +67,8 @@ fun <T> LazyTableWithScroll(
     showHeader: Boolean = true,
     onClick: ((T) -> Unit)? = null,
     columns: List<LazyTableColumn<T>>,
-    drawDividers: Boolean = true
+    drawDividers: Boolean = true,
+    isLoading: Boolean
 ) {
     Column {
         if (header != null)
@@ -77,7 +79,8 @@ fun <T> LazyTableWithScroll(
             )
 
         Box(
-            modifier = modifier
+            modifier = modifier,
+            contentAlignment = if (isLoading) Alignment.Center else Alignment.TopCenter
         ) {
             val scrollState = rememberLazyListState()
             val canScroll = scrollState.canScrollBackward || scrollState.canScrollForward
@@ -90,7 +93,7 @@ fun <T> LazyTableWithScroll(
                 if (showHeader)
                     header(columns = columns)
 
-                body(items = items, columns = columns, onClick = onClick, drawDividers = drawDividers)
+                body(items = items, columns = columns, onClick = onClick, drawDividers = drawDividers, isLoading = isLoading)
             }
 
             VerticalScrollbar(
@@ -127,26 +130,30 @@ private fun <T> LazyListScope.body(
     items: List<T>,
     columns: List<LazyTableColumn<T>>,
     onClick: ((T) -> Unit)?,
-    drawDividers: Boolean
+    drawDividers: Boolean,
+    isLoading: Boolean
 ) {
-    itemsIndexed(items = items) { index, item ->
-        Row(
-            modifier = Modifier
-                .run { if (onClick != null) clickable { onClick(item) } else this }
-                .padding(vertical = 5.dp, horizontal = 10.dp)
-                .run { if (drawDividers && index != 0) bottomBorder(color = MaterialTheme.colorScheme.primary) else this },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            columns.forEach {
-                when (it) {
-                    is LazyTableColumn.Builder<T> -> it.content(this, item, it.weight)
-                    is LazyTableColumn.Text<T> -> TableText(item = item, column = it)
-                    is LazyTableColumn.Checkbox<T> -> TableCheckbox(item = item, column = it)
-                    is LazyTableColumn.IconButton<T> -> TableIconButton(item = item, column = it)
+    if (isLoading)
+        item { Loading(paddingValues = PaddingValues(10.dp)) }
+    else
+        itemsIndexed(items = items) { index, item ->
+            Row(
+                modifier = Modifier
+                    .run { if (onClick != null) clickable { onClick(item) } else this }
+                    .padding(vertical = 5.dp, horizontal = 10.dp)
+                    .run { if (drawDividers && index != 0) bottomBorder(color = MaterialTheme.colorScheme.primary) else this },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                columns.forEach {
+                    when (it) {
+                        is LazyTableColumn.Builder<T> -> it.content(this, item, it.weight)
+                        is LazyTableColumn.Text<T> -> TableText(item = item, column = it)
+                        is LazyTableColumn.Checkbox<T> -> TableCheckbox(item = item, column = it)
+                        is LazyTableColumn.IconButton<T> -> TableIconButton(item = item, column = it)
+                    }
                 }
             }
         }
-    }
 }
 
 private fun Modifier.bottomBorder(color: Color) = composed(

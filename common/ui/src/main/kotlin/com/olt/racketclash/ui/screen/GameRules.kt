@@ -1,6 +1,8 @@
 package com.olt.racketclash.ui.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -45,6 +47,7 @@ internal fun GameRules(
     var gameRules by remember { mutableStateOf(listOf(GameRule())) }
 
     LazyTableWithScroll(
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainer),
         header = {
             Text(
                 text = "Game rules",
@@ -60,6 +63,7 @@ internal fun GameRules(
         },
         items = gameRules,
         showHeader = false,
+        isLoading = false,
         columns = listOf(
             LazyTableColumn.Builder { gameRule, weight ->
                 Column(modifier = Modifier.weight(weight)) {
