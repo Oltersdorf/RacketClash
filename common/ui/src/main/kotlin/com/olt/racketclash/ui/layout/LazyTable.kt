@@ -70,7 +70,7 @@ fun <T> LazyTableWithScroll(
     drawDividers: Boolean = true,
     isLoading: Boolean
 ) {
-    Column {
+    Column(modifier = modifier) {
         if (header != null)
             Row(
                 modifier = Modifier.background(color = MaterialTheme.colorScheme.primaryContainer),
@@ -78,10 +78,7 @@ fun <T> LazyTableWithScroll(
                 content = header
             )
 
-        Box(
-            modifier = modifier,
-            contentAlignment = if (isLoading) Alignment.Center else Alignment.TopCenter
-        ) {
+        Box(contentAlignment = if (isLoading) Alignment.Center else Alignment.TopCenter) {
             val scrollState = rememberLazyListState()
             val canScroll = scrollState.canScrollBackward || scrollState.canScrollForward
 
@@ -97,7 +94,7 @@ fun <T> LazyTableWithScroll(
             }
 
             VerticalScrollbar(
-                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                modifier = Modifier.align(Alignment.CenterEnd),
                 adapter = rememberScrollbarAdapter(scrollState = scrollState),
                 style = LocalScrollbarStyle.current.copy(
                     hoverColor = MaterialTheme.colorScheme.primary,
