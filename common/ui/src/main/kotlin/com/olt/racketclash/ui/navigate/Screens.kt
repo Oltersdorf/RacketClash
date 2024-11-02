@@ -54,6 +54,11 @@ internal sealed class Screens(val name: String) {
 
     data object Players: Screens(name = "Players")
 
+    data class Player(
+        val playerName: String,
+        val playerId: Long
+    ) : Screens(name = playerName)
+
     data class AddOrUpdatePlayer(
         val playerName: String?,
         val playerId: Long?

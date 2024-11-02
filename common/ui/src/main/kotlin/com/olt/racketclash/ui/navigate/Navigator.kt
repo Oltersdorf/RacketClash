@@ -13,6 +13,7 @@ import com.olt.racketclash.ui.component.SimpleIconButton
 import com.olt.racketclash.ui.screen.GameRules
 import com.olt.racketclash.ui.screen.Players
 import com.olt.racketclash.ui.screen.RacketClash
+import com.olt.racketclash.ui.screen.Tournaments
 
 @Composable
 fun Navigator(
@@ -53,6 +54,7 @@ fun Navigator(
                 is Screens.Categories -> TODO()
                 is Screens.Category -> TODO()
                 Screens.GamRules -> GameRules(database = database) { screen -> navLinks += screen }
+                is Screens.Player -> TODO()
                 Screens.Players -> Players(database = database) { screen -> navLinks += screen }
                 Screens.RacketClash -> RacketClash { screen -> navLinks += screen }
                 is Screens.Team -> TODO()
