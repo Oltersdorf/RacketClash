@@ -7,8 +7,21 @@ import androidx.compose.runtime.*
 fun RacketClashMaterialTheme(content: @Composable (isDarkMode: Boolean, switchDarkMode: () -> Unit) -> Unit) {
     var isDarkMode by remember { mutableStateOf(false) }
 
-    MaterialTheme(
-        colorScheme = if (isDarkMode) DarkColorSchema else LightColorSchema,
-        content = { content(isDarkMode) { isDarkMode = !isDarkMode } }
+    ProvideColors(additionalColorSchema = if (isDarkMode) AdditionalDarkColorSchema else AdditionalLightColorSchema) {
+        MaterialTheme(
+            colorScheme = if (isDarkMode) DarkColorSchema else LightColorSchema,
+            content = { content(isDarkMode) { isDarkMode = !isDarkMode } }
+        )
+    }
+}
+
+@Composable
+private fun ProvideColors(
+    additionalColorSchema: AdditionalColorSchema,
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(
+        AdditionalMaterialTheme provides additionalColorSchema,
+        content = content
     )
 }

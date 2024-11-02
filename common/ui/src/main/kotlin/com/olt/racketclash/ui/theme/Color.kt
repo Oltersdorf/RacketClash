@@ -2,6 +2,8 @@ package com.olt.racketclash.ui.theme
 
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 /**
@@ -10,6 +12,18 @@ import androidx.compose.ui.graphics.Color
  * Error = F7C600
  * Neutral = Neutral Variant = FFFFFF
  */
+
+@Immutable
+data class AdditionalColorSchema(
+    val bronze: Color = Color.Unspecified,
+    val silver: Color = Color.Unspecified,
+    val gold: Color = Color.Unspecified,
+    val won: Color = Color.Unspecified,
+    val neutral: Color = Color.Unspecified,
+    val lost: Color = Color.Unspecified
+)
+
+val AdditionalMaterialTheme = staticCompositionLocalOf { AdditionalColorSchema() }
 
 private val primaryLight = Color(0xFF9A0001)
 private val onPrimaryLight = Color(0xFFFFFFFF)
@@ -46,6 +60,12 @@ private val surfaceContainerLowLight = Color(0xFFF6F3F2)
 private val surfaceContainerLight = Color(0xFFF1EDEC)
 private val surfaceContainerHighLight = Color(0xFFEBE7E7)
 private val surfaceContainerHighestLight = Color(0xFFE5E2E1)
+private val bronzeLight = Color(0xFFCD7F32)
+private val silverLight = Color(0xFFC0C0C0)
+private val goldLight = Color(0xFFFFD700)
+private val wonLight = Color(0xFF70CC4E)
+private val neutralLight = Color(0xFF6D6D6E)
+private val lostLight = Color(0xFFC34942)
 
 val LightColorSchema = lightColorScheme(
     primary = primaryLight,
@@ -86,6 +106,15 @@ val LightColorSchema = lightColorScheme(
     surfaceContainerHighest = surfaceContainerHighestLight
 )
 
+val AdditionalLightColorSchema = AdditionalColorSchema(
+    bronze = bronzeLight,
+    silver = silverLight,
+    gold = goldLight,
+    won = wonLight,
+    neutral = neutralLight,
+    lost = lostLight
+)
+
 private val primaryDark = Color(0xFFFFB4A8)
 private val onPrimaryDark = Color(0xFF690000)
 private val primaryContainerDark = Color(0xFFB20002)
@@ -121,6 +150,12 @@ private val surfaceContainerLowDark = Color(0xFF1C1B1B)
 private val surfaceContainerDark = Color(0xFF201F1F)
 private val surfaceContainerHighDark = Color(0xFF2A2A2A)
 private val surfaceContainerHighestDark = Color(0xFF353434)
+private val bronzeDark = Color(0xFFCD7F32)
+private val silverDark = Color(0xFFC0C0C0)
+private val goldDark = Color(0xFFFFD700)
+private val wonDark = Color(0xFF5DB83D)
+private val neutralDark = Color(0xFF545455)
+private val lostDark = Color(0xFFA3322D)
 
 val DarkColorSchema = darkColorScheme(
     primary = primaryDark,
@@ -159,4 +194,13 @@ val DarkColorSchema = darkColorScheme(
     surfaceContainer = surfaceContainerDark,
     surfaceContainerHigh = surfaceContainerHighDark,
     surfaceContainerHighest = surfaceContainerHighestDark
+)
+
+val AdditionalDarkColorSchema = AdditionalColorSchema(
+    bronze = bronzeDark,
+    silver = silverDark,
+    gold = goldDark,
+    won = wonDark,
+    neutral = neutralDark,
+    lost = lostDark
 )
