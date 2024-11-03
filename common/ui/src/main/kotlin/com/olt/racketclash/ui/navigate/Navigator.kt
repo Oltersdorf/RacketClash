@@ -12,6 +12,7 @@ import com.olt.racketclash.ui.component.SimpleIconButton
 import com.olt.racketclash.ui.screen.GameRules
 import com.olt.racketclash.ui.screen.Players
 import com.olt.racketclash.ui.screen.RacketClash
+import com.olt.racketclash.ui.screen.Tournaments
 import org.jetbrains.compose.resources.painterResource
 import racketclash.common.ui.generated.resources.Res
 import racketclash.common.ui.generated.resources.dark_mode
@@ -62,7 +63,7 @@ fun Navigator(
                 is Screens.Team -> TODO()
                 is Screens.Teams -> TODO()
                 is Screens.Tournament -> TODO()
-                Screens.Tournaments -> TODO()
+                Screens.Tournaments -> Tournaments(database = database) { screen -> navLinks += screen }
                 null -> { navLinks = listOf(Screens.RacketClash) }
             }
         }

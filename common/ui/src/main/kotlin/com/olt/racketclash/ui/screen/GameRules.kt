@@ -1,9 +1,7 @@
 package com.olt.racketclash.ui.screen
 
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.ui.component.Link
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.LazyTableColumn
@@ -68,10 +66,8 @@ internal fun GameRules(
 
 private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<GameRule>> =
     listOf(
-        LazyTableColumn.Builder(name = "Name", weight = 0.3f) { gameRule, weight ->
-            Link(modifier = Modifier.weight(weight), text = gameRule.name) {
-                navigateTo(Screens.AddOrUpdateGameRule(gameRuleName = gameRule.name, gameRuleId = gameRule.id))
-            }
+        LazyTableColumn.Link(name = "Name", text = { it.name }) {
+            navigateTo(Screens.AddOrUpdateGameRule(gameRuleName = it.name, gameRuleId = it.id))
         },
         LazyTableColumn.Text(name = "Sets") { "${it.winSets}/${it.maxSets}" },
         LazyTableColumn.Text(name = "Points") { "${it.winPoints}/${it.maxPoints} +/- ${it.pointsDifference}" },

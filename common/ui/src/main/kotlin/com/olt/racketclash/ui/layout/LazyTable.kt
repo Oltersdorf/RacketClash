@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.olt.racketclash.ui.component.Link
 import com.olt.racketclash.ui.component.Loading
 import com.olt.racketclash.ui.component.SimpleIconButton
 
@@ -55,6 +56,14 @@ sealed class LazyTableColumn<T>(
         val enabled: (T) -> Boolean = { true },
         val imageVector: ImageVector,
         val contentDescription: String
+    ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign)
+
+    class Link<T>(
+        name: String = "",
+        weight: Float = 1.0f,
+        headerTextAlign: TextAlign? = null,
+        val text: (T) -> String,
+        val onClick: (T) -> Unit
     ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign)
 }
 
@@ -147,6 +156,7 @@ private fun <T> LazyListScope.body(
                         is LazyTableColumn.Text<T> -> TableText(item = item, column = it)
                         is LazyTableColumn.Checkbox<T> -> TableCheckbox(item = item, column = it)
                         is LazyTableColumn.IconButton<T> -> TableIconButton(item = item, column = it)
+                        is LazyTableColumn.Link<T> -> TableLink(item = item, column = it)
                     }
                 }
             }
@@ -205,6 +215,18 @@ private fun <T> RowScope.TableIconButton(
         enabled = column.enabled(item),
         imageVector = column.imageVector,
         contentDescription = column.contentDescription,
+        onClick = { column.onClick(item) }
+    )
+}
+
+@Composable
+private fun <T> RowScope.TableLink(
+    item: T,
+    column: LazyTableColumn.Link<T>
+) {
+    Link(
+        modifier = Modifier.weight(weight = column.weight),
+        text = column.text(item),
         onClick = { column.onClick(item) }
     )
 }

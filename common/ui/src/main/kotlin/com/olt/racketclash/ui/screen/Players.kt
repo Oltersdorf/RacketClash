@@ -93,10 +93,8 @@ internal fun Players(
 
 private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<Player>> =
     listOf(
-        LazyTableColumn.Builder(name = "Name", weight = 0.3f) { player, weight ->
-            Link(modifier = Modifier.weight(weight), text = player.name) {
-                navigateTo(Screens.AddOrUpdatePlayer(playerName = player.name, playerId = player.id))
-            }
+        LazyTableColumn.Link(name = "Name", weight = 0.3f, text = { it.name }) {
+            navigateTo(Screens.AddOrUpdatePlayer(playerName = it.name, playerId = it.id))
         },
         LazyTableColumn.Text(name = "Birth year", weight = 0.1f) { it.birthYear.toString() },
         LazyTableColumn.Text(name = "Club", weight = 0.3f) { it.club },
