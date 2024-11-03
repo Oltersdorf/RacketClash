@@ -1,24 +1,17 @@
 package com.olt.racketclash.ui.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
-import com.olt.racketclash.ui.layout.LazyTableWithScroll
+import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 import com.olt.racketclash.ui.theme.AdditionalMaterialTheme
 
@@ -35,12 +28,12 @@ private data class Player(
     val winRatioDouble: Triple<Int, Int, Int> = Triple(15, 0, 12)
 )
 
-private sealed class TagType {
-    data class Name(val text: String) : TagType()
-    data class BirthYear(val text: String) : TagType()
-    data class Club(val text: String) : TagType()
-    data object HasMedals : TagType()
-    data object HasNoMedals : TagType()
+private sealed class TagTypePlayer {
+    data class Name(val text: String) : TagTypePlayer()
+    data class BirthYear(val text: String) : TagTypePlayer()
+    data class Club(val text: String) : TagTypePlayer()
+    data object HasMedals : TagTypePlayer()
+    data object HasNoMedals : TagTypePlayer()
 }
 
 @Composable
@@ -50,18 +43,18 @@ internal fun Players(
 ) {
     var searchBarText by remember { mutableStateOf("1") }
     var availableTags by remember { mutableStateOf( listOf(
-        TagType.HasMedals,
-        TagType.HasNoMedals,
-        TagType.Name("1"),
-        TagType.BirthYear("1"),
-        TagType.Club("1")
+        TagTypePlayer.HasMedals,
+        TagTypePlayer.HasNoMedals,
+        TagTypePlayer.Name("1"),
+        TagTypePlayer.BirthYear("1"),
+        TagTypePlayer.Club("1")
     )) }
     var tags by remember { mutableStateOf(listOf(
-        TagType.HasMedals,
-        TagType.HasNoMedals,
-        TagType.Name("1"),
-        TagType.BirthYear("1"),
-        TagType.Club("1")
+        TagTypePlayer.HasMedals,
+        TagTypePlayer.HasNoMedals,
+        TagTypePlayer.Name("1"),
+        TagTypePlayer.BirthYear("1"),
+        TagTypePlayer.Club("1")
     )) }
     var players by remember { mutableStateOf(listOf(
         Player(),
@@ -72,127 +65,102 @@ internal fun Players(
     )) }
     var currentPage by remember { mutableStateOf(1) }
     var lastPage by remember { mutableStateOf(2) }
+    var isLoading by remember { mutableStateOf(false) }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    SearchableLazyTableWithScroll(
+        title = "Players",
+        onTitleAdd = { navigateTo(Screens.AddOrUpdatePlayer(playerName = null, playerId = null)) },
+        items = players,
+        isLoading = isLoading,
+        columns = columns(navigateTo = navigateTo),
+        currentPage = currentPage,
+        lastPage = lastPage,
+        onPageClicked = { currentPage = it }
+    ) {
         SearchBar(
-            label = "Filter",
             text = searchBarText,
             onTextChange = { searchBarText = it },
             dropDownItems = availableTags,
             onDropDownItemClick = { tags += it },
             tags = tags,
             onTagRemove = { tags -= it },
-            tagText = { tagText(it) }
+            tagText = { TagText(it) }
         )
+    }
+}
 
-        LazyTableWithScroll(
-            modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceContainer).weight(1.0f, fill = false),
-            header = {
-                Text(
-                    text = "Players",
-                    modifier = Modifier.weight(1.0f).padding(start = 10.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    style = MaterialTheme.typography.titleLarge
-                )
-                SimpleIconButton(
-                    modifier = Modifier.padding(top = 5.dp, end = 5.dp, bottom = 5.dp),
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add"
-                ) { navigateTo(Screens.AddOrUpdatePlayer(playerName = null, playerId = null)) }
-            },
-            items = players,
-            isLoading = false,
-            columns = listOf(
-                LazyTableColumn.Builder(name = "Name", weight = 0.3f) { player, weight ->
-                    Link(modifier = Modifier.weight(weight), text = player.name) {
-                        navigateTo(Screens.AddOrUpdatePlayer(playerName = player.name, playerId = player.id))
-                    }
-                },
-                LazyTableColumn.Text(name = "Birth year", weight = 0.1f) { it.birthYear.toString() },
-                LazyTableColumn.Text(name = "Club", weight = 0.3f) { it.club },
-                LazyTableColumn.Text(name = "# tournaments", weight = 0.1f) { it.numberOfTournaments.toString() },
-                LazyTableColumn.Builder(name = "Medals", weight = 0.1f) { player, weight ->
-                    Row(modifier = Modifier.weight(weight)) {
-                        if (player.goldMedals > 0) {
-                            Text(text = player.goldMedals.toString())
-                            Icon(
-                                painter = painterResource("medal.svg"),
-                                contentDescription = "Gold",
-                                tint = AdditionalMaterialTheme.current.gold
-                            )
-                        }
-                        if (player.silverMedals > 0) {
-                            Text(
-                                text = player.silverMedals.toString(),
-                                modifier = Modifier.padding(start = if (player.goldMedals > 0) 10.dp else 0.dp)
-                            )
-                            Icon(
-                                painter = painterResource("medal.svg"),
-                                contentDescription = "Silver",
-                                tint = AdditionalMaterialTheme.current.silver
-                            )
-                        }
-                        if (player.bronzeMedals > 0) {
-                            Text(
-                                text = player.bronzeMedals.toString(),
-                                modifier = Modifier.padding(start = if (player.goldMedals > 0 || player.silverMedals > 0) 10.dp else 0.dp)
-                            )
-                            Icon(
-                                painter = painterResource("medal.svg"),
-                                contentDescription = "Bronze",
-                                tint = AdditionalMaterialTheme.current.bronze
-                            )
-                        }
-                    }
-                },
-                LazyTableColumn.Builder(name = "Single", weight = 0.05f) { player, weight ->
-                    RatioBar(
-                        modifier = Modifier
-                            .weight(weight)
-                            .padding(horizontal = 5.dp),
-                        left = player.winRatioSingle.first,
-                        middle = player.winRatioSingle.second,
-                        right = player.winRatioSingle.third
-                    )
-                },
-                LazyTableColumn.Builder(name = "Double", weight = 0.05f) { player, weight ->
-                    RatioBar(
-                        modifier = Modifier
-                            .weight(weight)
-                            .padding(horizontal = 5.dp),
-                        left = player.winRatioDouble.first,
-                        middle = player.winRatioDouble.second,
-                        right = player.winRatioDouble.third
+private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<Player>> =
+    listOf(
+        LazyTableColumn.Builder(name = "Name", weight = 0.3f) { player, weight ->
+            Link(modifier = Modifier.weight(weight), text = player.name) {
+                navigateTo(Screens.AddOrUpdatePlayer(playerName = player.name, playerId = player.id))
+            }
+        },
+        LazyTableColumn.Text(name = "Birth year", weight = 0.1f) { it.birthYear.toString() },
+        LazyTableColumn.Text(name = "Club", weight = 0.3f) { it.club },
+        LazyTableColumn.Text(name = "# tournaments", weight = 0.1f) { it.numberOfTournaments.toString() },
+        LazyTableColumn.Builder(name = "Medals", weight = 0.1f) { player, weight ->
+            Row(modifier = Modifier.weight(weight)) {
+                if (player.goldMedals > 0) {
+                    Text(text = player.goldMedals.toString())
+                    Icon(
+                        painter = painterResource("medal.svg"),
+                        contentDescription = "Gold",
+                        tint = AdditionalMaterialTheme.current.gold
                     )
                 }
+                if (player.silverMedals > 0) {
+                    Text(
+                        text = player.silverMedals.toString(),
+                        modifier = Modifier.padding(start = if (player.goldMedals > 0) 10.dp else 0.dp)
+                    )
+                    Icon(
+                        painter = painterResource("medal.svg"),
+                        contentDescription = "Silver",
+                        tint = AdditionalMaterialTheme.current.silver
+                    )
+                }
+                if (player.bronzeMedals > 0) {
+                    Text(
+                        text = player.bronzeMedals.toString(),
+                        modifier = Modifier.padding(start = if (player.goldMedals > 0 || player.silverMedals > 0) 10.dp else 0.dp)
+                    )
+                    Icon(
+                        painter = painterResource("medal.svg"),
+                        contentDescription = "Bronze",
+                        tint = AdditionalMaterialTheme.current.bronze
+                    )
+                }
+            }
+        },
+        LazyTableColumn.Builder(name = "Single", weight = 0.1f) { player, weight ->
+            RatioBar(
+                modifier = Modifier
+                    .weight(weight)
+                    .padding(horizontal = 5.dp),
+                left = player.winRatioSingle.first,
+                middle = player.winRatioSingle.second,
+                right = player.winRatioSingle.third
             )
-        )
-
-        if (lastPage != 1)
-            PageSelector(
-                currentPage = currentPage,
-                lastPage = lastPage,
-                onPageClicked = { currentPage = it }
+        },
+        LazyTableColumn.Builder(name = "Double", weight = 0.1f) { player, weight ->
+            RatioBar(
+                modifier = Modifier
+                    .weight(weight)
+                    .padding(horizontal = 5.dp),
+                left = player.winRatioDouble.first,
+                middle = player.winRatioDouble.second,
+                right = player.winRatioDouble.third
             )
-    }
-}
+        }
+    )
 
 @Composable
-private fun tagText(tagType: TagType) {
+private fun TagText(tagType: TagTypePlayer) =
     when (tagType) {
-        is TagType.BirthYear -> Row {
-            Text(text = "Birth year: ", fontWeight = FontWeight.Bold)
-            Text(text = "\"${tagType.text}\"")
-        }
-        is TagType.Club -> Row {
-            Text(text = "Club: ", fontWeight = FontWeight.Bold)
-            Text(text = "\"${tagType.text}\"")
-        }
-        TagType.HasMedals -> Text(text = "Has medals", fontWeight = FontWeight.Bold)
-        TagType.HasNoMedals -> Text(text = "Has no medals", fontWeight = FontWeight.Bold)
-        is TagType.Name -> Row {
-            Text(text = "Name: ", fontWeight = FontWeight.Bold)
-            Text(text = "\"${tagType.text}\"")
-        }
+        is TagTypePlayer.BirthYear -> Tag(name = "Birth year", text = tagType.text)
+        is TagTypePlayer.Club -> Tag(name = "Club", text = tagType.text)
+        TagTypePlayer.HasMedals -> Tag(name = "Has medals")
+        TagTypePlayer.HasNoMedals -> Tag(name = "Has no medals")
+        is TagTypePlayer.Name -> Tag(name = "Name", text = tagType.text)
     }
-}

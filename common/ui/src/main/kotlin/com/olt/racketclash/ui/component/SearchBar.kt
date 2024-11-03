@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun <T> SearchBar(
     modifier: Modifier = Modifier,
-    label: String = "",
     text: String,
     onTextChange: (String) -> Unit,
     dropDownItems: List<T>,
@@ -30,7 +29,7 @@ fun <T> SearchBar(
                 .fillMaxWidth(0.8f)
                 .align(Alignment.CenterHorizontally)
                 .padding(bottom = if (tags.isEmpty()) 5.dp else 0.dp),
-            label = label,
+            label = "Filter",
             text = text,
             onTextChange = onTextChange,
             dropDownItems = dropDownItems,

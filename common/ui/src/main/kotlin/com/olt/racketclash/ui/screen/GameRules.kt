@@ -1,25 +1,13 @@
 package com.olt.racketclash.ui.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.Link
-import com.olt.racketclash.ui.component.PageSelector
-import com.olt.racketclash.ui.component.SimpleIconButton
+import com.olt.racketclash.ui.component.SearchBar
+import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.LazyTableColumn
-import com.olt.racketclash.ui.layout.LazyTableWithScroll
+import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 
 private data class GameRule(
@@ -38,6 +26,10 @@ private data class GameRule(
     val pointPointsForRest: Int = 0
 )
 
+private sealed class TagTypeGameRule {
+    data class Name(val text: String) : TagTypeGameRule()
+}
+
 @Composable
 internal fun GameRules(
     database: Database,
@@ -47,51 +39,48 @@ internal fun GameRules(
     var gameRules by remember { mutableStateOf(listOf(GameRule())) }
     var currentPage by remember { mutableStateOf(1) }
     var lastPage by remember { mutableStateOf(1) }
+    var isLoading by remember { mutableStateOf(false) }
+    var searchBarText by remember { mutableStateOf("") }
+    var availableTags by remember { mutableStateOf(listOf<TagTypeGameRule>(TagTypeGameRule.Name("A"))) }
+    var tags by remember { mutableStateOf(listOf<TagTypeGameRule>(TagTypeGameRule.Name("A"))) }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        LazyTableWithScroll(
-            modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceContainer).weight(1.0f, fill = false),
-            showHeader = false,
-            header = {
-                Text(
-                    text = "Game rules",
-                    modifier = Modifier.weight(1.0f).padding(start = 10.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    style = MaterialTheme.typography.titleLarge
-                )
-                SimpleIconButton(
-                    modifier = Modifier.padding(top = 5.dp, end = 5.dp, bottom = 5.dp),
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add"
-                ) { navigateTo(Screens.AddOrUpdateGameRule(gameRuleName = null, gameRuleId = null)) }
-            },
-            items = gameRules,
-            isLoading = false,
-            columns = listOf(
-                LazyTableColumn.Builder { gameRule, weight ->
-                    Column(modifier = Modifier.weight(weight)) {
-                        Link(text = gameRule.name, style = MaterialTheme.typography.titleMedium) {
-                            navigateTo(Screens.AddOrUpdateGameRule(gameRuleName = gameRule.name, gameRuleId = gameRule.id))
-                        }
-
-                        Text( text =
-                            "${gameRule.winSets}/${gameRule.maxSets} sets, " +
-                            "${gameRule.winPoints}/${gameRule.maxPoints} +/- ${gameRule.pointsDifference} points"
-                        )
-                        Text( text =
-                            "Rating: W:${gameRule.gamePointsForWin} / D:${gameRule.gamePointsForDraw} / L:${gameRule.gamePointsForLose}, " +
-                            "Rest: G:${gameRule.gamePointsForRest} / S:${gameRule.setPointsForRest} / P:${gameRule.pointPointsForRest}"
-                        )
-                    }
-                }
-            )
+    SearchableLazyTableWithScroll(
+        title = "Game rules",
+        onTitleAdd = { navigateTo(Screens.AddOrUpdateGameRule(gameRuleName = null, gameRuleId = null)) },
+        items = gameRules,
+        isLoading = isLoading,
+        columns = columns(navigateTo = navigateTo),
+        currentPage = currentPage,
+        lastPage = lastPage,
+        onPageClicked = { currentPage = it }
+    ) {
+        SearchBar(
+            text = searchBarText,
+            onTextChange = { searchBarText = it },
+            dropDownItems = availableTags,
+            onDropDownItemClick = { tags += it },
+            tags = tags,
+            onTagRemove = { tags -= it },
+            tagText = { TagText(it) }
         )
-
-        if (lastPage != 1)
-            PageSelector(
-                currentPage = currentPage,
-                lastPage = lastPage,
-                onPageClicked = { currentPage = it }
-            )
     }
 }
+
+private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<GameRule>> =
+    listOf(
+        LazyTableColumn.Builder(name = "Name", weight = 0.3f) { gameRule, weight ->
+            Link(modifier = Modifier.weight(weight), text = gameRule.name) {
+                navigateTo(Screens.AddOrUpdateGameRule(gameRuleName = gameRule.name, gameRuleId = gameRule.id))
+            }
+        },
+        LazyTableColumn.Text(name = "Sets") { "${it.winSets}/${it.maxSets}" },
+        LazyTableColumn.Text(name = "Points") { "${it.winPoints}/${it.maxPoints} +/- ${it.pointsDifference}" },
+        LazyTableColumn.Text(name = "Rating") { "W:${it.gamePointsForWin} / D:${it.gamePointsForDraw} / L:${it.gamePointsForLose}" },
+        LazyTableColumn.Text(name = "Rest") { "G:${it.gamePointsForRest} / S:${it.setPointsForRest} / P:${it.pointPointsForRest}" }
+    )
+
+@Composable
+private fun TagText(tagType: TagTypeGameRule) =
+    when (tagType) {
+        is TagTypeGameRule.Name -> Tag(name = "Name", text = tagType.text)
+    }
