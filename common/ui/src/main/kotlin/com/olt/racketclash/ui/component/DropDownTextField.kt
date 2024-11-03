@@ -29,7 +29,7 @@ fun <T> DropDownTextField(
         onExpandedChange = { expanded = !expanded }
     ) {
         OutlinedTextField(
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
+            modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryEditable).fillMaxWidth(),
             value = text,
             onValueChange = onTextChange,
             label = { Text(label) },

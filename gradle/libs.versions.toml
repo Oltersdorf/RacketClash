@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.0.0"
-compose = "1.6.11"
+compose = "1.7.0"
 compose-navigation-version = "2.7.0-alpha07"
 coroutines = "1.7.3"
 sqldelight = "2.0.2"
