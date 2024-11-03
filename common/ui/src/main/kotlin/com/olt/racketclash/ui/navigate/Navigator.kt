@@ -5,7 +5,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.DropDownIconButton
@@ -13,7 +12,10 @@ import com.olt.racketclash.ui.component.SimpleIconButton
 import com.olt.racketclash.ui.screen.GameRules
 import com.olt.racketclash.ui.screen.Players
 import com.olt.racketclash.ui.screen.RacketClash
-import com.olt.racketclash.ui.screen.Tournaments
+import org.jetbrains.compose.resources.painterResource
+import racketclash.common.ui.generated.resources.Res
+import racketclash.common.ui.generated.resources.dark_mode
+import racketclash.common.ui.generated.resources.light_mode
 
 @Composable
 fun Navigator(
@@ -91,9 +93,9 @@ private fun TopBar(
         actions = {
             SimpleIconButton(
                 painter = if (isDarkMode)
-                    painterResource(resourcePath = "dark_mode.svg")
+                    painterResource(Res.drawable.light_mode)
                 else
-                    painterResource("light_mode.svg"),
+                    painterResource(Res.drawable.dark_mode),
                 contentDescription = "Light/Dark mode",
                 onClick = switchDarkMode
             )

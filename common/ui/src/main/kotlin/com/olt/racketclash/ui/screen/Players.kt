@@ -6,7 +6,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.*
@@ -14,6 +13,9 @@ import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 import com.olt.racketclash.ui.theme.AdditionalMaterialTheme
+import org.jetbrains.compose.resources.painterResource
+import racketclash.common.ui.generated.resources.Res
+import racketclash.common.ui.generated.resources.medal
 
 private data class Player(
     val id: Long = 0L,
@@ -104,7 +106,7 @@ private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<Player>
                 if (player.goldMedals > 0) {
                     Text(text = player.goldMedals.toString())
                     Icon(
-                        painter = painterResource("medal.svg"),
+                        painter = painterResource(Res.drawable.medal),
                         contentDescription = "Gold",
                         tint = AdditionalMaterialTheme.current.gold
                     )
@@ -115,7 +117,7 @@ private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<Player>
                         modifier = Modifier.padding(start = if (player.goldMedals > 0) 10.dp else 0.dp)
                     )
                     Icon(
-                        painter = painterResource("medal.svg"),
+                        painter = painterResource(Res.drawable.medal),
                         contentDescription = "Silver",
                         tint = AdditionalMaterialTheme.current.silver
                     )
@@ -126,7 +128,7 @@ private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<Player>
                         modifier = Modifier.padding(start = if (player.goldMedals > 0 || player.silverMedals > 0) 10.dp else 0.dp)
                     )
                     Icon(
-                        painter = painterResource("medal.svg"),
+                        painter = painterResource(Res.drawable.medal),
                         contentDescription = "Bronze",
                         tint = AdditionalMaterialTheme.current.bronze
                     )
