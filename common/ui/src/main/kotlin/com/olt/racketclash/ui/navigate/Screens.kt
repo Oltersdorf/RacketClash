@@ -52,6 +52,10 @@ internal sealed class Screens(val name: String) {
         val tournamentId: Long
     ) : Screens(name = "Games")
 
+    data class Schedule(
+        val tournamentId: Long
+    ) : Screens(name = "Schedule")
+
     data object Players: Screens(name = "Players")
 
     data class Player(
@@ -64,7 +68,7 @@ internal sealed class Screens(val name: String) {
         val playerId: Long?
     ) : Screens(name = playerName ?: "New player")
 
-    data object GamRules : Screens(name = "Game rules")
+    data object GameRules : Screens(name = "Game rules")
 
     data class AddOrUpdateGameRule(
         val gameRuleName: String?,

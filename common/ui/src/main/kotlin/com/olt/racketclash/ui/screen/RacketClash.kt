@@ -10,7 +10,7 @@ internal fun RacketClash(navigateTo: (Screens) -> Unit) {
         navList = listOf(
             Screens.Tournaments,
             Screens.Players,
-            Screens.GamRules
+            Screens.GameRules
         ),
         onClick = navigateTo
     )

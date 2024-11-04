@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.DropDownIconButton
 import com.olt.racketclash.ui.component.SimpleIconButton
+import com.olt.racketclash.ui.screen.*
 import com.olt.racketclash.ui.screen.GameRules
 import com.olt.racketclash.ui.screen.Players
 import com.olt.racketclash.ui.screen.RacketClash
@@ -47,7 +48,7 @@ fun Navigator(
             .padding(10.dp),
             contentAlignment = Alignment.Center
         ) {
-            when (navLinks.lastOrNull()) {
+            when (val navLink = navLinks.lastOrNull()) {
                 is Screens.AddOrUpdateCategory -> TODO()
                 is Screens.AddOrUpdateGameRule -> TODO()
                 is Screens.AddOrUpdateGames -> TODO()
@@ -56,13 +57,14 @@ fun Navigator(
                 is Screens.AddOrUpdateTournament -> TODO()
                 is Screens.Categories -> TODO()
                 is Screens.Category -> TODO()
-                Screens.GamRules -> GameRules(database = database) { screen -> navLinks += screen }
+                Screens.GameRules -> GameRules(database = database) { screen -> navLinks += screen }
                 is Screens.Player -> TODO()
                 Screens.Players -> Players(database = database) { screen -> navLinks += screen }
                 Screens.RacketClash -> RacketClash { screen -> navLinks += screen }
+                is Screens.Schedule -> TODO()
                 is Screens.Team -> TODO()
                 is Screens.Teams -> TODO()
-                is Screens.Tournament -> TODO()
+                is Screens.Tournament -> Tournament(tournamentId = navLink.tournamentId, tournamentName = navLink.tournamentName) { screen -> navLinks += screen }
                 Screens.Tournaments -> Tournaments(database = database) { screen -> navLinks += screen }
                 null -> { navLinks = listOf(Screens.RacketClash) }
             }

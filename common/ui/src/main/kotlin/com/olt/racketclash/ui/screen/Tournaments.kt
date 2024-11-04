@@ -71,7 +71,7 @@ internal fun Tournaments(
 private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<Tournament>> =
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.25f, text = { it.name }) {
-            navigateTo(Screens.AddOrUpdateTournament(tournamentName = it.name, tournamentId = it.id))
+            navigateTo(Screens.Tournament(tournamentName = it.name, tournamentId = it.id))
         },
         LazyTableColumn.Text(name = "Location", weight = 0.25f) { it.location },
         LazyTableColumn.Text(name = "Courts", weight = 0.1f) { it.numberOfCourts.toString() },
