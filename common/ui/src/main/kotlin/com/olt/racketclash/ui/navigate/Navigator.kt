@@ -55,15 +55,15 @@ fun Navigator(
                 is Screens.AddOrUpdatePlayer -> TODO()
                 is Screens.AddOrUpdateTeam -> TODO()
                 is Screens.AddOrUpdateTournament -> TODO()
-                is Screens.Categories -> TODO()
+                is Screens.Categories -> Categories(database = database, tournamentId = navLink.tournamentId) { screen -> navLinks += screen }
                 is Screens.Category -> TODO()
                 Screens.GameRules -> GameRules(database = database) { screen -> navLinks += screen }
                 is Screens.Player -> TODO()
                 Screens.Players -> Players(database = database) { screen -> navLinks += screen }
                 Screens.RacketClash -> RacketClash { screen -> navLinks += screen }
-                is Screens.Schedule -> TODO()
+                is Screens.Schedule -> Schedule(database = database, tournamentId = navLink.tournamentId)
                 is Screens.Team -> TODO()
-                is Screens.Teams -> TODO()
+                is Screens.Teams -> Teams(database = database, tournamentId = navLink.tournamentId) { screen -> navLinks += screen }
                 is Screens.Tournament -> Tournament(tournamentId = navLink.tournamentId, tournamentName = navLink.tournamentName) { screen -> navLinks += screen }
                 Screens.Tournaments -> Tournaments(database = database) { screen -> navLinks += screen }
                 null -> { navLinks = listOf(Screens.RacketClash) }

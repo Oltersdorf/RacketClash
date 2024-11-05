@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun RowScope.LazyTableWithScrollHeader(
     title: String,
-    onAddClicked: () -> Unit
+    onAddClicked: (() -> Unit)?
 ) {
     Text(
         text = title,
@@ -25,6 +25,7 @@ fun RowScope.LazyTableWithScrollHeader(
         modifier = Modifier.padding(top = 5.dp, end = 5.dp, bottom = 5.dp),
         imageVector = Icons.Default.Add,
         contentDescription = "Add",
-        onClick = onAddClicked
+        enabled = onAddClicked != null,
+        onClick = onAddClicked ?: {}
     )
 }

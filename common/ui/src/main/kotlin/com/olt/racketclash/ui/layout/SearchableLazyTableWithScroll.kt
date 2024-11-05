@@ -12,7 +12,7 @@ import com.olt.racketclash.ui.component.PageSelector
 @Composable
 fun <T> SearchableLazyTableWithScroll(
     title: String = "",
-    onTitleAdd: () -> Unit,
+    onTitleAdd: (() -> Unit)? = null,
     items: List<T>,
     isLoading: Boolean = false,
     columns: List<LazyTableColumn<T>>,
