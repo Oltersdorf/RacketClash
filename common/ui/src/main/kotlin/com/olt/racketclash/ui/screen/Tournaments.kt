@@ -5,6 +5,7 @@ import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.LazyTableColumn
+import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 
@@ -51,7 +52,21 @@ internal fun Tournaments(
         onTitleAdd = { navigateTo(Screens.AddOrUpdateTournament(tournamentName = null, tournamentId = null)) },
         items = tournaments,
         isLoading = isLoading,
-        columns = columns(navigateTo = navigateTo),
+        columns = columns(
+            navigateTo = navigateTo,
+            onNameSortAscending = {},
+            onNameSortDescending = {},
+            onLocationSortAscending = {},
+            onLocationSortDescending = {},
+            onCourtsSortAscending = {},
+            onCourtsSortDescending = {},
+            onStartDateTimeSortAscending = {},
+            onStartDateTimeSortDescending = {},
+            onEndDateTimeSortAscending = {},
+            onEndDateTimeSortDescending = {},
+            onPlayersSortAscending = {},
+            onPlayersSortDescending = {}
+        ),
         currentPage = currentPage,
         lastPage = lastPage,
         onPageClicked = { currentPage = it }
@@ -68,16 +83,58 @@ internal fun Tournaments(
     }
 }
 
-private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<Tournament>> =
+private fun columns(
+    navigateTo: (Screens) -> Unit,
+    onNameSortAscending: () -> Unit,
+    onNameSortDescending: () -> Unit,
+    onLocationSortAscending: () -> Unit,
+    onLocationSortDescending: () -> Unit,
+    onCourtsSortAscending: () -> Unit,
+    onCourtsSortDescending: () -> Unit,
+    onStartDateTimeSortAscending: () -> Unit,
+    onStartDateTimeSortDescending: () -> Unit,
+    onEndDateTimeSortAscending: () -> Unit,
+    onEndDateTimeSortDescending: () -> Unit,
+    onPlayersSortAscending: () -> Unit,
+    onPlayersSortDescending: () -> Unit
+): List<LazyTableColumn<Tournament>> =
     listOf(
-        LazyTableColumn.Link(name = "Name", weight = 0.25f, text = { it.name }) {
-            navigateTo(Screens.Tournament(tournamentName = it.name, tournamentId = it.id))
-        },
-        LazyTableColumn.Text(name = "Location", weight = 0.25f) { it.location },
-        LazyTableColumn.Text(name = "Courts", weight = 0.1f) { it.numberOfCourts.toString() },
-        LazyTableColumn.Text(name = "Start", weight = 0.1f) { it.startDateTime },
-        LazyTableColumn.Text(name = "End", weight = 0.1f) { it.endDateTime },
-        LazyTableColumn.Text(name = "Players", weight = 0.1f) { it.playersCount.toString() },
+        LazyTableColumn.Link(name = "Name", weight = 0.25f, text = { it.name }, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onNameSortAscending()
+                LazyTableSortDirection.Descending -> onNameSortDescending()
+            }
+        }) { navigateTo(Screens.Tournament(tournamentName = it.name, tournamentId = it.id)) },
+        LazyTableColumn.Text(name = "Location", weight = 0.25f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onLocationSortAscending()
+                LazyTableSortDirection.Descending -> onLocationSortDescending()
+            }
+        }) { it.location },
+        LazyTableColumn.Text(name = "Courts", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onCourtsSortAscending()
+                LazyTableSortDirection.Descending -> onCourtsSortDescending()
+            }
+        }) { it.numberOfCourts.toString() },
+        LazyTableColumn.Text(name = "Start", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onStartDateTimeSortAscending()
+                LazyTableSortDirection.Descending -> onStartDateTimeSortDescending()
+            }
+        }) { it.startDateTime },
+        LazyTableColumn.Text(name = "End", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onEndDateTimeSortAscending()
+                LazyTableSortDirection.Descending -> onEndDateTimeSortDescending()
+            }
+        }) { it.endDateTime },
+        LazyTableColumn.Text(name = "Players", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onPlayersSortAscending()
+                LazyTableSortDirection.Descending -> onPlayersSortDescending()
+            }
+        }) { it.playersCount.toString() },
         LazyTableColumn.Text(name = "Categories", weight = 0.1f) { it.categoriesCount.toString() }
     )
 

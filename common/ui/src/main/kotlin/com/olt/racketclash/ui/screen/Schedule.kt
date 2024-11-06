@@ -15,6 +15,7 @@ import com.olt.racketclash.ui.component.SimpleIconButton
 import com.olt.racketclash.ui.component.Status
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.LazyTableColumn
+import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 
 private data class ScheduledGame(
@@ -74,7 +75,17 @@ internal fun Schedule(
         title = "Schedule",
         items = scheduledGames,
         isLoading = isLoading,
-        columns = columns(onConfirm = {}),
+        columns = columns(
+            onConfirm = {},
+            onActiveSortAscending = {},
+            onActiveSortDescending = {},
+            onScheduleSortAscending = {},
+            onScheduleSortDescending = {},
+            onTypeSortAscending = {},
+            onTypeSortDescending = {},
+            onCategorySortAscending = {},
+            onCategorySortDescending = {}
+        ),
         currentPage = currentPage,
         lastPage = lastPage,
         onPageClicked = { currentPage = it }
@@ -92,15 +103,43 @@ internal fun Schedule(
 }
 
 private fun columns(
-    onConfirm: (Long) -> Unit
+    onConfirm: (Long) -> Unit,
+    onActiveSortAscending: () -> Unit,
+    onActiveSortDescending: () -> Unit,
+    onScheduleSortAscending: () -> Unit,
+    onScheduleSortDescending: () -> Unit,
+    onTypeSortAscending: () -> Unit,
+    onTypeSortDescending: () -> Unit,
+    onCategorySortAscending: () -> Unit,
+    onCategorySortDescending: () -> Unit
 ): List<LazyTableColumn<ScheduledGame>> =
     listOf(
-        LazyTableColumn.Builder("Active", weight = 0.05f) { scheduledGame, weight ->
+        LazyTableColumn.Builder("Active", weight = 0.05f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onActiveSortAscending()
+                LazyTableSortDirection.Descending -> onActiveSortDescending()
+            }
+        }) { scheduledGame, weight ->
             Status(modifier = Modifier.weight(weight), isOkay = scheduledGame.active)
         },
-        LazyTableColumn.Text(name = "Schedule", weight = 0.15f) { it.scheduled },
-        LazyTableColumn.Text(name = "Type", weight = 0.05f) { if (it.single) "Single" else "Double" },
-        LazyTableColumn.Text(name = "Category", weight = 0.15f) { it.categoryName },
+        LazyTableColumn.Text(name = "Schedule", weight = 0.15f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onScheduleSortAscending()
+                LazyTableSortDirection.Descending -> onScheduleSortDescending()
+            }
+        }) { it.scheduled },
+        LazyTableColumn.Text(name = "Type", weight = 0.05f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onTypeSortAscending()
+                LazyTableSortDirection.Descending -> onTypeSortDescending()
+            }
+        }) { if (it.single) "Single" else "Double" },
+        LazyTableColumn.Text(name = "Category", weight = 0.15f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onCategorySortAscending()
+                LazyTableSortDirection.Descending -> onCategorySortDescending()
+            }
+        }) { it.categoryName },
         LazyTableColumn.Builder(name = "Left", weight = 0.2f) { scheduledGame, weight ->
             Column(modifier = Modifier.weight(weight)) {
                 Text(scheduledGame.playerLeftOneName)

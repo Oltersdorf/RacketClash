@@ -9,6 +9,7 @@ import com.olt.racketclash.ui.component.RatioBar
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.LazyTableColumn
+import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 
@@ -53,7 +54,18 @@ internal fun Teams(
         onTitleAdd = { navigateTo(Screens.AddOrUpdateTeam(teamId = null, teamName = null, tournamentId = tournamentId)) },
         items = teams,
         isLoading = isLoading,
-        columns = columns(navigateTo = navigateTo, tournamentId = tournamentId),
+        columns = columns(
+            navigateTo = navigateTo,
+            tournamentId = tournamentId,
+            onNameSortAscending = {},
+            onNameSortDescending = {},
+            onSizeSortAscending = {},
+            onSizeSortDescending = {},
+            onSingleSortAscending = {},
+            onSingleSortDescending = {},
+            onDoubleSortAscending = {},
+            onDoubleSortDescending = {}
+        ),
         currentPage = currentPage,
         lastPage = lastPage,
         onPageClicked = { currentPage = it }
@@ -72,14 +84,37 @@ internal fun Teams(
 
 private fun columns(
     navigateTo: (Screens) -> Unit,
-    tournamentId: Long
+    tournamentId: Long,
+    onNameSortAscending: () -> Unit,
+    onNameSortDescending: () -> Unit,
+    onSizeSortAscending: () -> Unit,
+    onSizeSortDescending: () -> Unit,
+    onSingleSortAscending: () -> Unit,
+    onSingleSortDescending: () -> Unit,
+    onDoubleSortAscending: () -> Unit,
+    onDoubleSortDescending: () -> Unit
 ): List<LazyTableColumn<Team>> =
     listOf(
-        LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }) {
+        LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onNameSortAscending()
+                LazyTableSortDirection.Descending -> onNameSortDescending()
+            }
+        }) {
             navigateTo(Screens.Team(teamName = it.name, teamId = it.id, tournamentId = tournamentId))
         },
-        LazyTableColumn.Text(name = "Size", weight = 0.1f) { it.size.toString() },
-        LazyTableColumn.Builder(name = "Single", weight = 0.1f) { team, weight ->
+        LazyTableColumn.Text(name = "Size", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSizeSortAscending()
+                LazyTableSortDirection.Descending -> onSizeSortDescending()
+            }
+        }) { it.size.toString() },
+        LazyTableColumn.Builder(name = "Single", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSingleSortAscending()
+                LazyTableSortDirection.Descending -> onSingleSortDescending()
+            }
+        }) { team, weight ->
             RatioBar(
                 modifier = Modifier
                     .weight(weight)
@@ -89,7 +124,12 @@ private fun columns(
                 right = team.winRatioSingle.third
             )
         },
-        LazyTableColumn.Builder(name = "Double", weight = 0.1f) { team, weight ->
+        LazyTableColumn.Builder(name = "Double", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onDoubleSortAscending()
+                LazyTableSortDirection.Descending -> onDoubleSortDescending()
+            }
+        }) { team, weight ->
             RatioBar(
                 modifier = Modifier
                     .weight(weight)

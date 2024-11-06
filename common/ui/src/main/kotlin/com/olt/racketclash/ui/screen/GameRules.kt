@@ -5,6 +5,7 @@ import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.LazyTableColumn
+import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 
@@ -47,7 +48,11 @@ internal fun GameRules(
         onTitleAdd = { navigateTo(Screens.AddOrUpdateGameRule(gameRuleName = null, gameRuleId = null)) },
         items = gameRules,
         isLoading = isLoading,
-        columns = columns(navigateTo = navigateTo),
+        columns = columns(
+            navigateTo = navigateTo,
+            onNameSortAscending = {},
+            onNameSortDescending = {}
+        ),
         currentPage = currentPage,
         lastPage = lastPage,
         onPageClicked = { currentPage = it }
@@ -64,9 +69,18 @@ internal fun GameRules(
     }
 }
 
-private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<GameRule>> =
+private fun columns(
+    navigateTo: (Screens) -> Unit,
+    onNameSortAscending: () -> Unit,
+    onNameSortDescending: () -> Unit
+): List<LazyTableColumn<GameRule>> =
     listOf(
-        LazyTableColumn.Link(name = "Name", text = { it.name }) {
+        LazyTableColumn.Link(name = "Name", text = { it.name }, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onNameSortAscending()
+                LazyTableSortDirection.Descending -> onNameSortDescending()
+            }
+        }) {
             navigateTo(Screens.AddOrUpdateGameRule(gameRuleName = it.name, gameRuleId = it.id))
         },
         LazyTableColumn.Text(name = "Sets") { "${it.winSets}/${it.maxSets}" },

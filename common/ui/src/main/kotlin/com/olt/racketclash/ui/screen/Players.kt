@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
+import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 import com.olt.racketclash.ui.theme.AdditionalMaterialTheme
@@ -74,7 +75,23 @@ internal fun Players(
         onTitleAdd = { navigateTo(Screens.AddOrUpdatePlayer(playerName = null, playerId = null)) },
         items = players,
         isLoading = isLoading,
-        columns = columns(navigateTo = navigateTo),
+        columns = columns(
+            navigateTo = navigateTo,
+            onNameSortAscending = {},
+            onNameSortDescending = {},
+            onBirthYearSortAscending = {},
+            onBirthYearSortDescending = {},
+            onClubSortAscending = {},
+            onClubSortDescending = {},
+            onTournamentsSortAscending = {},
+            onTournamentsSortDescending = {},
+            onMedalsSortAscending = {},
+            onMedalsSortDescending = {},
+            onSinglesSortAscending = {},
+            onSinglesSortDescending = {},
+            onDoublesSortAscending = {},
+            onDoublesSortDescending = {}
+        ),
         currentPage = currentPage,
         lastPage = lastPage,
         onPageClicked = { currentPage = it }
@@ -91,15 +108,54 @@ internal fun Players(
     }
 }
 
-private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<Player>> =
+private fun columns(
+    navigateTo: (Screens) -> Unit,
+    onNameSortAscending: () -> Unit,
+    onNameSortDescending: () -> Unit,
+    onBirthYearSortAscending: () -> Unit,
+    onBirthYearSortDescending: () -> Unit,
+    onClubSortAscending: () -> Unit,
+    onClubSortDescending: () -> Unit,
+    onTournamentsSortAscending: () -> Unit,
+    onTournamentsSortDescending: () -> Unit,
+    onMedalsSortAscending: () -> Unit,
+    onMedalsSortDescending: () -> Unit,
+    onSinglesSortAscending: () -> Unit,
+    onSinglesSortDescending: () -> Unit,
+    onDoublesSortAscending: () -> Unit,
+    onDoublesSortDescending: () -> Unit
+): List<LazyTableColumn<Player>> =
     listOf(
-        LazyTableColumn.Link(name = "Name", weight = 0.3f, text = { it.name }) {
-            navigateTo(Screens.Player(playerName = it.name, playerId = it.id))
-        },
-        LazyTableColumn.Text(name = "Birth year", weight = 0.1f) { it.birthYear.toString() },
-        LazyTableColumn.Text(name = "Club", weight = 0.3f) { it.club },
-        LazyTableColumn.Text(name = "# tournaments", weight = 0.1f) { it.numberOfTournaments.toString() },
-        LazyTableColumn.Builder(name = "Medals", weight = 0.1f) { player, weight ->
+        LazyTableColumn.Link(name = "Name", weight = 0.3f, text = { it.name }, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onNameSortAscending()
+                LazyTableSortDirection.Descending -> onNameSortDescending()
+            }
+        }) { navigateTo(Screens.Player(playerName = it.name, playerId = it.id)) },
+        LazyTableColumn.Text(name = "Birth year", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onBirthYearSortAscending()
+                LazyTableSortDirection.Descending -> onBirthYearSortDescending()
+            }
+        }) { it.birthYear.toString() },
+        LazyTableColumn.Text(name = "Club", weight = 0.3f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onClubSortAscending()
+                LazyTableSortDirection.Descending -> onClubSortDescending()
+            }
+        }) { it.club },
+        LazyTableColumn.Text(name = "# tournaments", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onTournamentsSortAscending()
+                LazyTableSortDirection.Descending -> onTournamentsSortDescending()
+            }
+        }) { it.numberOfTournaments.toString() },
+        LazyTableColumn.Builder(name = "Medals", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onMedalsSortAscending()
+                LazyTableSortDirection.Descending -> onMedalsSortDescending()
+            }
+        }) { player, weight ->
             Row(modifier = Modifier.weight(weight)) {
                 if (player.goldMedals > 0) {
                     Text(text = player.goldMedals.toString())
@@ -133,7 +189,12 @@ private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<Player>
                 }
             }
         },
-        LazyTableColumn.Builder(name = "Single", weight = 0.1f) { player, weight ->
+        LazyTableColumn.Builder(name = "Single", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSinglesSortAscending()
+                LazyTableSortDirection.Descending -> onSinglesSortDescending()
+            }
+        }) { player, weight ->
             RatioBar(
                 modifier = Modifier
                     .weight(weight)
@@ -143,7 +204,12 @@ private fun columns(navigateTo: (Screens) -> Unit): List<LazyTableColumn<Player>
                 right = player.winRatioSingle.third
             )
         },
-        LazyTableColumn.Builder(name = "Double", weight = 0.1f) { player, weight ->
+        LazyTableColumn.Builder(name = "Double", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onDoublesSortAscending()
+                LazyTableSortDirection.Descending -> onDoublesSortDescending()
+            }
+        }) { player, weight ->
             RatioBar(
                 modifier = Modifier
                     .weight(weight)

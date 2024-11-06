@@ -4,7 +4,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -13,6 +13,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -21,32 +23,48 @@ import com.olt.racketclash.ui.component.Link
 import com.olt.racketclash.ui.component.Loading
 import com.olt.racketclash.ui.component.SimpleIconButton
 
+private sealed class LazyTableSortState {
+    data object Up : LazyTableSortState()
+    data object Down : LazyTableSortState()
+    data object None : LazyTableSortState()
+    data object NotSortable : LazyTableSortState()
+}
+
+sealed class LazyTableSortDirection {
+    data object Ascending : LazyTableSortDirection()
+    data object Descending : LazyTableSortDirection()
+}
+
 sealed class LazyTableColumn<T>(
     val name: String,
     val weight: Float,
-    val headerTextAlign: TextAlign?
+    val headerTextAlign: TextAlign?,
+    val onSort: ((LazyTableSortDirection) -> Unit)?
 ) {
     class Builder<T>(
         name: String = "",
         weight: Float = 1.0f,
         headerTextAlign: TextAlign? = null,
+        onSort: ((LazyTableSortDirection) -> Unit)? = null,
         val content: @Composable RowScope.(item: T, weight: Float) -> Unit
-    ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign)
+    ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign, onSort = onSort)
 
     class Text<T>(
         name: String = "",
         weight: Float = 1.0f,
         headerTextAlign: TextAlign? = null,
+        onSort: ((LazyTableSortDirection) -> Unit)? = null,
         val text: (T) -> String
-    ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign)
+    ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign, onSort = onSort)
 
     class Checkbox<T>(
         name: String = "",
         weight: Float = 1.0f,
         headerTextAlign: TextAlign? = null,
+        onSort: ((LazyTableSortDirection) -> Unit)? = null,
         val checked: (T) -> Boolean,
         val onCheckChanged: (T, Boolean) -> Unit
-    ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign)
+    ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign, onSort = onSort)
 
     class IconButton<T>(
         name: String = "",
@@ -56,15 +74,16 @@ sealed class LazyTableColumn<T>(
         val enabled: (T) -> Boolean = { true },
         val imageVector: ImageVector,
         val contentDescription: String
-    ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign)
+    ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign, onSort = null)
 
     class Link<T>(
         name: String = "",
         weight: Float = 1.0f,
         headerTextAlign: TextAlign? = null,
+        onSort: ((LazyTableSortDirection) -> Unit)? = null,
         val text: (T) -> String,
         val onClick: (T) -> Unit
-    ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign)
+    ) : LazyTableColumn<T>(name = name, weight = weight, headerTextAlign = headerTextAlign, onSort = onSort)
 }
 
 @Composable
@@ -115,17 +134,78 @@ fun <T> LazyTableWithScroll(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 private fun <T> LazyListScope.header(columns: List<LazyTableColumn<T>>) {
     stickyHeader {
         Surface(tonalElevation = 5.dp) {
             Row(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp, horizontal = 10.dp)) {
-                columns.forEach {
-                    Text(
-                        text = it.name,
-                        modifier = Modifier.weight(it.weight),
-                        textAlign = it.headerTextAlign
-                    )
+                var sortStateColumns by remember { mutableStateOf(
+                    columns.map {
+                        if (it.onSort == null)
+                            LazyTableSortState.NotSortable to it
+                        else
+                            LazyTableSortState.None to it
+                    }
+                ) }
+                var currentSortedColumnIndex by remember { mutableStateOf<Int?>(null) }
+
+                sortStateColumns.forEachIndexed { index, (sortState, column) ->
+                    Box(modifier = Modifier
+                        .weight(column.weight)
+                        .run {
+                            when (sortState) {
+                                LazyTableSortState.Down -> {
+                                    pointerHoverIcon(PointerIcon.Hand)
+                                        .clickable {
+                                            column.onSort?.let { it(LazyTableSortDirection.Ascending) }
+                                            sortStateColumns = sortStateColumns.toMutableList().apply {
+                                                this[index] = LazyTableSortState.Up to column
+                                            }
+                                        }
+                                }
+                                LazyTableSortState.Up -> {
+                                    pointerHoverIcon(PointerIcon.Hand)
+                                        .clickable {
+                                            column.onSort?.let { it(LazyTableSortDirection.Descending) }
+                                            sortStateColumns = sortStateColumns.toMutableList().apply {
+                                                this[index] = LazyTableSortState.Down to column
+                                            }
+                                        }
+                                }
+                                LazyTableSortState.None -> {
+                                    pointerHoverIcon(PointerIcon.Hand)
+                                        .clickable {
+                                            column.onSort?.let { it(LazyTableSortDirection.Descending) }
+                                            sortStateColumns = sortStateColumns.toMutableList().apply {
+                                                this[index] = LazyTableSortState.Down to column
+
+                                                val lastSortedColumnIndex = currentSortedColumnIndex
+                                                if (lastSortedColumnIndex != null)
+                                                    this[lastSortedColumnIndex] =
+                                                        LazyTableSortState.None as LazyTableSortState to this[lastSortedColumnIndex].second
+                                            }
+
+                                            currentSortedColumnIndex = index
+                                        }
+                                }
+                                LazyTableSortState.NotSortable -> this
+                            }
+                        }
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            when (sortState) {
+                                is LazyTableSortState.Down -> ExposedDropdownMenuDefaults.TrailingIcon(expanded = true)
+                                is LazyTableSortState.None -> {}
+                                is LazyTableSortState.Up -> ExposedDropdownMenuDefaults.TrailingIcon(expanded = false)
+                                LazyTableSortState.NotSortable -> {}
+                            }
+
+                            Text(
+                                text = column.name,
+                                textAlign = column.headerTextAlign
+                            )
+                        }
+                    }
                 }
             }
         }

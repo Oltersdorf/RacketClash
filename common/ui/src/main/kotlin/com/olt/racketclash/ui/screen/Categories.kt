@@ -7,6 +7,7 @@ import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Status
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.LazyTableColumn
+import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 
@@ -53,7 +54,16 @@ internal fun Categories(
         onTitleAdd = { navigateTo(Screens.AddOrUpdateCategory(categoryName = null, categoryId = null, tournamentId = tournamentId)) },
         items = categories,
         isLoading = isLoading,
-        columns = columns(navigateTo = navigateTo, tournamentId = tournamentId),
+        columns = columns(
+            navigateTo = navigateTo,
+            tournamentId = tournamentId,
+            onNameSortAscending = {},
+            onNameSortDescending = {},
+            onPlayersSortAscending = {},
+            onPlayersSortDescending = {},
+            onStatusSortAscending = {},
+            onStatusSortDescending = {}
+        ),
         currentPage = currentPage,
         lastPage = lastPage,
         onPageClicked = { currentPage = it }
@@ -72,14 +82,33 @@ internal fun Categories(
 
 private fun columns(
     navigateTo: (Screens) -> Unit,
-    tournamentId: Long
+    tournamentId: Long,
+    onNameSortAscending: () -> Unit,
+    onNameSortDescending: () -> Unit,
+    onPlayersSortAscending: () -> Unit,
+    onPlayersSortDescending: () -> Unit,
+    onStatusSortAscending: () -> Unit,
+    onStatusSortDescending: () -> Unit
 ): List<LazyTableColumn<Category>> =
     listOf(
-        LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }) {
-            navigateTo(Screens.Category(categoryName = it.name, categoryId = it.id, tournamentId = tournamentId))
-        },
-        LazyTableColumn.Text(name = "Players", weight = 0.1f) { it.players.toString() },
-        LazyTableColumn.Builder(name = "Status", weight = 0.1f) { category, weight ->
+        LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onNameSortAscending()
+                LazyTableSortDirection.Descending -> onNameSortDescending()
+            }
+        }) { navigateTo(Screens.Category(categoryName = it.name, categoryId = it.id, tournamentId = tournamentId)) },
+        LazyTableColumn.Text(name = "Players", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onPlayersSortAscending()
+                LazyTableSortDirection.Descending -> onPlayersSortDescending()
+            }
+        }) { it.players.toString() },
+        LazyTableColumn.Builder(name = "Status", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onStatusSortAscending()
+                LazyTableSortDirection.Descending -> onStatusSortDescending()
+            }
+        }) { category, weight ->
             Status(modifier = Modifier.weight(weight), isOkay = category.finished)
         }
     )
