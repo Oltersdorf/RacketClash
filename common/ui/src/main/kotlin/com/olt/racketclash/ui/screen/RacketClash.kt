@@ -1,12 +1,13 @@
 package com.olt.racketclash.ui.screen
 
 import androidx.compose.runtime.Composable
-import com.olt.racketclash.ui.layout.NavigationList
+import com.olt.racketclash.ui.layout.TextNavigationList
 import com.olt.racketclash.ui.navigate.Screens
 
 @Composable
 internal fun RacketClash(navigateTo: (Screens) -> Unit) {
-    NavigationList(
+    TextNavigationList(
+        title = "Racket Clash",
         navList = listOf(
             Screens.Tournaments,
             Screens.Players,

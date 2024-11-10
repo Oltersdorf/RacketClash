@@ -11,12 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.TextUnit
 
 @Composable
 fun Link(
     modifier: Modifier = Modifier,
     text: String,
     style: TextStyle = LocalTextStyle.current,
+    fontSize: TextUnit = LocalTextStyle.current.fontSize,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -26,6 +28,7 @@ fun Link(
         modifier = modifier
             .clickable(onClick = onClick, interactionSource = interactionSource, indication = null)
             .pointerHoverIcon(icon = PointerIcon.Hand),
-        style = style.merge(color = MaterialTheme.colorScheme.primary)
+        style = style.merge(color = MaterialTheme.colorScheme.primary),
+        fontSize = fontSize
     )
 }

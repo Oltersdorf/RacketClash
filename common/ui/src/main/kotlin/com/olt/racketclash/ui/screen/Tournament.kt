@@ -1,7 +1,7 @@
 package com.olt.racketclash.ui.screen
 
 import androidx.compose.runtime.Composable
-import com.olt.racketclash.ui.layout.NavigationList
+import com.olt.racketclash.ui.layout.LinkNavigationList
 import com.olt.racketclash.ui.navigate.Screens
 
 @Composable
@@ -10,13 +10,21 @@ internal fun Tournament(
     tournamentName: String,
     navigateTo: (Screens) -> Unit
 ) {
-    NavigationList(
+    LinkNavigationList(
+        title = tournamentName,
         navList = listOf(
-            Screens.AddOrUpdateTournament(tournamentId = tournamentId, tournamentName = tournamentName),
             Screens.Teams(tournamentId = tournamentId),
             Screens.Categories(tournamentId = tournamentId),
             Screens.Schedule(tournamentId = tournamentId)
         ),
-        onClick = navigateTo
+        onClick = navigateTo,
+        onLinkClick = {
+            navigateTo(
+                Screens.AddOrUpdateTournament(
+                    tournamentId = tournamentId,
+                    tournamentName = tournamentName
+                )
+            )
+        }
     )
 }
