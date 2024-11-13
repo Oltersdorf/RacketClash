@@ -49,12 +49,12 @@ fun Navigator(
             contentAlignment = Alignment.Center
         ) {
             when (val navLink = navLinks.lastOrNull()) {
-                is Screens.AddOrUpdateCategory -> TODO()
-                is Screens.AddOrUpdateGameRule -> TODO()
+                is Screens.AddOrUpdateCategory -> AddOrUpdateCategory(database = database, categoryId = navLink.categoryId, categoryName = navLink.categoryName, tournamentId = navLink.tournamentId) { navLinks = navLinks.dropLast(1) }
+                is Screens.AddOrUpdateGameRule -> AddOrUpdateGameRule(database = database, gameRuleId = navLink.gameRuleId, gameRuleName = navLink.gameRuleName) { navLinks = navLinks.dropLast(1) }
                 is Screens.AddOrUpdateGames -> TODO()
-                is Screens.AddOrUpdatePlayer -> TODO()
-                is Screens.AddOrUpdateTeam -> TODO()
-                is Screens.AddOrUpdateTournament -> TODO()
+                is Screens.AddOrUpdatePlayer -> AddOrUpdatePlayer(database = database, playerId = navLink.playerId, playerName = navLink.playerName) { navLinks = navLinks.dropLast(1) }
+                is Screens.AddOrUpdateTeam -> AddOrUpdateTeam(database = database, teamId = navLink.teamId, teamName = navLink.teamName, tournamentId = navLink.tournamentId) { navLinks = navLinks.dropLast(1) }
+                is Screens.AddOrUpdateTournament -> AddOrUpdateTournament(database = database, tournamentId = navLink.tournamentId, tournamentName = navLink.tournamentName) { navLinks = navLinks.dropLast(1) }
                 is Screens.Categories -> Categories(database = database, tournamentId = navLink.tournamentId) { screen -> navLinks += screen }
                 is Screens.Category -> TODO()
                 Screens.GameRules -> GameRules(database = database) { screen -> navLinks += screen }

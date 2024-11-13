@@ -16,6 +16,7 @@ fun <T> DropDownTextField(
     modifier: Modifier = Modifier,
     label: String = "",
     text: String,
+    readOnly: Boolean = false,
     onTextChange: (String) -> Unit,
     dropDownItems: List<T>,
     dropDownItemText: @Composable (T) -> Unit,
@@ -31,6 +32,7 @@ fun <T> DropDownTextField(
         OutlinedTextField(
             modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryEditable).fillMaxWidth(),
             value = text,
+            readOnly = readOnly,
             onValueChange = onTextChange,
             label = { Text(label) },
             singleLine = true
