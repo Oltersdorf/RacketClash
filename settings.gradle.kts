@@ -1,2 +1,2 @@
 rootProject.name = "RacketClash"
-include("common:database", "common:ui", "desktop")
+include("common:database", "common:ui", "common:util:state", "desktop")
