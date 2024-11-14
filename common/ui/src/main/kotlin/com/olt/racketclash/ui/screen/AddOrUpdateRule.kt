@@ -12,10 +12,10 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 @Composable
-internal fun AddOrUpdateGameRule(
+internal fun AddOrUpdateRule(
     database: Database,
-    gameRuleId: Long?,
-    gameRuleName: String?,
+    ruleId: Long?,
+    ruleName: String?,
     navigateBack: () -> Unit
 ) {
     var isLoading by remember { mutableStateOf(false) }
@@ -34,7 +34,7 @@ internal fun AddOrUpdateGameRule(
     var pointPointsForRest by remember { mutableStateOf(0) }
 
     Form(
-        title = gameRuleName ?: "New game rule",
+        title = ruleName ?: "New rule",
         isLoading = isLoading,
         isSavable = isSavable,
         onSave = {

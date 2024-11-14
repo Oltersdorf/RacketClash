@@ -10,7 +10,7 @@ import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.DropDownIconButton
 import com.olt.racketclash.ui.component.SimpleIconButton
 import com.olt.racketclash.ui.screen.*
-import com.olt.racketclash.ui.screen.GameRules
+import com.olt.racketclash.ui.screen.Rules
 import com.olt.racketclash.ui.screen.Players
 import com.olt.racketclash.ui.screen.RacketClash
 import com.olt.racketclash.ui.screen.Tournaments
@@ -50,14 +50,14 @@ fun Navigator(
         ) {
             when (val navLink = navLinks.lastOrNull()) {
                 is Screens.AddOrUpdateCategory -> AddOrUpdateCategory(database = database, categoryId = navLink.categoryId, categoryName = navLink.categoryName, tournamentId = navLink.tournamentId) { navLinks = navLinks.dropLast(1) }
-                is Screens.AddOrUpdateGameRule -> AddOrUpdateGameRule(database = database, gameRuleId = navLink.gameRuleId, gameRuleName = navLink.gameRuleName) { navLinks = navLinks.dropLast(1) }
+                is Screens.AddOrUpdateRule -> AddOrUpdateRule(database = database, ruleId = navLink.ruleId, ruleName = navLink.ruleName) { navLinks = navLinks.dropLast(1) }
                 is Screens.AddOrUpdateGames -> TODO()
                 is Screens.AddOrUpdatePlayer -> AddOrUpdatePlayer(database = database, playerId = navLink.playerId, playerName = navLink.playerName) { navLinks = navLinks.dropLast(1) }
                 is Screens.AddOrUpdateTeam -> AddOrUpdateTeam(database = database, teamId = navLink.teamId, teamName = navLink.teamName, tournamentId = navLink.tournamentId) { navLinks = navLinks.dropLast(1) }
                 is Screens.AddOrUpdateTournament -> AddOrUpdateTournament(database = database, tournamentId = navLink.tournamentId, tournamentName = navLink.tournamentName) { navLinks = navLinks.dropLast(1) }
                 is Screens.Categories -> Categories(database = database, tournamentId = navLink.tournamentId) { screen -> navLinks += screen }
                 is Screens.Category -> TODO()
-                Screens.GameRules -> GameRules(database = database) { screen -> navLinks += screen }
+                Screens.Rules -> Rules(database = database) { screen -> navLinks += screen }
                 is Screens.Player -> Player(database = database, playerId = navLink.playerId, playerName = navLink.playerName) { screen -> navLinks += screen }
                 Screens.Players -> Players(database = database) { screen -> navLinks += screen }
                 Screens.RacketClash -> RacketClash { screen -> navLinks += screen }
