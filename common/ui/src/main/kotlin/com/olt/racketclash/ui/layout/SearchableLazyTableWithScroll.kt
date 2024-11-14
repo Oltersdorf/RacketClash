@@ -11,7 +11,7 @@ import com.olt.racketclash.ui.component.PageSelector
 
 @Composable
 fun <T> SearchableLazyTableWithScroll(
-    title: String = "",
+    title: String? = null,
     onTitleAdd: (() -> Unit)? = null,
     items: List<T>,
     isLoading: Boolean = false,
@@ -26,7 +26,7 @@ fun <T> SearchableLazyTableWithScroll(
 
         LazyTableWithScroll(
             modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceContainer).weight(1.0f, fill = false),
-            header = { LazyTableWithScrollHeader(title = title, onAddClicked = onTitleAdd) },
+            header = title?.let { { LazyTableWithScrollHeader(title = title, onAddClicked = onTitleAdd) } },
             items = items,
             isLoading = isLoading,
             columns = columns

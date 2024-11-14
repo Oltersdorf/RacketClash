@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.TextUnit
 
 @Composable
 fun Link(
-    modifier: Modifier = Modifier,
     text: String,
+    modifier: Modifier = Modifier,
     style: TextStyle = LocalTextStyle.current,
     fontSize: TextUnit = LocalTextStyle.current.fontSize,
     onClick: () -> Unit
