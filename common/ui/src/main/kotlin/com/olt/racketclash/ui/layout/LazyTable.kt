@@ -106,7 +106,7 @@ fun <T> LazyTableWithScroll(
                 content = header
             )
 
-        Box(contentAlignment = if (isLoading) Alignment.Center else Alignment.TopCenter) {
+        Box(contentAlignment = Alignment.TopCenter) {
             val scrollState = rememberLazyListState()
             val canScroll = scrollState.canScrollBackward || scrollState.canScrollForward
 
