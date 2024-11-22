@@ -2,7 +2,11 @@ package com.olt.racketclash.ui.screen
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import com.olt.racketclash.categories.CategoriesModel
+import com.olt.racketclash.categories.Category
+import com.olt.racketclash.categories.Tag
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.state.SortDirection
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Status
 import com.olt.racketclash.ui.component.Tag
@@ -11,70 +15,38 @@ import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 
-private data class Category(
-    val id: Long = 0L,
-    val name: String = "Test Category",
-    val players: Int = 24,
-    val finished: Boolean = false
-)
-
-private sealed class TagTypeCategory {
-    data class Name(val text: String) : TagTypeCategory()
-    data object Finished : TagTypeCategory()
-    data object NotFinished : TagTypeCategory()
-}
-
 @Composable
 internal fun Categories(
     database: Database,
     tournamentId: Long,
     navigateTo: (Screens) -> Unit
 ) {
-    var searchBarText by remember { mutableStateOf("1") }
-    var availableTags by remember { mutableStateOf( listOf(
-        TagTypeCategory.Name("1"),
-        TagTypeCategory.Finished,
-        TagTypeCategory.NotFinished
-    )) }
-    var tags by remember { mutableStateOf(listOf(
-        TagTypeCategory.Name("1"),
-        TagTypeCategory.Finished,
-        TagTypeCategory.NotFinished
-    )) }
-    var categories by remember { mutableStateOf(listOf(
-        Category(),
-        Category(finished = true)
-    )) }
-    var currentPage by remember { mutableStateOf(1) }
-    var lastPage by remember { mutableStateOf(2) }
-    var isLoading by remember { mutableStateOf(false) }
+    val model = remember { CategoriesModel(database = database, tournamentId = tournamentId) }
+    val state by model.state.collectAsState()
 
     SearchableLazyTableWithScroll(
         title = "Categories",
         onTitleAdd = { navigateTo(Screens.AddOrUpdateCategory(categoryName = null, categoryId = null, tournamentId = tournamentId)) },
-        items = categories,
-        isLoading = isLoading,
+        items = state.categories,
+        isLoading = state.isLoading,
         columns = columns(
             navigateTo = navigateTo,
             tournamentId = tournamentId,
-            onNameSortAscending = {},
-            onNameSortDescending = {},
-            onPlayersSortAscending = {},
-            onPlayersSortDescending = {},
-            onStatusSortAscending = {},
-            onStatusSortDescending = {}
+            onNameSort = model::onNameSort,
+            onPlayersSort = model::onPlayerSort,
+            onStatusSort = model::onStatusSort,
         ),
-        currentPage = currentPage,
-        lastPage = lastPage,
-        onPageClicked = { currentPage = it }
+        currentPage = state.currentPage,
+        lastPage = state.lastPage,
+        onPageClicked = model::updatePage
     ) {
         SearchBar(
-            text = searchBarText,
-            onTextChange = { searchBarText = it },
-            dropDownItems = availableTags,
-            onDropDownItemClick = { tags += it },
-            tags = tags,
-            onTagRemove = { tags -= it },
+            text = state.searchBarText,
+            onTextChange = model::updateSearchBar,
+            dropDownItems = state.availableTags,
+            onDropDownItemClick = model::addTag,
+            tags = state.tags,
+            onTagRemove = model::removeTag,
             tagText = { TagText(it) }
         )
     }
@@ -83,30 +55,27 @@ internal fun Categories(
 private fun columns(
     navigateTo: (Screens) -> Unit,
     tournamentId: Long,
-    onNameSortAscending: () -> Unit,
-    onNameSortDescending: () -> Unit,
-    onPlayersSortAscending: () -> Unit,
-    onPlayersSortDescending: () -> Unit,
-    onStatusSortAscending: () -> Unit,
-    onStatusSortDescending: () -> Unit
+    onNameSort: (SortDirection) -> Unit,
+    onPlayersSort: (SortDirection) -> Unit,
+    onStatusSort: (SortDirection) -> Unit
 ): List<LazyTableColumn<Category>> =
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onNameSortAscending()
-                LazyTableSortDirection.Descending -> onNameSortDescending()
+                LazyTableSortDirection.Ascending -> onNameSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onNameSort(SortDirection.Descending)
             }
         }) { navigateTo(Screens.Category(categoryName = it.name, categoryId = it.id, tournamentId = tournamentId)) },
         LazyTableColumn.Text(name = "Players", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onPlayersSortAscending()
-                LazyTableSortDirection.Descending -> onPlayersSortDescending()
+                LazyTableSortDirection.Ascending -> onPlayersSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onPlayersSort(SortDirection.Descending)
             }
         }) { it.players.toString() },
         LazyTableColumn.Builder(name = "Status", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onStatusSortAscending()
-                LazyTableSortDirection.Descending -> onStatusSortDescending()
+                LazyTableSortDirection.Ascending -> onStatusSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onStatusSort(SortDirection.Descending)
             }
         }) { category, weight ->
             Status(modifier = Modifier.weight(weight), isOkay = category.finished)
@@ -114,9 +83,9 @@ private fun columns(
     )
 
 @Composable
-private fun TagText(tagType: TagTypeCategory) =
+private fun TagText(tagType: Tag) =
     when (tagType) {
-        is TagTypeCategory.Name -> Tag(name = "Name", text = tagType.text)
-        TagTypeCategory.Finished -> Tag(name = "Finished")
-        TagTypeCategory.NotFinished -> Tag(name = "Not finished")
+        is Tag.Name -> Tag(name = "Name", text = tagType.text)
+        Tag.Finished -> Tag(name = "Finished")
+        Tag.NotFinished -> Tag(name = "Not finished")
     }

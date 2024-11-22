@@ -18,7 +18,7 @@ internal fun Rules(
     database: Database,
     navigateTo: (Screens) -> Unit
 ) {
-    val model = RulesModel(database = database)
+    val model = remember { RulesModel(database = database) }
     val state by model.state.collectAsState()
 
     SearchableLazyTableWithScroll(
@@ -32,16 +32,11 @@ internal fun Rules(
         ),
         currentPage = state.currentPage,
         lastPage = state.lastPage,
-        onPageClicked = model::goToPage
+        onPageClicked = model::updatePage
     ) {
-        var searchBarText by remember { mutableStateOf("") }
-
         SearchBar(
-            text = searchBarText,
-            onTextChange = {
-                searchBarText = it
-                model.updateAvailableTags(text = it)
-            },
+            text = state.searchBarText,
+            onTextChange = model::updateSearchBar,
             dropDownItems = state.availableTags,
             onDropDownItemClick = model::addTag,
             tags = state.tags,

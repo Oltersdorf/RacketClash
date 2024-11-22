@@ -2,6 +2,7 @@ package com.olt.racketclash.ui.screen
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import com.olt.racketclash.addorupdateplayer.AddOrUpdatePlayerModel
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.layout.Form
 import com.olt.racketclash.ui.layout.FormDropDownTextField
@@ -14,42 +15,41 @@ internal fun AddOrUpdatePlayer(
     playerName: String?,
     navigateBack: () -> Unit
 ) {
-    var isLoading by remember { mutableStateOf(false) }
-    var isSavable by remember { mutableStateOf(false) }
-    var name by remember { mutableStateOf("") }
-    var birthYear by remember { mutableStateOf(1900) }
-    var club by remember { mutableStateOf("") }
-    val clubs by remember { mutableStateOf(listOf("Club 1", "Club 2")) }
+    val model = remember { AddOrUpdatePlayerModel(database = database, playerId = playerId) }
+    val state by model.state.collectAsState()
 
     Form(
         title = playerName ?: "New player",
-        isLoading = isLoading,
-        isSavable = isSavable,
+        isLoading = state.isLoading,
+        isSavable = state.isSavable,
         onSave = {
+            model.save()
             navigateBack()
         }
     ) {
-        FormTextField(value = name, label = "Name", isError = !isSavable) {
-            name = it
-            isSavable = name.isNotBlank()
-        }
+        FormTextField(
+            value = state.name,
+            label = "Name",
+            isError = !state.isSavable,
+            onValueChange = model::updateName
+        )
 
         FormDropDownTextField(
-            text = birthYear.toString(),
+            text = state.birthYear.toString(),
             label = "Birth year",
             readOnly = true,
             dropDownItems = (1900..2050).toList(),
             dropDownItemText = { Text(it.toString()) },
-            onItemClicked = { birthYear = it }
+            onItemClicked = model::updateBirthYear
         )
 
         FormDropDownTextField(
-            text = club,
+            text = state.club,
             label = "Club",
-            onTextChange = { club = it },
-            dropDownItems = clubs,
+            onTextChange = model::updateClub,
+            dropDownItems = state.clubSuggestions,
             dropDownItemText = { Text(it) },
-            onItemClicked = { club = it }
+            onItemClicked = model::updateClub
         )
     }
 }

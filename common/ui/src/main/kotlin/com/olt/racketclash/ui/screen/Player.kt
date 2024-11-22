@@ -7,57 +7,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.player.Game
+import com.olt.racketclash.player.PlayerModel
+import com.olt.racketclash.player.Tag
+import com.olt.racketclash.state.SortDirection
 import com.olt.racketclash.ui.component.Link
 import com.olt.racketclash.ui.component.RatioBar
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.navigate.Screens
-
-private data class PlayerGame(
-    val id: Long = 0L,
-    val date: String = "01/01/2024 15:00",
-    val playerLeftOneId: Long = 0L,
-    val playerLeftOneName: String = "Test player",
-    val playerLeftTwoId: Long? = 0L,
-    val playerLeftTwoName: String? = "Test player",
-    val playerRightOneId: Long = 0L,
-    val playerRightOneName: String = "Test player",
-    val playerRightTwoId: Long? = 0L,
-    val playerRightTwoName: String? = "Test player",
-    val results: List<Pair<Int, Int>> = listOf(21 to 18, 22 to 20),
-    val tournamentId: Long = 0L,
-    val tournamentName: String = "Test tournament",
-    val categoryId: Long = 0L,
-    val categoryName: String = "Test category",
-    val gameRuleId: Long = 0L,
-    val gameRuleName: String = "Test game rule",
-    val totalGamePoints: Pair<Int, Int> = 2 to 0,
-    val totalSetPoints: Pair<Int, Int> = 2 to 0,
-    val totalPointPoints: Pair<Int, Int> = 43 to 38
-)
-
-private sealed class TagTypePlayerGame {
-    data class Date(val text: String) : TagTypePlayerGame()
-    data class Tournament(val text: String) : TagTypePlayerGame()
-    data class Category(val text: String) : TagTypePlayerGame()
-    data class GameRule(val text: String) : TagTypePlayerGame()
-    data class Player(val text: String) : TagTypePlayerGame()
-}
-
-private data class PlayerTournament(
-    val id: Long = 0L,
-    val name: String = "Test tournament",
-    val teamId: Long? = 0L,
-    val teamName: String? = "Test team",
-    val categories: List<PlayerTournamentCategory> = listOf(PlayerTournamentCategory(), PlayerTournamentCategory())
-)
-
-private data class PlayerTournamentCategory(
-    val id: Long = 0L,
-    val name: String = "Test Category",
-    val rank: String = "1/24"
-)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -67,82 +26,48 @@ internal fun Player(
     playerName: String,
     navigateTo: (Screens) -> Unit
 ) {
-    val isLoading by remember { mutableStateOf(false) }
-    val birthYear = remember { 1900 }
-    val club = remember { "Test club" }
-    val firstGame = remember { "01/01/2024" }
-    val lastGame = remember { "02/01/2024" }
-    val doubleGamePoints = remember { Triple(15, 1, 20) }
-    val doubleSetPoints = remember { Triple(15, 1, 20) }
-    val doublePointPoints = remember { Triple(15, 1, 20) }
-    val singleGamePoints = remember { Triple(15, 1, 20) }
-    val singleSetPoints = remember { Triple(15, 1, 20) }
-    val singlePointPoints = remember { Triple(15, 1, 20) }
-    var searchBar by remember { mutableStateOf("") }
-    var currentPage by remember { mutableStateOf(1) }
-    var lastPage by remember { mutableStateOf(2) }
-    var playerGames by remember { mutableStateOf(listOf(
-        PlayerGame(),
-        PlayerGame(),
-        PlayerGame(),
-        PlayerGame(),
-        PlayerGame()
-    )) }
-    var availableTags by remember { mutableStateOf(listOf(
-        TagTypePlayerGame.Date("01/01/2024"),
-        TagTypePlayerGame.Tournament("Test tournament"),
-        TagTypePlayerGame.Category("Test category"),
-        TagTypePlayerGame.GameRule("Test game rule"),
-        TagTypePlayerGame.Player("Test player")
-    )) }
-    var tags by remember { mutableStateOf(listOf(
-        TagTypePlayerGame.Date("01/01/2024"),
-        TagTypePlayerGame.Tournament("Test tournament"),
-        TagTypePlayerGame.Category("Test category"),
-        TagTypePlayerGame.GameRule("Test game rule"),
-        TagTypePlayerGame.Player("Test player")
-    )) }
-    val tournaments = remember { listOf(
-        PlayerTournament(),
-        PlayerTournament()
-    ) }
+    val model = remember { PlayerModel(database = database, playerId = playerId) }
+    val state by model.state.collectAsState()
 
     Details(
-        isLoading = isLoading,
+        isLoading = state.isLoading,
         onEdit = { navigateTo(Screens.AddOrUpdatePlayer(playerName = playerName, playerId = playerId)) }
     ) {
         DetailSection(title = "Description") {
-            DetailText(title = "Name", text = "$playerName (Year: $birthYear)")
-            DetailText(title = "Club", text = club)
+            DetailText(title = "Name", text = "$playerName (Year: ${state.birthYear})")
+            DetailText(title = "Club", text = state.club)
         }
 
         DetailSection(title = "Statistics") {
             Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                DetailText(title = "First game", text = firstGame)
-                DetailText(title = "Last game", text = lastGame)
+                DetailText(title = "First game", text = state.firstGame)
+                DetailText(title = "Last game", text = state.lastGame)
             }
 
             StatisticsDetail(
-                doubleGamePoints = doubleGamePoints,
-                doubleSetPoints = doubleSetPoints,
-                doublePointPoints = doublePointPoints,
-                singleGamePoints = singleGamePoints,
-                singleSetPoints = singleSetPoints,
-                singlePointPoints = singlePointPoints
+                doubleGamePoints = state.doubleGamePoints,
+                doubleSetPoints = state.doubleSetPoints,
+                doublePointPoints = state.doublePointPoints,
+                singleGamePoints = state.singleGamePoints,
+                singleSetPoints = state.singleSetPoints,
+                singlePointPoints = state.singlePointPoints
             )
         }
 
         DetailSection("Tournaments") {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                tournaments.forEach { tournament ->
+                state.tournaments.forEach { tournament ->
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         Text(tournament.name)
-                        if (tournament.teamId != null && tournament.teamName != null)
-                            Link(tournament.teamName) {
+
+                        val teamId = tournament.teamId
+                        val teamName = tournament.teamName
+                        if (teamId != null && teamName != null)
+                            Link(teamName) {
                                 navigateTo(Screens.Team(
                                     tournamentId = tournament.id,
-                                    teamId = tournament.teamId,
-                                    teamName = tournament.teamName
+                                    teamId = teamId,
+                                    teamName = teamName
                                 ))
                             }
 
@@ -171,28 +96,25 @@ internal fun Player(
 
         DetailSection(title = "Games") {
             SearchableLazyTableWithScroll(
-                items = playerGames,
+                items = state.games,
                 columns = columns(
                     navigateTo = navigateTo,
-                    onDateSortAscending = {},
-                    onDateSortDescending = {},
-                    onTournamentSortAscending = {},
-                    onTournamentSortDescending = {},
-                    onCategorySortAscending = {},
-                    onCategorySortDescending = {},
+                    onDateSort = model::onDateSort,
+                    onTournamentSort = model::onTournamentSort,
+                    onCategorySort = model::onCategorySort,
                     playerId = playerId
                 ),
-                currentPage = currentPage,
-                lastPage = lastPage,
-                onPageClicked = { currentPage = it }
+                currentPage = state.currentPage,
+                lastPage = state.lastPage,
+                onPageClicked = model::updatePage
             ) {
                 SearchBar(
-                    text = searchBar,
-                    onTextChange = { searchBar = it },
-                    dropDownItems = availableTags,
-                    onDropDownItemClick = { tags += it },
-                    tags = tags,
-                    onTagRemove = { tags -= it },
+                    text = state.searchBarText,
+                    onTextChange = model::updateSearchBar,
+                    dropDownItems = state.availableTags,
+                    onDropDownItemClick = model::addTag,
+                    tags = state.tags,
+                    onTagRemove = model::removeTag,
                     tagText = { TagText(it) }
                 )
             }
@@ -202,25 +124,22 @@ internal fun Player(
 
 private fun columns(
     navigateTo: (Screens) -> Unit,
-    onDateSortAscending: () -> Unit,
-    onDateSortDescending: () -> Unit,
-    onTournamentSortAscending: () -> Unit,
-    onTournamentSortDescending: () -> Unit,
-    onCategorySortAscending: () -> Unit,
-    onCategorySortDescending: () -> Unit,
+    onDateSort: (SortDirection) -> Unit,
+    onTournamentSort: (SortDirection) -> Unit,
+    onCategorySort: (SortDirection) -> Unit,
     playerId: Long
-): List<LazyTableColumn<PlayerGame>> =
+): List<LazyTableColumn<Game>> =
     listOf(
         LazyTableColumn.Text(name = "Date", weight = 0.08f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onDateSortAscending()
-                LazyTableSortDirection.Descending -> onDateSortDescending()
+                LazyTableSortDirection.Ascending -> onDateSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onDateSort(SortDirection.Descending)
             }
         }) { it.date },
         LazyTableColumn.Builder(name = "Tournament", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onTournamentSortAscending()
-                LazyTableSortDirection.Descending -> onTournamentSortDescending()
+                LazyTableSortDirection.Ascending -> onTournamentSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onTournamentSort(SortDirection.Descending)
             }
         }) { game, weight ->
             Row(
@@ -239,10 +158,10 @@ private fun columns(
         },
         LazyTableColumn.Text(name = "Game Rule", weight = 0.08f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onCategorySortAscending()
-                LazyTableSortDirection.Descending -> onCategorySortDescending()
+                LazyTableSortDirection.Ascending -> onCategorySort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onCategorySort(SortDirection.Descending)
             }
-        }) { it.gameRuleName },
+        }) { it.ruleName },
         LazyTableColumn.Builder(name = "Left", weight = 0.1f) { game, weight ->
             Column(modifier = Modifier.weight(weight)) {
                 if (game.playerLeftOneId == playerId)
@@ -252,12 +171,14 @@ private fun columns(
                         navigateTo(Screens.Player(playerId = game.playerLeftOneId, playerName = game.playerLeftOneName))
                     }
 
-                if (game.playerLeftTwoId != null && game.playerLeftTwoName != null) {
-                    if (game.playerLeftTwoId == playerId)
-                        Text(game.playerLeftTwoName)
+                val playerLeftTwoId = game.playerLeftTwoId
+                val playerLeftTwoName = game.playerLeftTwoName
+                if (playerLeftTwoId != null && playerLeftTwoName != null) {
+                    if (playerLeftTwoId == playerId)
+                        Text(playerLeftTwoName)
                     else
-                        Link(game.playerLeftTwoName) {
-                            navigateTo(Screens.Player(playerId = game.playerLeftTwoId, playerName = game.playerLeftTwoName))
+                        Link(playerLeftTwoName) {
+                            navigateTo(Screens.Player(playerId = playerLeftTwoId, playerName = playerLeftTwoName))
                         }
                 }
             }
@@ -284,12 +205,14 @@ private fun columns(
                         navigateTo(Screens.Player(playerId = game.playerRightOneId, playerName = game.playerRightOneName))
                     }
 
-                if (game.playerRightTwoId != null && game.playerRightTwoName != null) {
-                    if (game.playerRightTwoId == playerId)
-                        Text(game.playerRightTwoName)
+                val playerRightTwoId = game.playerRightTwoId
+                val playerRightTwoName = game.playerRightTwoName
+                if (playerRightTwoId != null && playerRightTwoName != null) {
+                    if (playerRightTwoId == playerId)
+                        Text(playerRightTwoName)
                     else
-                        Link(game.playerRightTwoName) {
-                            navigateTo(Screens.Player(playerId = game.playerRightTwoId, playerName = game.playerRightTwoName))
+                        Link(playerRightTwoName) {
+                            navigateTo(Screens.Player(playerId = playerRightTwoId, playerName = playerRightTwoName))
                         }
                 }
             }
@@ -324,11 +247,11 @@ private fun columns(
     )
 
 @Composable
-private fun TagText(tagType: TagTypePlayerGame) =
+private fun TagText(tagType: Tag) =
     when (tagType) {
-        is TagTypePlayerGame.Date -> Tag(name = "Date", text = tagType.text)
-        is TagTypePlayerGame.Tournament -> Tag(name = "Tournament", text = tagType.text)
-        is TagTypePlayerGame.Category -> Tag(name = "Category", text = tagType.text)
-        is TagTypePlayerGame.GameRule -> Tag(name = "Game rule", text = tagType.text)
-        is TagTypePlayerGame.Player -> Tag(name = "Player", text = tagType.text)
+        is Tag.Date -> Tag(name = "Date", text = tagType.text)
+        is Tag.Tournament -> Tag(name = "Tournament", text = tagType.text)
+        is Tag.Category -> Tag(name = "Category", text = tagType.text)
+        is Tag.Rule -> Tag(name = "Game rule", text = tagType.text)
+        is Tag.Player -> Tag(name = "Player", text = tagType.text)
     }

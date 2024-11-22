@@ -10,6 +10,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.schedule.ScheduleModel
+import com.olt.racketclash.schedule.ScheduledGame
+import com.olt.racketclash.schedule.Tag
+import com.olt.racketclash.state.SortDirection
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.SimpleIconButton
 import com.olt.racketclash.ui.component.Status
@@ -18,85 +22,37 @@ import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 
-private data class ScheduledGame(
-    val id: Long = 0L,
-    val active: Boolean = false,
-    val scheduled: String = "01 Jan 2024 10:00",
-    val single: Boolean = false,
-    val sets: Int = 3,
-    val categoryName: String = "Test Category",
-    val playerLeftOneName: String = "Player Left One",
-    val playerLeftTwoName: String = "Player Left Two",
-    val playerRightOneName: String = "Player Right One",
-    val playerRightTwoName: String = "Player Right Two"
-)
-
-private sealed class TagTypeScheduledGame {
-    data object Active : TagTypeScheduledGame()
-    data object Singles : TagTypeScheduledGame()
-    data object Doubles : TagTypeScheduledGame()
-    data class Category(val text: String) : TagTypeScheduledGame()
-    data class Player(val text: String) : TagTypeScheduledGame()
-}
-
 @Composable
 internal fun Schedule(
     database: Database,
     tournamentId: Long
 ) {
-    var searchBarText by remember { mutableStateOf("1") }
-    var availableTags by remember { mutableStateOf( listOf(
-        TagTypeScheduledGame.Category("1"),
-        TagTypeScheduledGame.Player("1"),
-        TagTypeScheduledGame.Active,
-        TagTypeScheduledGame.Singles,
-        TagTypeScheduledGame.Doubles
-    )) }
-    var tags by remember { mutableStateOf(listOf(
-        TagTypeScheduledGame.Category("1"),
-        TagTypeScheduledGame.Player("1"),
-        TagTypeScheduledGame.Active,
-        TagTypeScheduledGame.Singles,
-        TagTypeScheduledGame.Doubles
-    )) }
-    var scheduledGames by remember { mutableStateOf(listOf(
-        ScheduledGame(),
-        ScheduledGame(active = true),
-        ScheduledGame(single = true),
-        ScheduledGame(sets = 1),
-        ScheduledGame(single = true, sets = 1),
-        ScheduledGame()
-    )) }
-    var currentPage by remember { mutableStateOf(1) }
-    var lastPage by remember { mutableStateOf(2) }
-    var isLoading by remember { mutableStateOf(false) }
+    val model = remember { ScheduleModel(database = database, tournamentId = tournamentId) }
+    val state by model.state.collectAsState()
 
     SearchableLazyTableWithScroll(
         title = "Schedule",
-        items = scheduledGames,
-        isLoading = isLoading,
+        items = state.scheduledGames,
+        isLoading = state.isLoading,
         columns = columns(
-            onConfirm = {},
-            onActiveSortAscending = {},
-            onActiveSortDescending = {},
-            onScheduleSortAscending = {},
-            onScheduleSortDescending = {},
-            onTypeSortAscending = {},
-            onTypeSortDescending = {},
-            onCategorySortAscending = {},
-            onCategorySortDescending = {}
+            onConfirm = model::onSaveResult,
+            updateResult = model::updateResult,
+            onActiveSort = model::onActiveSort,
+            onScheduleSort = model::onScheduleSort,
+            onTypeSort = model::onTypeSort,
+            onCategorySort = model::onCategorySort
         ),
-        currentPage = currentPage,
-        lastPage = lastPage,
-        onPageClicked = { currentPage = it }
+        currentPage = state.currentPage,
+        lastPage = state.lastPage,
+        onPageClicked = model::updatePage
     ) {
         SearchBar(
-            text = searchBarText,
-            onTextChange = { searchBarText = it },
-            dropDownItems = availableTags,
-            onDropDownItemClick = { tags += it },
-            tags = tags,
-            onTagRemove = { tags -= it },
+            text = state.searchBarText,
+            onTextChange = model::updateSearchBar,
+            dropDownItems = state.availableTags,
+            onDropDownItemClick = model::addTag,
+            tags = state.tags,
+            onTagRemove = model::removeTag,
             tagText = { TagText(it) }
         )
     }
@@ -104,40 +60,37 @@ internal fun Schedule(
 
 private fun columns(
     onConfirm: (Long) -> Unit,
-    onActiveSortAscending: () -> Unit,
-    onActiveSortDescending: () -> Unit,
-    onScheduleSortAscending: () -> Unit,
-    onScheduleSortDescending: () -> Unit,
-    onTypeSortAscending: () -> Unit,
-    onTypeSortDescending: () -> Unit,
-    onCategorySortAscending: () -> Unit,
-    onCategorySortDescending: () -> Unit
+    updateResult: (scheduledGameId: Long, set: Int, isLeft: Boolean, resultString: String) -> Unit,
+    onActiveSort: (SortDirection) -> Unit,
+    onScheduleSort: (SortDirection) -> Unit,
+    onTypeSort: (SortDirection) -> Unit,
+    onCategorySort: (SortDirection) -> Unit,
 ): List<LazyTableColumn<ScheduledGame>> =
     listOf(
         LazyTableColumn.Builder("Active", weight = 0.05f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onActiveSortAscending()
-                LazyTableSortDirection.Descending -> onActiveSortDescending()
+                LazyTableSortDirection.Ascending -> onActiveSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onActiveSort(SortDirection.Descending)
             }
         }) { scheduledGame, weight ->
             Status(modifier = Modifier.weight(weight), isOkay = scheduledGame.active)
         },
         LazyTableColumn.Text(name = "Schedule", weight = 0.15f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onScheduleSortAscending()
-                LazyTableSortDirection.Descending -> onScheduleSortDescending()
+                LazyTableSortDirection.Ascending -> onScheduleSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onActiveSort(SortDirection.Descending)
             }
         }) { it.scheduled },
         LazyTableColumn.Text(name = "Type", weight = 0.05f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onTypeSortAscending()
-                LazyTableSortDirection.Descending -> onTypeSortDescending()
+                LazyTableSortDirection.Ascending -> onTypeSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onActiveSort(SortDirection.Descending)
             }
         }) { if (it.single) "Single" else "Double" },
         LazyTableColumn.Text(name = "Category", weight = 0.15f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onCategorySortAscending()
-                LazyTableSortDirection.Descending -> onCategorySortDescending()
+                LazyTableSortDirection.Ascending -> onCategorySort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onActiveSort(SortDirection.Descending)
             }
         }) { it.categoryName },
         LazyTableColumn.Builder(name = "Left", weight = 0.2f) { scheduledGame, weight ->
@@ -151,25 +104,21 @@ private fun columns(
             Column(modifier = Modifier.weight(weight)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column {
-                        repeat(scheduledGame.sets) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                var leftPoints by remember { mutableStateOf("") }
+                        scheduledGame.sets.forEachIndexed { index, set ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 OutlinedTextField(
                                     modifier = Modifier.width(100.dp),
-                                    value = leftPoints,
-                                    onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) leftPoints = it },
+                                    value = set.first,
+                                    onValueChange = { updateResult(scheduledGame.id, index, true, it) },
                                     singleLine = true
                                 )
 
                                 Text(text = ":", modifier = Modifier.padding(horizontal = 5.dp))
 
-                                var rightPoints by remember { mutableStateOf("") }
                                 OutlinedTextField(
                                     modifier = Modifier.width(100.dp),
-                                    value = rightPoints,
-                                    onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) rightPoints = it },
+                                    value = set.second,
+                                    onValueChange = { updateResult(scheduledGame.id, index, false, it) },
                                     singleLine = true
                                 )
                             }
@@ -193,11 +142,11 @@ private fun columns(
     )
 
 @Composable
-private fun TagText(tagType: TagTypeScheduledGame) =
+private fun TagText(tagType: Tag) =
     when (tagType) {
-        TagTypeScheduledGame.Active -> Tag(name = "Active")
-        is TagTypeScheduledGame.Category -> Tag(name = "Category", text = tagType.text)
-        TagTypeScheduledGame.Doubles -> Tag(name = "Doubles")
-        is TagTypeScheduledGame.Player -> Tag(name = "Player", text = tagType.text)
-        TagTypeScheduledGame.Singles -> Tag(name = "Singles")
+        Tag.Active -> Tag(name = "Active")
+        is Tag.Category -> Tag(name = "Category", text = tagType.text)
+        Tag.Doubles -> Tag(name = "Doubles")
+        is Tag.Player -> Tag(name = "Player", text = tagType.text)
+        Tag.Singles -> Tag(name = "Singles")
     }

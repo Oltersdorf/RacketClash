@@ -2,6 +2,10 @@ package com.olt.racketclash.ui.screen
 
 import androidx.compose.runtime.*
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.state.SortDirection
+import com.olt.racketclash.tournaments.Tag
+import com.olt.racketclash.tournaments.Tournament
+import com.olt.racketclash.tournaments.TournamentsModel
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.LazyTableColumn
@@ -9,75 +13,39 @@ import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 
-private data class Tournament(
-    val id: Long = 0L,
-    val name: String = "Test tournament",
-    val numberOfCourts: Int = 6,
-    val location: String = "Test location",
-    val startDateTime: String = "01 Jan 2024 10:00",
-    val endDateTime: String = "02 Jan 2024 16:00",
-    val playersCount: Int = 205,
-    val categoriesCount: Int = 10
-)
-
-private sealed class TagTypeTournament {
-    data class Name(val text: String) : TagTypeTournament()
-    data class Location(val text: String) : TagTypeTournament()
-    data class Year(val text: String) : TagTypeTournament()
-}
-
 @Composable
 internal fun Tournaments(
     database: Database,
     navigateTo: (Screens) -> Unit
 ) {
-    var tournaments by remember { mutableStateOf(listOf(Tournament(), Tournament())) }
-    var currentPage by remember { mutableStateOf(1) }
-    var lastPage by remember { mutableStateOf(1) }
-    var isLoading by remember { mutableStateOf(false) }
-    var searchBarText by remember { mutableStateOf("1") }
-    var availableTags by remember { mutableStateOf(listOf(
-        TagTypeTournament.Name("1"),
-        TagTypeTournament.Location("1"),
-        TagTypeTournament.Year("1")
-    )) }
-    var tags by remember { mutableStateOf(listOf(
-        TagTypeTournament.Name("1"),
-        TagTypeTournament.Location("1"),
-        TagTypeTournament.Year("1")
-    )) }
+    val model = remember { TournamentsModel(database = database) }
+    val state by model.state.collectAsState()
 
     SearchableLazyTableWithScroll(
         title = "Tournaments",
         onTitleAdd = { navigateTo(Screens.AddOrUpdateTournament(tournamentName = null, tournamentId = null)) },
-        items = tournaments,
-        isLoading = isLoading,
+        items = state.tournaments,
+        isLoading = state.isLoading,
         columns = columns(
             navigateTo = navigateTo,
-            onNameSortAscending = {},
-            onNameSortDescending = {},
-            onLocationSortAscending = {},
-            onLocationSortDescending = {},
-            onCourtsSortAscending = {},
-            onCourtsSortDescending = {},
-            onStartDateTimeSortAscending = {},
-            onStartDateTimeSortDescending = {},
-            onEndDateTimeSortAscending = {},
-            onEndDateTimeSortDescending = {},
-            onPlayersSortAscending = {},
-            onPlayersSortDescending = {}
+            onNameSort = model::onNameSort,
+            onLocationSort = model::onLocationSort,
+            onCourtsSort = model::onCourtsSort,
+            onStartDateTimeSort = model::onStartDateTimeSort,
+            onEndDateTimeSort = model::onEndDateTimeSort,
+            onPlayersSort = model::onPlayersSort
         ),
-        currentPage = currentPage,
-        lastPage = lastPage,
-        onPageClicked = { currentPage = it }
+        currentPage = state.currentPage,
+        lastPage = state.lastPage,
+        onPageClicked = model::updatePage
     ) {
         SearchBar(
-            text = searchBarText,
-            onTextChange = { searchBarText = it },
-            dropDownItems = availableTags,
-            onDropDownItemClick = { tags += it },
-            tags = tags,
-            onTagRemove = { tags -= it },
+            text = state.searchBarText,
+            onTextChange = model::updateSearchBar,
+            dropDownItems = state.availableTags,
+            onDropDownItemClick = model::addTag,
+            tags = state.tags,
+            onTagRemove = model::removeTag,
             tagText = { TagText(it) }
         )
     }
@@ -85,63 +53,57 @@ internal fun Tournaments(
 
 private fun columns(
     navigateTo: (Screens) -> Unit,
-    onNameSortAscending: () -> Unit,
-    onNameSortDescending: () -> Unit,
-    onLocationSortAscending: () -> Unit,
-    onLocationSortDescending: () -> Unit,
-    onCourtsSortAscending: () -> Unit,
-    onCourtsSortDescending: () -> Unit,
-    onStartDateTimeSortAscending: () -> Unit,
-    onStartDateTimeSortDescending: () -> Unit,
-    onEndDateTimeSortAscending: () -> Unit,
-    onEndDateTimeSortDescending: () -> Unit,
-    onPlayersSortAscending: () -> Unit,
-    onPlayersSortDescending: () -> Unit
+    onNameSort: (SortDirection) -> Unit,
+    onLocationSort: (SortDirection) -> Unit,
+    onCourtsSort: (SortDirection) -> Unit,
+    onStartDateTimeSort: (SortDirection) -> Unit,
+    onEndDateTimeSort: (SortDirection) -> Unit,
+    onPlayersSort: (SortDirection) -> Unit
 ): List<LazyTableColumn<Tournament>> =
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.25f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onNameSortAscending()
-                LazyTableSortDirection.Descending -> onNameSortDescending()
+                LazyTableSortDirection.Ascending -> onNameSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onNameSort(SortDirection.Descending)
             }
         }) { navigateTo(Screens.Tournament(tournamentName = it.name, tournamentId = it.id)) },
         LazyTableColumn.Text(name = "Location", weight = 0.25f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onLocationSortAscending()
-                LazyTableSortDirection.Descending -> onLocationSortDescending()
+                LazyTableSortDirection.Ascending -> onLocationSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onLocationSort(SortDirection.Descending)
             }
         }) { it.location },
         LazyTableColumn.Text(name = "Courts", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onCourtsSortAscending()
-                LazyTableSortDirection.Descending -> onCourtsSortDescending()
+                LazyTableSortDirection.Ascending -> onCourtsSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onCourtsSort(SortDirection.Descending)
             }
         }) { it.numberOfCourts.toString() },
         LazyTableColumn.Text(name = "Start", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onStartDateTimeSortAscending()
-                LazyTableSortDirection.Descending -> onStartDateTimeSortDescending()
+                LazyTableSortDirection.Ascending -> onStartDateTimeSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onStartDateTimeSort(SortDirection.Descending)
             }
         }) { it.startDateTime },
         LazyTableColumn.Text(name = "End", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onEndDateTimeSortAscending()
-                LazyTableSortDirection.Descending -> onEndDateTimeSortDescending()
+                LazyTableSortDirection.Ascending -> onEndDateTimeSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onEndDateTimeSort(SortDirection.Descending)
             }
         }) { it.endDateTime },
         LazyTableColumn.Text(name = "Players", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onPlayersSortAscending()
-                LazyTableSortDirection.Descending -> onPlayersSortDescending()
+                LazyTableSortDirection.Ascending -> onPlayersSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onPlayersSort(SortDirection.Descending)
             }
         }) { it.playersCount.toString() },
         LazyTableColumn.Text(name = "Categories", weight = 0.1f) { it.categoriesCount.toString() }
     )
 
 @Composable
-private fun TagText(tagType: TagTypeTournament) =
+private fun TagText(tagType: Tag) =
     when (tagType) {
-        is TagTypeTournament.Year -> Tag(name = "Date", text = tagType.text)
-        is TagTypeTournament.Location -> Tag(name = "Location", text = tagType.text)
-        is TagTypeTournament.Name -> Tag(name = "Name", text = tagType.text)
+        is Tag.Year -> Tag(name = "Date", text = tagType.text)
+        is Tag.Location -> Tag(name = "Location", text = tagType.text)
+        is Tag.Name -> Tag(name = "Name", text = tagType.text)
     }

@@ -5,6 +5,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.state.SortDirection
+import com.olt.racketclash.teams.Tag
+import com.olt.racketclash.teams.Team
+import com.olt.racketclash.teams.TeamsModel
 import com.olt.racketclash.ui.component.RatioBar
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Tag
@@ -13,70 +17,39 @@ import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 
-private data class Team(
-    val id: Long = 0L,
-    val name: String = "Test Team",
-    val size: Int = 24,
-    val winRatioSingle: Triple<Int, Int, Int> = Triple(10, 2, 15),
-    val winRatioDouble: Triple<Int, Int, Int> = Triple(14, 0, 16)
-)
-
-private sealed class TagTypeTeam {
-    data class Name(val text: String) : TagTypeTeam()
-}
-
 @Composable
 internal fun Teams(
     database: Database,
     tournamentId: Long,
     navigateTo: (Screens) -> Unit
 ) {
-    var searchBarText by remember { mutableStateOf("1") }
-    var availableTags by remember { mutableStateOf( listOf(
-        TagTypeTeam.Name("1")
-    )) }
-    var tags by remember { mutableStateOf(listOf(
-        TagTypeTeam.Name("1")
-    )) }
-    var teams by remember { mutableStateOf(listOf(
-        Team(),
-        Team(winRatioSingle = Triple(1, 0, 100)),
-        Team(winRatioSingle = Triple(0, 0, 5)),
-        Team(winRatioSingle = Triple(10, 10, 23)),
-        Team(winRatioSingle = Triple(10, 10, 100))
-    )) }
-    var currentPage by remember { mutableStateOf(1) }
-    var lastPage by remember { mutableStateOf(2) }
-    var isLoading by remember { mutableStateOf(false) }
+    val model = remember { TeamsModel(database = database, tournamentId = tournamentId) }
+    val state by model.state.collectAsState()
 
     SearchableLazyTableWithScroll(
         title = "Teams",
         onTitleAdd = { navigateTo(Screens.AddOrUpdateTeam(teamId = null, teamName = null, tournamentId = tournamentId)) },
-        items = teams,
-        isLoading = isLoading,
+        items = state.teams,
+        isLoading = state.isLoading,
         columns = columns(
             navigateTo = navigateTo,
             tournamentId = tournamentId,
-            onNameSortAscending = {},
-            onNameSortDescending = {},
-            onSizeSortAscending = {},
-            onSizeSortDescending = {},
-            onSingleSortAscending = {},
-            onSingleSortDescending = {},
-            onDoubleSortAscending = {},
-            onDoubleSortDescending = {}
+            onNameSort = model::onNameSort,
+            onSizeSort = model::onSizeSort,
+            onSingleSort = model::onSingleSort,
+            onDoubleSort = model::onDoubleSort
         ),
-        currentPage = currentPage,
-        lastPage = lastPage,
-        onPageClicked = { currentPage = it }
+        currentPage = state.currentPage,
+        lastPage = state.lastPage,
+        onPageClicked = model::updatePage
     ) {
         SearchBar(
-            text = searchBarText,
-            onTextChange = { searchBarText = it },
-            dropDownItems = availableTags,
-            onDropDownItemClick = { tags += it },
-            tags = tags,
-            onTagRemove = { tags -= it },
+            text = state.searchBarText,
+            onTextChange = model::updateSearchBar,
+            dropDownItems = state.availableTags,
+            onDropDownItemClick = model::addTag,
+            tags = state.tags,
+            onTagRemove = model::removeTag,
             tagText = { TagText(it) }
         )
     }
@@ -85,34 +58,30 @@ internal fun Teams(
 private fun columns(
     navigateTo: (Screens) -> Unit,
     tournamentId: Long,
-    onNameSortAscending: () -> Unit,
-    onNameSortDescending: () -> Unit,
-    onSizeSortAscending: () -> Unit,
-    onSizeSortDescending: () -> Unit,
-    onSingleSortAscending: () -> Unit,
-    onSingleSortDescending: () -> Unit,
-    onDoubleSortAscending: () -> Unit,
-    onDoubleSortDescending: () -> Unit
+    onNameSort: (SortDirection) -> Unit,
+    onSizeSort: (SortDirection) -> Unit,
+    onSingleSort: (SortDirection) -> Unit,
+    onDoubleSort: (SortDirection) -> Unit,
 ): List<LazyTableColumn<Team>> =
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onNameSortAscending()
-                LazyTableSortDirection.Descending -> onNameSortDescending()
+                LazyTableSortDirection.Ascending -> onNameSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onNameSort(SortDirection.Descending)
             }
         }) {
             navigateTo(Screens.Team(teamName = it.name, teamId = it.id, tournamentId = tournamentId))
         },
         LazyTableColumn.Text(name = "Size", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSizeSortAscending()
-                LazyTableSortDirection.Descending -> onSizeSortDescending()
+                LazyTableSortDirection.Ascending -> onSizeSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onSizeSort(SortDirection.Descending)
             }
         }) { it.size.toString() },
         LazyTableColumn.Builder(name = "Single", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSingleSortAscending()
-                LazyTableSortDirection.Descending -> onSingleSortDescending()
+                LazyTableSortDirection.Ascending -> onSingleSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onSingleSort(SortDirection.Descending)
             }
         }) { team, weight ->
             RatioBar(
@@ -126,8 +95,8 @@ private fun columns(
         },
         LazyTableColumn.Builder(name = "Double", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onDoubleSortAscending()
-                LazyTableSortDirection.Descending -> onDoubleSortDescending()
+                LazyTableSortDirection.Ascending -> onDoubleSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onDoubleSort(SortDirection.Descending)
             }
         }) { team, weight ->
             RatioBar(
@@ -142,7 +111,7 @@ private fun columns(
     )
 
 @Composable
-private fun TagText(tagType: TagTypeTeam) =
+private fun TagText(tagType: Tag) =
     when (tagType) {
-        is TagTypeTeam.Name -> Tag(name = "Name", text = tagType.text)
+        is Tag.Name -> Tag(name = "Name", text = tagType.text)
     }

@@ -8,6 +8,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.players.Player
+import com.olt.racketclash.players.PlayersModel
+import com.olt.racketclash.players.Tag
+import com.olt.racketclash.state.SortDirection
 import com.olt.racketclash.ui.component.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
@@ -18,91 +22,40 @@ import org.jetbrains.compose.resources.painterResource
 import racketclash.common.ui.generated.resources.Res
 import racketclash.common.ui.generated.resources.medal
 
-private data class Player(
-    val id: Long = 0L,
-    val name: String = "Test Player",
-    val birthYear: Int = 1900,
-    val club: String = "Test club",
-    val numberOfTournaments: Int = 3,
-    val goldMedals: Int = 1,
-    val silverMedals: Int = 3,
-    val bronzeMedals: Int = 2,
-    val winRatioSingle: Triple<Int, Int, Int> = Triple(10, 0, 20),
-    val winRatioDouble: Triple<Int, Int, Int> = Triple(15, 0, 12)
-)
-
-private sealed class TagTypePlayer {
-    data class Name(val text: String) : TagTypePlayer()
-    data class BirthYear(val text: String) : TagTypePlayer()
-    data class Club(val text: String) : TagTypePlayer()
-    data object HasMedals : TagTypePlayer()
-    data object HasNoMedals : TagTypePlayer()
-}
-
 @Composable
 internal fun Players(
     database: Database,
     navigateTo: (Screens) -> Unit
 ) {
-    var searchBarText by remember { mutableStateOf("1") }
-    var availableTags by remember { mutableStateOf( listOf(
-        TagTypePlayer.HasMedals,
-        TagTypePlayer.HasNoMedals,
-        TagTypePlayer.Name("1"),
-        TagTypePlayer.BirthYear("1"),
-        TagTypePlayer.Club("1")
-    )) }
-    var tags by remember { mutableStateOf(listOf(
-        TagTypePlayer.HasMedals,
-        TagTypePlayer.HasNoMedals,
-        TagTypePlayer.Name("1"),
-        TagTypePlayer.BirthYear("1"),
-        TagTypePlayer.Club("1")
-    )) }
-    var players by remember { mutableStateOf(listOf(
-        Player(),
-        Player(goldMedals = 0, winRatioSingle = Triple(1, 0, 100)),
-        Player(winRatioSingle = Triple(0, 0, 5)),
-        Player(winRatioSingle = Triple(10, 10, 23)),
-        Player(winRatioSingle = Triple(10, 10, 100))
-    )) }
-    var currentPage by remember { mutableStateOf(1) }
-    var lastPage by remember { mutableStateOf(2) }
-    var isLoading by remember { mutableStateOf(false) }
+    val model = remember { PlayersModel(database = database) }
+    val state by model.state.collectAsState()
 
     SearchableLazyTableWithScroll(
         title = "Players",
         onTitleAdd = { navigateTo(Screens.AddOrUpdatePlayer(playerName = null, playerId = null)) },
-        items = players,
-        isLoading = isLoading,
+        items = state.players,
+        isLoading = state.isLoading,
         columns = columns(
             navigateTo = navigateTo,
-            onNameSortAscending = {},
-            onNameSortDescending = {},
-            onBirthYearSortAscending = {},
-            onBirthYearSortDescending = {},
-            onClubSortAscending = {},
-            onClubSortDescending = {},
-            onTournamentsSortAscending = {},
-            onTournamentsSortDescending = {},
-            onMedalsSortAscending = {},
-            onMedalsSortDescending = {},
-            onSinglesSortAscending = {},
-            onSinglesSortDescending = {},
-            onDoublesSortAscending = {},
-            onDoublesSortDescending = {}
+            onNameSort = model::onNameSort,
+            onBirthYearSort = model::onBirthYearSort,
+            onClubSort = model::onClubSort,
+            onTournamentsSort = model::onTournamentSort,
+            onMedalsSort = model::onMedalsSort,
+            onSinglesSort = model::onSinglesSort,
+            onDoublesSort = model::onDoublesSort
         ),
-        currentPage = currentPage,
-        lastPage = lastPage,
-        onPageClicked = { currentPage = it }
+        currentPage = state.currentPage,
+        lastPage = state.lastPage,
+        onPageClicked = model::updatePage
     ) {
         SearchBar(
-            text = searchBarText,
-            onTextChange = { searchBarText = it },
-            dropDownItems = availableTags,
-            onDropDownItemClick = { tags += it },
-            tags = tags,
-            onTagRemove = { tags -= it },
+            text = state.searchBarText,
+            onTextChange = model::updateSearchBar,
+            dropDownItems = state.availableTags,
+            onDropDownItemClick = model::addTag,
+            tags = state.tags,
+            onTagRemove = model::removeTag,
             tagText = { TagText(it) }
         )
     }
@@ -110,50 +63,43 @@ internal fun Players(
 
 private fun columns(
     navigateTo: (Screens) -> Unit,
-    onNameSortAscending: () -> Unit,
-    onNameSortDescending: () -> Unit,
-    onBirthYearSortAscending: () -> Unit,
-    onBirthYearSortDescending: () -> Unit,
-    onClubSortAscending: () -> Unit,
-    onClubSortDescending: () -> Unit,
-    onTournamentsSortAscending: () -> Unit,
-    onTournamentsSortDescending: () -> Unit,
-    onMedalsSortAscending: () -> Unit,
-    onMedalsSortDescending: () -> Unit,
-    onSinglesSortAscending: () -> Unit,
-    onSinglesSortDescending: () -> Unit,
-    onDoublesSortAscending: () -> Unit,
-    onDoublesSortDescending: () -> Unit
+    onNameSort: (SortDirection) -> Unit,
+    onBirthYearSort: (SortDirection) -> Unit,
+    onClubSort: (SortDirection) -> Unit,
+    onTournamentsSort: (SortDirection) -> Unit,
+    onMedalsSort: (SortDirection) -> Unit,
+    onSinglesSort: (SortDirection) -> Unit,
+    onDoublesSort: (SortDirection) -> Unit,
 ): List<LazyTableColumn<Player>> =
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.3f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onNameSortAscending()
-                LazyTableSortDirection.Descending -> onNameSortDescending()
+                LazyTableSortDirection.Ascending -> onNameSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onNameSort(SortDirection.Descending)
             }
         }) { navigateTo(Screens.Player(playerName = it.name, playerId = it.id)) },
         LazyTableColumn.Text(name = "Birth year", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onBirthYearSortAscending()
-                LazyTableSortDirection.Descending -> onBirthYearSortDescending()
+                LazyTableSortDirection.Ascending -> onBirthYearSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onBirthYearSort(SortDirection.Descending)
             }
         }) { it.birthYear.toString() },
         LazyTableColumn.Text(name = "Club", weight = 0.3f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onClubSortAscending()
-                LazyTableSortDirection.Descending -> onClubSortDescending()
+                LazyTableSortDirection.Ascending -> onClubSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onClubSort(SortDirection.Descending)
             }
         }) { it.club },
         LazyTableColumn.Text(name = "# tournaments", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onTournamentsSortAscending()
-                LazyTableSortDirection.Descending -> onTournamentsSortDescending()
+                LazyTableSortDirection.Ascending -> onTournamentsSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onTournamentsSort(SortDirection.Descending)
             }
         }) { it.numberOfTournaments.toString() },
         LazyTableColumn.Builder(name = "Medals", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onMedalsSortAscending()
-                LazyTableSortDirection.Descending -> onMedalsSortDescending()
+                LazyTableSortDirection.Ascending -> onMedalsSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onMedalsSort(SortDirection.Descending)
             }
         }) { player, weight ->
             Row(modifier = Modifier.weight(weight)) {
@@ -191,8 +137,8 @@ private fun columns(
         },
         LazyTableColumn.Builder(name = "Single", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSinglesSortAscending()
-                LazyTableSortDirection.Descending -> onSinglesSortDescending()
+                LazyTableSortDirection.Ascending -> onSinglesSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onSinglesSort(SortDirection.Descending)
             }
         }) { player, weight ->
             RatioBar(
@@ -206,8 +152,8 @@ private fun columns(
         },
         LazyTableColumn.Builder(name = "Double", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onDoublesSortAscending()
-                LazyTableSortDirection.Descending -> onDoublesSortDescending()
+                LazyTableSortDirection.Ascending -> onDoublesSort(SortDirection.Ascending)
+                LazyTableSortDirection.Descending -> onDoublesSort(SortDirection.Descending)
             }
         }) { player, weight ->
             RatioBar(
@@ -222,11 +168,11 @@ private fun columns(
     )
 
 @Composable
-private fun TagText(tagType: TagTypePlayer) =
+private fun TagText(tagType: Tag) =
     when (tagType) {
-        is TagTypePlayer.BirthYear -> Tag(name = "Birth year", text = tagType.text)
-        is TagTypePlayer.Club -> Tag(name = "Club", text = tagType.text)
-        TagTypePlayer.HasMedals -> Tag(name = "Has medals")
-        TagTypePlayer.HasNoMedals -> Tag(name = "Has no medals")
-        is TagTypePlayer.Name -> Tag(name = "Name", text = tagType.text)
+        is Tag.BirthYear -> Tag(name = "Birth year", text = tagType.text)
+        is Tag.Club -> Tag(name = "Club", text = tagType.text)
+        Tag.HasMedals -> Tag(name = "Has medals")
+        Tag.HasNoMedals -> Tag(name = "Has no medals")
+        is Tag.Name -> Tag(name = "Name", text = tagType.text)
     }
