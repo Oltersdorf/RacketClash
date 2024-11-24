@@ -28,7 +28,7 @@ internal fun AddOrUpdateRule(
         }
     ) {
         FormTextField(
-            value = state.name,
+            value = state.rule.name,
             label = "Name",
             isError = !state.isSavable,
             onValueChange = model::updateName
@@ -36,7 +36,7 @@ internal fun AddOrUpdateRule(
 
         FormRow {
             FormNumberSelector(
-                value = state.maxSets,
+                value = state.rule.maxSets,
                 label = "Max sets",
                 range = 1..Int.MAX_VALUE,
                 onUp = model::maxSetsUp,
@@ -44,7 +44,7 @@ internal fun AddOrUpdateRule(
             )
 
             FormNumberSelector(
-                value = state.winSets,
+                value = state.rule.winSets,
                 label = "Win sets",
                 range = 1..Int.MAX_VALUE,
                 onUp = model::winSetsUp,
@@ -54,7 +54,7 @@ internal fun AddOrUpdateRule(
 
         FormRow {
             FormNumberSelector(
-                value = state.maxPoints,
+                value = state.rule.maxPoints,
                 label = "Max points",
                 range = 1..Int.MAX_VALUE,
                 onUp = model::maxPointsUp,
@@ -62,7 +62,7 @@ internal fun AddOrUpdateRule(
             )
 
             FormNumberSelector(
-                value = state.winPoints,
+                value = state.rule.winPoints,
                 label = "Win points",
                 range = 1..Int.MAX_VALUE,
                 onUp = model::winPointsUp,
@@ -70,7 +70,7 @@ internal fun AddOrUpdateRule(
             )
 
             FormNumberSelector(
-                value = state.pointsDifference,
+                value = state.rule.pointsDifference,
                 label = "Points difference",
                 range = 0..Int.MAX_VALUE,
                 onUp = model::pointsDifferenceUp,
@@ -80,7 +80,7 @@ internal fun AddOrUpdateRule(
 
         FormRow {
             FormNumberSelector(
-                value = state.gamePointsForWin,
+                value = state.rule.gamePointsForWin,
                 label = "Game points for win",
                 range = 0..Int.MAX_VALUE,
                 onUp = model::updateGamePointsForWin,
@@ -88,7 +88,7 @@ internal fun AddOrUpdateRule(
             )
 
             FormNumberSelector(
-                value = state.gamePointsForLose,
+                value = state.rule.gamePointsForLose,
                 label = "Game points for lose",
                 range = 0..Int.MAX_VALUE,
                 onUp = model::updateGamePointsForLose,
@@ -96,7 +96,7 @@ internal fun AddOrUpdateRule(
             )
 
             FormNumberSelector(
-                value = state.gamePointsForDraw,
+                value = state.rule.gamePointsForDraw,
                 label = "Game points for draw",
                 range = 0..Int.MAX_VALUE,
                 onUp = model::updateGamePointsForDraw,
@@ -106,7 +106,7 @@ internal fun AddOrUpdateRule(
 
         FormRow {
             FormNumberSelector(
-                value = state.gamePointsForRest,
+                value = state.rule.gamePointsForRest,
                 label = "Game points for rest",
                 range = 0..Int.MAX_VALUE,
                 onUp = model::updateGamePointsForRest,
@@ -114,7 +114,7 @@ internal fun AddOrUpdateRule(
             )
 
             FormNumberSelector(
-                value = state.setPointsForRest,
+                value = state.rule.setPointsForRest,
                 label = "Set points for rest",
                 range = 0..Int.MAX_VALUE,
                 onUp = model::updateSetPointsForRest,
@@ -122,7 +122,7 @@ internal fun AddOrUpdateRule(
             )
 
             FormNumberSelector(
-                value = state.pointPointsForRest,
+                value = state.rule.pointPointsForRest,
                 label = "Point points for rest",
                 range = 0..Int.MAX_VALUE,
                 onUp = model::updatePointPointsForRest,

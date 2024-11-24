@@ -290,13 +290,17 @@ private fun <T> RowScope.TableIconButton(
     item: T,
     column: LazyTableColumn.IconButton<T>
 ) {
-    SimpleIconButton(
+    Box(
         modifier = Modifier.weight(column.weight),
-        enabled = column.enabled(item),
-        imageVector = column.imageVector,
-        contentDescription = column.contentDescription,
-        onClick = { column.onClick(item) }
-    )
+        contentAlignment = Alignment.Center
+    ) {
+        SimpleIconButton(
+            enabled = column.enabled(item),
+            imageVector = column.imageVector,
+            contentDescription = column.contentDescription,
+            onClick = { column.onClick(item) }
+        )
+    }
 }
 
 @Composable

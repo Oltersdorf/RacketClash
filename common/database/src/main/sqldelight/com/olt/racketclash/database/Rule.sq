@@ -1,0 +1,106 @@
+import kotlin.Int;
+
+CREATE TABLE IF NOT EXISTS Rule (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    maxSets INTEGER AS Int NOT NULL,
+    winSets INTEGER AS Int NOT NULL,
+    maxPoints INTEGER AS Int NOT NULL,
+    winPoints INTEGER AS Int NOT NULL,
+    pointsDifference INTEGER AS Int NOT NULL,
+    gamePointsForWin INTEGER AS Int NOT NULL,
+    gamePointsForLose INTEGER AS Int NOT NULL,
+    gamePointsForDraw INTEGER AS Int NOT NULL,
+    gamePointsForRest INTEGER AS Int NOT NULL,
+    setPointsForRest INTEGER AS Int NOT NULL,
+    pointPointsForRest INTEGER AS Int NOT NULL
+);
+
+selectFilteredAndOrderedByNameAsc:
+SELECT
+    *, 1 AS deletable
+FROM
+    Rule
+WHERE
+    name LIKE '%' || :name || '%'
+ORDER BY
+    name ASC
+LIMIT :limit OFFSET :offset;
+
+sizeOfFilteredByNameAsc:
+SELECT
+    count(id)
+FROM
+    Rule
+WHERE
+    name LIKE '%' || :name || '%';
+
+selectFilteredAndOrderedByNameDesc:
+SELECT
+    *, 1 AS deletable
+FROM
+    Rule
+WHERE
+    name LIKE '%' || :name || '%'
+ORDER BY
+    name DESC
+LIMIT :limit OFFSET :offset;
+
+sizeOfFilteredByNameDesc:
+SELECT
+    count(id)
+FROM
+    Rule
+WHERE
+    name LIKE '%' || :name || '%';
+
+selectSingle:
+SELECT
+    *, 1 AS deletable
+FROM
+    Rule
+WHERE
+    id = :id;
+
+add:
+INSERT INTO
+    Rule(
+        name,
+        maxSets, winSets,
+        maxPoints, winPoints, pointsDifference,
+        gamePointsForWin, gamePointsForLose, gamePointsForDraw,
+        gamePointsForRest, setPointsForRest, pointPointsForRest
+    )
+VALUES
+    (
+        :name,
+        :maxSets, :winSets,
+        :maxPoints, :winPoints, :pointsDifference,
+        :gamePointsForWin, :gamePointsForLose, :gamePointsForDraw,
+        :gamePointsForRest, :setPointsForRest, :pointPointsForRest
+    );
+
+update:
+UPDATE
+    Rule
+SET
+    name = :name,
+    maxSets = :maxSets,
+    winSets = :winSets,
+    maxPoints = :maxPoints,
+    winPoints = :winPoints,
+    pointsDifference = :pointsDifference,
+    gamePointsForWin = :gamePointsForWin,
+    gamePointsForLose = :gamePointsForLose,
+    gamePointsForDraw = :gamePointsForDraw,
+    gamePointsForRest = :gamePointsForRest,
+    setPointsForRest = :setPointsForRest,
+    pointPointsForRest = :pointPointsForRest
+WHERE
+    id = :id;
+
+delete:
+DELETE FROM
+    Rule
+WHERE
+    id = :id;

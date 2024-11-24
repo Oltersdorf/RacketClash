@@ -1,11 +1,13 @@
 package com.olt.racketclash.ui.screen
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
-import com.olt.rackeclash.rules.Rule
 import com.olt.rackeclash.rules.RulesModel
+import com.olt.rackeclash.rules.Sorting
 import com.olt.rackeclash.rules.Tag
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.state.SortDirection
+import com.olt.racketclash.database.rule.DeletableRule
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.LazyTableColumn
@@ -28,7 +30,8 @@ internal fun Rules(
         isLoading = state.isLoading,
         columns = columns(
             navigateTo = navigateTo,
-            onNameSort = model::onNameSort
+            onSort = model::onSort,
+            onDelete = model::deleteRule
         ),
         currentPage = state.currentPage,
         lastPage = state.lastPage,
@@ -48,21 +51,38 @@ internal fun Rules(
 
 private fun columns(
     navigateTo: (Screens) -> Unit,
-    onNameSort: (SortDirection) -> Unit
-): List<LazyTableColumn<Rule>> =
+    onSort: (Sorting) -> Unit,
+    onDelete: (Long) -> Unit
+): List<LazyTableColumn<DeletableRule>> =
     listOf(
-        LazyTableColumn.Link(name = "Name", text = { it.name }, onSort = {
+        LazyTableColumn.Link(name = "Name", text = { it.name }, weight = 0.6f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onNameSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onNameSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.NameAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
             }
         }) {
             navigateTo(Screens.AddOrUpdateRule(ruleName = it.name, ruleId = it.id))
         },
-        LazyTableColumn.Text(name = "Sets") { "${it.winSets}/${it.maxSets}" },
-        LazyTableColumn.Text(name = "Points") { "${it.winPoints}/${it.maxPoints} +/- ${it.pointsDifference}" },
-        LazyTableColumn.Text(name = "Rating") { "W:${it.gamePointsForWin} / D:${it.gamePointsForDraw} / L:${it.gamePointsForLose}" },
-        LazyTableColumn.Text(name = "Rest") { "G:${it.gamePointsForRest} / S:${it.setPointsForRest} / P:${it.pointPointsForRest}" }
+        LazyTableColumn.Text(name = "Sets", weight = 0.1f) {
+            "${it.winSets}/${it.maxSets}"
+        },
+        LazyTableColumn.Text(name = "Points", weight = 0.1f) {
+            "${it.winPoints}/${it.maxPoints} +/- ${it.pointsDifference}"
+        },
+        LazyTableColumn.Text(name = "Rating", weight = 0.1f) {
+            "W:${it.gamePointsForWin} / D:${it.gamePointsForDraw} / L:${it.gamePointsForLose}"
+        },
+        LazyTableColumn.Text(name = "Rest", weight = 0.1f) {
+            "G:${it.gamePointsForRest} / S:${it.setPointsForRest} / P:${it.pointPointsForRest}"
+        },
+        LazyTableColumn.IconButton(
+            name = "Delete",
+            weight = 0.1f,
+            onClick = { onDelete(it.id) },
+            enabled = { it.deletable },
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete"
+        )
     )
 
 @Composable

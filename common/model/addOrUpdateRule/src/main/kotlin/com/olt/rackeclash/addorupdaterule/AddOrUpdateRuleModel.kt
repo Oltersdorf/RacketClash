@@ -12,101 +12,136 @@ class AddOrUpdateRuleModel(
     private val ruleId: Long?
 ) : ViewModelState<State>(initialState = State()) {
 
+    init {
+        onIO {
+            if (ruleId == null)
+                updateState { copy(isLoading = false) }
+            else {
+                updateState {
+                    copy(
+                        isSavable = true,
+                        isLoading = false,
+                        rule = database.rules.selectSingle(id = ruleId)
+                    )
+                }
+            }
+        }
+    }
+
     fun updateName(newName: String) =
-        updateState { copy(isSavable = newName.isNotBlank(), name = newName) }
+        updateState { copy(isSavable = newName.isNotBlank(), rule = rule.copy(name = newName)) }
 
     fun maxSetsUp(newNumber: Int) =
         updateState {
             copy(
-                maxSets = newNumber,
-                winSets = max(winSets, ceil(maxSets.toDouble() / 2).roundToInt())
+                rule = rule.copy(
+                    maxSets = newNumber,
+                    winSets = max(rule.winSets, ceil(rule.maxSets.toDouble() / 2).roundToInt())
+                )
             )
         }
 
     fun maxSetsDown(newNumber: Int) =
         updateState {
             copy(
-                maxSets = newNumber,
-                winSets = min(maxSets, winSets)
+                rule = rule.copy(
+                    maxSets = newNumber,
+                    winSets = min(rule.maxSets, rule.winSets)
+                )
             )
         }
 
     fun winSetsUp(newNumber: Int) =
         updateState {
             copy(
-                winSets = newNumber,
-                maxSets = max(maxSets, winSets)
+                rule = rule.copy(
+                    winSets = newNumber,
+                    maxSets = max(rule.maxSets, rule.winSets)
+                )
             )
         }
 
     fun winSetsDown(newNumber: Int) =
         updateState {
             copy(
-                winSets = newNumber,
-                maxSets = min(maxSets, winSets * 2)
+                rule = rule.copy(
+                    winSets = newNumber,
+                    maxSets = min(rule.maxSets, rule.winSets * 2)
+                )
             )
         }
 
     fun maxPointsUp(newNumber: Int) =
-        updateState { copy(maxPoints = newNumber) }
+        updateState { copy(rule = rule.copy(maxPoints = newNumber)) }
 
     fun maxPointsDown(newNumber: Int) =
         updateState {
             copy(
-                maxPoints = newNumber,
-                winPoints = min(winPoints, maxPoints),
-                pointsDifference = min(pointsDifference, winPoints)
+                rule = rule.copy(
+                    maxPoints = newNumber,
+                    winPoints = min(rule.winPoints, rule.maxPoints),
+                    pointsDifference = min(rule.pointsDifference, rule.winPoints)
+                )
             )
         }
 
     fun winPointsUp(newNumber: Int) =
         updateState {
             copy(
-                winPoints = newNumber,
-                maxPoints = max(maxPoints, winPoints)
+                rule = rule.copy(
+                    winPoints = newNumber,
+                    maxPoints = max(rule.maxPoints, rule.winPoints)
+                )
             )
         }
 
     fun winPointsDown(newNumber: Int) =
         updateState {
             copy(
-                winPoints = newNumber,
-                pointsDifference = min(pointsDifference, winPoints)
+                rule = rule.copy(
+                    winPoints = newNumber,
+                    pointsDifference = min(rule.pointsDifference, rule.winPoints)
+                )
             )
         }
 
     fun pointsDifferenceUp(newNumber: Int) =
         updateState {
             copy(
-                pointsDifference = newNumber,
-                winPoints = max(winPoints, pointsDifference),
-                maxPoints = max(maxPoints, winPoints)
+                rule = rule.copy(
+                    pointsDifference = newNumber,
+                    winPoints = max(rule.winPoints, rule.pointsDifference),
+                    maxPoints = max(rule.maxPoints, rule.winPoints)
+                )
             )
         }
 
     fun pointsDifferenceDown(newNumber: Int) =
-        updateState { copy(pointsDifference = newNumber) }
+        updateState { copy(rule = rule.copy(pointsDifference = newNumber)) }
 
     fun updateGamePointsForWin(newNumber: Int) =
-        updateState { copy(gamePointsForWin = newNumber) }
+        updateState { copy(rule = rule.copy(gamePointsForWin = newNumber)) }
 
     fun updateGamePointsForLose(newNumber: Int) =
-        updateState { copy(gamePointsForLose = newNumber) }
+        updateState { copy(rule = rule.copy(gamePointsForLose = newNumber)) }
 
     fun updateGamePointsForDraw(newNumber: Int) =
-        updateState { copy(gamePointsForDraw = newNumber) }
+        updateState { copy(rule = rule.copy(gamePointsForDraw = newNumber)) }
 
     fun updateGamePointsForRest(newNumber: Int) =
-        updateState { copy(gamePointsForRest = newNumber) }
+        updateState { copy(rule = rule.copy(gamePointsForRest = newNumber)) }
 
     fun updateSetPointsForRest(newNumber: Int) =
-        updateState { copy(setPointsForRest = newNumber) }
+        updateState { copy(rule = rule.copy(setPointsForRest = newNumber)) }
 
     fun updatePointPointsForRest(newNumber: Int) =
-        updateState { copy(pointPointsForRest = newNumber) }
+        updateState { copy(rule = rule.copy(pointPointsForRest = newNumber)) }
 
     fun save() =
         onIO {
-            //write to database
+            if (ruleId == null)
+                database.rules.add(rule = state.value.rule)
+            else
+                database.rules.update(rule = state.value.rule)
         }
 }
