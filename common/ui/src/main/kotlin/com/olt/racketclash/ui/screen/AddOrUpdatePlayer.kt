@@ -28,14 +28,14 @@ internal fun AddOrUpdatePlayer(
         }
     ) {
         FormTextField(
-            value = state.name,
+            value = state.player.name,
             label = "Name",
             isError = !state.isSavable,
             onValueChange = model::updateName
         )
 
         FormDropDownTextField(
-            text = state.birthYear.toString(),
+            text = state.player.birthYear.toString(),
             label = "Birth year",
             readOnly = true,
             dropDownItems = (1900..2050).toList(),
@@ -44,7 +44,7 @@ internal fun AddOrUpdatePlayer(
         )
 
         FormDropDownTextField(
-            text = state.club,
+            text = state.player.club,
             label = "Club",
             onTextChange = model::updateClub,
             dropDownItems = state.clubSuggestions,

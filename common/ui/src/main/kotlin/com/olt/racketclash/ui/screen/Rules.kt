@@ -1,20 +1,22 @@
 package com.olt.racketclash.ui.screen
 
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import com.olt.rackeclash.rules.RulesModel
-import com.olt.rackeclash.rules.Sorting
-import com.olt.rackeclash.rules.Tag
+import com.olt.racketclash.database.rule.Sorting
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.database.rule.DeletableRule
 import com.olt.racketclash.ui.component.SearchBar
-import com.olt.racketclash.ui.component.Tag
+import com.olt.racketclash.ui.component.SearchBarMenuItem
+import com.olt.racketclash.ui.component.SearchBarTagChip
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Rules(
     database: Database,
@@ -40,12 +42,16 @@ internal fun Rules(
         SearchBar(
             text = state.searchBarText,
             onTextChange = model::updateSearchBar,
-            dropDownItems = state.availableTags,
-            onDropDownItemClick = model::addTag,
-            tags = state.tags,
-            onTagRemove = model::removeTag,
-            tagText = { TagText(it) }
-        )
+            dropDownItems = {
+                state.availableTags.name?.let {
+                    SearchBarMenuItem(name = "Name", text = it, onClick = model::addNameTag)
+                }
+            }
+        ) {
+            state.tags.name?.let {
+                SearchBarTagChip(name = "Name", text = it, onRemove = model::removeNameTag)
+            }
+        }
     }
 }
 
@@ -84,9 +90,3 @@ private fun columns(
             contentDescription = "Delete"
         )
     )
-
-@Composable
-private fun TagText(tagType: Tag) =
-    when (tagType) {
-        is Tag.Name -> Tag(name = "Name", text = tagType.text)
-    }

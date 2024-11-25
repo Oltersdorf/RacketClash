@@ -8,22 +8,47 @@ class AddOrUpdatePlayerModel(
     private val playerId: Long?
 ) : ViewModelState<State>(initialState = State()) {
 
+    init {
+        onIO {
+            if (playerId == null)
+                updateState { copy(isLoading = false) }
+            else {
+                updateState {
+                    copy(
+                        isSavable = true,
+                        isLoading = false,
+                        player = database.players.selectSingle(id = playerId)
+                    )
+                }
+            }
+
+            updateState {
+                copy(clubSuggestions = database.players.clubs(clubFilter = player.club))
+            }
+        }
+    }
+
     fun updateName(newName: String) =
-        updateState { copy(name = newName, isSavable = newName.isNotBlank()) }
+        updateState { copy(isSavable = newName.isNotBlank(), player = player.copy(name = newName)) }
 
     fun updateBirthYear(newBirthYear: Int) =
-        updateState { copy(birthYear = newBirthYear) }
+        updateState { copy(player = player.copy(birthYear = newBirthYear)) }
 
     fun updateClub(newClub: String) {
-        updateState { copy(club = newClub) }
+        updateState { copy(player = player.copy(club = newClub)) }
 
         onIO {
-            //update suggestedClubs
+            updateState {
+                copy(clubSuggestions = database.players.clubs(clubFilter = newClub))
+            }
         }
     }
 
     fun save() =
         onIO {
-            //write to database
+            if (playerId == null)
+                database.players.add(player = state.value.player)
+            else
+                database.players.update(player = state.value.player)
         }
 }

@@ -1,9 +1,5 @@
 package com.olt.racketclash.database.rule
 
-import com.olt.racketclash.database.SelectFilteredAndOrderedByNameAsc
-import com.olt.racketclash.database.SelectFilteredAndOrderedByNameDesc
-import com.olt.racketclash.database.SelectSingle
-
 data class DeletableRule(
     val id: Long,
     val name: String,
@@ -21,7 +17,7 @@ data class DeletableRule(
     val deletable: Boolean
 )
 
-fun SelectFilteredAndOrderedByNameAsc.toDeletableRule(): DeletableRule =
+internal fun SelectFilteredAndOrdered.toDeletableRule(): DeletableRule =
     DeletableRule(
         id = id,
         name = name,
@@ -39,25 +35,7 @@ fun SelectFilteredAndOrderedByNameAsc.toDeletableRule(): DeletableRule =
         deletable = deletable != 0L
     )
 
-fun SelectFilteredAndOrderedByNameDesc.toDeletableRule(): DeletableRule =
-    DeletableRule(
-        id = id,
-        name = name,
-        maxSets = maxSets,
-        winSets = winSets,
-        maxPoints = maxPoints,
-        winPoints = winPoints,
-        pointsDifference = pointsDifference,
-        gamePointsForWin = gamePointsForWin,
-        gamePointsForLose = gamePointsForLose,
-        gamePointsForDraw = gamePointsForDraw,
-        gamePointsForRest = gamePointsForRest,
-        setPointsForRest = setPointsForRest,
-        pointPointsForRest = pointPointsForRest,
-        deletable = deletable != 0L
-    )
-
-fun SelectSingle.toDeletableRule(): DeletableRule =
+internal fun SelectSingle.toDeletableRule(): DeletableRule =
     DeletableRule(
         id = id,
         name = name,

@@ -1,6 +1,7 @@
 package com.olt.rackeclash.rules
 
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.rule.Sorting
 import com.olt.racketclash.state.ViewModelState
 import kotlin.math.min
 
@@ -17,27 +18,27 @@ class RulesModel(
     fun updateSearchBar(text: String) {
         updateState { copy(searchBarText = text) }
 
-        onDefault {
-            updateState {
-                val tags = availableTags.toMutableList()
-                tags.replaceAll { it.changeText(newText = text) }
-
-                copy(availableTags = tags.toList())
-            }
+        updateState {
+            copy(availableTags = Tags(name = if (tags.name == null) text else null))
         }
     }
 
-    fun addTag(tag: Tag) {
-        updateState { copy(availableTags = availableTags - tag, tags = tags + tag) }
+    fun addNameTag() {
+        updateState {
+            copy(
+                availableTags = availableTags.copy(name = null),
+                tags = tags.copy(name = availableTags.name)
+            )
+        }
 
         updateRulesState()
     }
 
-    fun removeTag(tag: Tag) {
+    fun removeNameTag() {
         updateState {
             copy(
-                tags = tags - tag,
-                availableTags = availableTags + tag.changeText(newText = searchBarText)
+                tags = tags.copy(name = null),
+                availableTags = availableTags.copy(name = searchBarText)
             )
         }
 
@@ -64,20 +65,14 @@ class RulesModel(
         onIO {
             updateState { copy(isLoading = true) }
 
-            val nameFilter = state.value.tags.filterIsInstance<Tag.Name>().firstOrNull()?.text ?: ""
+            val filters = state.value.tags
 
-            val (totalSize, sortedRules) = when (sorting) {
-                Sorting.NameAsc -> database.rules.selectFilteredAndOrderedByNameAsc(
-                    nameFilter = nameFilter,
-                    fromIndex = (currentPage - 1) * pageSize,
-                    toIndex = currentPage * pageSize
-                )
-                Sorting.NameDesc -> database.rules.selectFilteredAndOrderedByNameDesc(
-                    nameFilter = nameFilter,
-                    fromIndex = (currentPage - 1) * pageSize,
-                    toIndex = currentPage * pageSize
-                )
-            }
+            val (totalSize, sortedRules) = database.rules.selectFilteredAndOrdered(
+                nameFilter = filters.name ?: "",
+                sorting = sorting,
+                fromIndex = (currentPage - 1) * pageSize,
+                toIndex = currentPage * pageSize
+            )
 
             updateState {
                 copy(

@@ -3,6 +3,8 @@ package com.olt.racketclash.database
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.olt.racketclash.database.RacketClashDatabase.Companion.Schema
+import com.olt.racketclash.database.player.PlayerDatabase
+import com.olt.racketclash.database.player.playerAdapter
 import com.olt.racketclash.database.rule.RuleDatabase
 import com.olt.racketclash.database.rule.ruleAdapter
 import java.io.File
@@ -27,8 +29,10 @@ class Database internal constructor(
 
     private val database = RacketClashDatabase(
         driver = driver,
-        RuleAdapter = ruleAdapter()
+        ruleAdapter = ruleAdapter(),
+        playerAdapter = playerAdapter()
     )
 
     val rules = RuleDatabase(database = database)
+    val players = PlayerDatabase(database = database)
 }

@@ -1,17 +1,19 @@
 package com.olt.racketclash.ui.screen
 
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.players.Player
+import com.olt.racketclash.database.player.DeletablePlayer
 import com.olt.racketclash.players.PlayersModel
-import com.olt.racketclash.players.Tag
-import com.olt.racketclash.state.SortDirection
+import com.olt.racketclash.database.player.Sorting
 import com.olt.racketclash.ui.component.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
@@ -22,6 +24,7 @@ import org.jetbrains.compose.resources.painterResource
 import racketclash.common.ui.generated.resources.Res
 import racketclash.common.ui.generated.resources.medal
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Players(
     database: Database,
@@ -37,13 +40,8 @@ internal fun Players(
         isLoading = state.isLoading,
         columns = columns(
             navigateTo = navigateTo,
-            onNameSort = model::onNameSort,
-            onBirthYearSort = model::onBirthYearSort,
-            onClubSort = model::onClubSort,
-            onTournamentsSort = model::onTournamentSort,
-            onMedalsSort = model::onMedalsSort,
-            onSinglesSort = model::onSinglesSort,
-            onDoublesSort = model::onDoublesSort
+            onSort = model::onSort,
+            onDelete = model::deletePlayer
         ),
         currentPage = state.currentPage,
         lastPage = state.lastPage,
@@ -52,54 +50,75 @@ internal fun Players(
         SearchBar(
             text = state.searchBarText,
             onTextChange = model::updateSearchBar,
-            dropDownItems = state.availableTags,
-            onDropDownItemClick = model::addTag,
-            tags = state.tags,
-            onTagRemove = model::removeTag,
-            tagText = { TagText(it) }
-        )
+            dropDownItems = {
+                state.availableTags.name?.let {
+                    SearchBarMenuItem(name = "Name", text = it, onClick = model::addNameTag)
+                }
+                state.availableTags.birthYear?.let {
+                    SearchBarMenuItem(name = "Birth year", text = it.toString(), onClick = model::addBirthYearTag)
+                }
+                state.availableTags.club?.let {
+                    SearchBarMenuItem(name = "Club", text = it, onClick = model::addClubTag)
+                }
+                state.availableTags.hasMedals?.let {
+                    SearchBarMenuItem(name = "Has medals") { model.addHasMedalsTag(value = true) }
+                    SearchBarMenuItem(name = "Has no medals") { model.addHasMedalsTag(value = false) }
+                }
+            }
+        ) {
+            state.tags.name?.let {
+                SearchBarTagChip(name = "Name", text = it, onRemove = model::removeNameTag)
+            }
+            state.tags.birthYear?.let {
+                SearchBarTagChip(name = "Birth year", text = it.toString(), onRemove = model::removeBirthYearTag)
+            }
+            state.tags.club?.let {
+                SearchBarTagChip(name = "Club", text = it, onRemove = model::removeClubTag)
+            }
+            state.tags.hasMedals?.let {
+                if (it)
+                    SearchBarTagChip(name = "Has medals", onRemove = model::removeHasMedalsTag)
+                else
+                    SearchBarTagChip(name = "Has no medals", onRemove = model::removeHasMedalsTag)
+            }
+        }
     }
 }
 
 private fun columns(
     navigateTo: (Screens) -> Unit,
-    onNameSort: (SortDirection) -> Unit,
-    onBirthYearSort: (SortDirection) -> Unit,
-    onClubSort: (SortDirection) -> Unit,
-    onTournamentsSort: (SortDirection) -> Unit,
-    onMedalsSort: (SortDirection) -> Unit,
-    onSinglesSort: (SortDirection) -> Unit,
-    onDoublesSort: (SortDirection) -> Unit,
-): List<LazyTableColumn<Player>> =
+    onSort: (Sorting) -> Unit,
+    onDelete: (Long) -> Unit
+): List<LazyTableColumn<DeletablePlayer>> =
     listOf(
-        LazyTableColumn.Link(name = "Name", weight = 0.3f, text = { it.name }, onSort = {
+        LazyTableColumn.Link(name = "Name", weight = 0.25f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onNameSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onNameSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.NameAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
             }
         }) { navigateTo(Screens.Player(playerName = it.name, playerId = it.id)) },
         LazyTableColumn.Text(name = "Birth year", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onBirthYearSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onBirthYearSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.BirthYearAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.BirthYearDesc)
             }
         }) { it.birthYear.toString() },
-        LazyTableColumn.Text(name = "Club", weight = 0.3f, onSort = {
+        LazyTableColumn.Text(name = "Club", weight = 0.25f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onClubSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onClubSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.ClubAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.ClubDesc)
             }
         }) { it.club },
         LazyTableColumn.Text(name = "# tournaments", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onTournamentsSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onTournamentsSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.TournamentsAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.TournamentsDesc)
             }
         }) { it.numberOfTournaments.toString() },
         LazyTableColumn.Builder(name = "Medals", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onMedalsSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onMedalsSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.MedalsAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.MedalsDesc)
             }
         }) { player, weight ->
             Row(modifier = Modifier.weight(weight)) {
@@ -137,8 +156,8 @@ private fun columns(
         },
         LazyTableColumn.Builder(name = "Single", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSinglesSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onSinglesSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.SinglesAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.SinglesDesc)
             }
         }) { player, weight ->
             RatioBar(
@@ -152,8 +171,8 @@ private fun columns(
         },
         LazyTableColumn.Builder(name = "Double", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onDoublesSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onDoublesSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.DoublesAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.DoublesDesc)
             }
         }) { player, weight ->
             RatioBar(
@@ -164,15 +183,13 @@ private fun columns(
                 middle = player.winRatioDouble.second,
                 right = player.winRatioDouble.third
             )
-        }
+        },
+        LazyTableColumn.IconButton(
+            name = "Delete",
+            weight = 0.1f,
+            enabled = { it.deletable },
+            onClick = { onDelete(it.id) },
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete"
+        )
     )
-
-@Composable
-private fun TagText(tagType: Tag) =
-    when (tagType) {
-        is Tag.BirthYear -> Tag(name = "Birth year", text = tagType.text)
-        is Tag.Club -> Tag(name = "Club", text = tagType.text)
-        Tag.HasMedals -> Tag(name = "Has medals")
-        Tag.HasNoMedals -> Tag(name = "Has no medals")
-        is Tag.Name -> Tag(name = "Name", text = tagType.text)
-    }

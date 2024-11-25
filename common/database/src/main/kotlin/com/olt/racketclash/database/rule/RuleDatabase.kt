@@ -4,26 +4,16 @@ import com.olt.racketclash.database.RacketClashDatabase
 
 class RuleDatabase(private val database: RacketClashDatabase) {
 
-    fun selectFilteredAndOrderedByNameAsc(
+    fun selectFilteredAndOrdered(
         nameFilter: String,
+        sorting: Sorting,
         fromIndex: Int,
         toIndex: Int
     ): Pair<Long, List<DeletableRule>> =
-        database.ruleQueries.sizeOfFilteredByNameAsc(name = nameFilter).executeAsOne() to
-        database.ruleQueries.selectFilteredAndOrderedByNameAsc(
+        database.ruleQueries.selectFilteredAndOrderedSize(name = nameFilter).executeAsOne() to
+        database.ruleQueries.selectFilteredAndOrdered(
             name = nameFilter,
-            offset = fromIndex.toLong(),
-            limit = toIndex.toLong()
-        ).executeAsList().map { it.toDeletableRule() }
-
-    fun selectFilteredAndOrderedByNameDesc(
-        nameFilter: String,
-        fromIndex: Int,
-        toIndex: Int
-    ): Pair<Long, List<DeletableRule>> =
-        database.ruleQueries.sizeOfFilteredByNameDesc(name = nameFilter).executeAsOne() to
-        database.ruleQueries.selectFilteredAndOrderedByNameDesc(
-            name = nameFilter,
+            sorting = sorting.name,
             offset = fromIndex.toLong(),
             limit = toIndex.toLong()
         ).executeAsList().map { it.toDeletableRule() }

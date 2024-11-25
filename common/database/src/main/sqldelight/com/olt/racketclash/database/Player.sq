@@ -1,3 +1,136 @@
-CREATE TABLE IF NOT EXISTS Player (
-    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+import kotlin.Int;
+
+CREATE TABLE IF NOT EXISTS player (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    birthYear INTEGER AS Int NOT NULL,
+    club TEXT NOT NULL
 );
+
+selectFilteredAndOrdered:
+WITH filteredAndOrdered AS (
+    SELECT
+        id, name, birthYear, club,
+        0 AS numberOfTournaments,
+        0 AS goldMedals,
+        0 AS silverMedals,
+        0 AS bronzeMedals,
+        0 AS deletable
+    FROM
+        player
+    WHERE
+        name LIKE '%' || :nameFilter || '%' AND
+        club LIKE '%' || :clubFilter || '%' AND
+        CASE
+            WHEN :birthYearFilter IS NULL THEN TRUE
+            ELSE birthYear = :birthYearFilter
+        END AND
+        CASE
+            WHEN :hasMedalsFilter IS NULL THEN TRUE
+            WHEN :hasMedalsFilter = FALSE THEN goldMedals = 0 AND silverMedals = 0 AND bronzeMedals = 0
+            ELSE goldMedals > 0 OR silverMedals > 0 OR bronzeMedals > 0
+        END
+)
+SELECT
+    *
+FROM
+    filteredAndOrdered
+ORDER BY
+    CASE :sorting
+        WHEN 'nameAsc' THEN name
+        WHEN 'birthYearAsc' THEN birthYear
+        WHEN 'clubAsc' THEN club
+        WHEN 'tournamentsAsc' THEN numberOfTournaments
+        WHEN 'medalsAsc' THEN goldMedals
+        WHEN 'singlesAsc' THEN name
+        WHEN 'doublesAsc' THEN name
+    END ASC,
+    CASE :sorting
+        WHEN 'medalsAsc' THEN silverMedals
+        WHEN 'singlesAsc' THEN name
+        WHEN 'doublesAsc' THEN name
+    END ASC,
+    CASE :sorting
+        WHEN 'medalsAsc' THEN bronzeMedals
+        WHEN 'singlesAsc' THEN name
+        WHEN 'doublesAsc' THEN name
+    END ASC,
+    CASE :sorting
+        WHEN 'nameDesc' THEN name
+        WHEN 'birthYearDesc' THEN birthYear
+        WHEN 'clubDesc' THEN club
+        WHEN 'tournamentsDesc' THEN numberOfTournaments
+        WHEN 'medalsAsc' THEN goldMedals
+        WHEN 'singlesDesc' THEN name
+        WHEN 'doublesDesc' THEN name
+    END DESC,
+    CASE :sorting
+        WHEN 'medalsAsc' THEN silverMedals
+        WHEN 'singlesDesc' THEN name
+        WHEN 'doublesDesc' THEN name
+    END DESC,
+    CASE :sorting
+        WHEN 'medalsAsc' THEN bronzeMedals
+        WHEN 'singlesDesc' THEN name
+        WHEN 'doublesDesc' THEN name
+    END DESC
+LIMIT :limit OFFSET :offset;
+
+selectFilteredAndOrderedSize:
+SELECT
+    COUNT(*) AS size,
+    0 AS goldMedals,
+    0 AS silverMedals,
+    0 AS bronzeMedals
+FROM
+    player
+WHERE
+    name LIKE '%' || :nameFilter || '%' AND
+    ifnull(club, '') LIKE '%' || :clubFilter || '%' AND
+    CASE
+        WHEN :birthYearFilter IS NULL THEN TRUE
+        ELSE birthYear = :birthYearFilter
+    END AND
+    CASE
+        WHEN :hasMedalsFilter IS NULL THEN TRUE
+        WHEN :hasMedalsFilter = FALSE THEN goldMedals = 0 AND silverMedals = 0 AND bronzeMedals = 0
+        ELSE goldMedals > 0 OR silverMedals > 0 OR bronzeMedals > 0
+    END;
+
+selectSingle:
+SELECT
+    *, 1 AS deletable
+FROM
+    player
+WHERE
+    id = :id;
+
+clubs:
+SELECT
+    DISTINCT club
+FROM
+    player
+WHERE
+    club LIKE '%' || :clubFilter || '%';
+
+add:
+INSERT INTO
+    player(name, birthYear, club)
+VALUES
+    (:name, :birthYear, :club);
+
+update:
+UPDATE
+    player
+SET
+    name = :name,
+    birthYear = :birthYear,
+    club = :club
+WHERE
+    id = :id;
+
+delete:
+DELETE FROM
+    player
+WHERE
+    id = :id;

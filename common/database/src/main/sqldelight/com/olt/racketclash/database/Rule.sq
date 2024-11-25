@@ -1,6 +1,6 @@
 import kotlin.Int;
 
-CREATE TABLE IF NOT EXISTS Rule (
+CREATE TABLE IF NOT EXISTS rule (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     maxSets INTEGER AS Int NOT NULL,
@@ -16,41 +16,33 @@ CREATE TABLE IF NOT EXISTS Rule (
     pointPointsForRest INTEGER AS Int NOT NULL
 );
 
-selectFilteredAndOrderedByNameAsc:
+selectFilteredAndOrdered:
+WITH filteredAndOrdered AS (
+    SELECT
+        *, 0 AS deletable
+    FROM
+        rule
+    WHERE
+        name LIKE '%' || :name || '%'
+)
 SELECT
-    *, 1 AS deletable
+    *
 FROM
-    Rule
-WHERE
-    name LIKE '%' || :name || '%'
+    filteredAndOrdered
 ORDER BY
-    name ASC
+    CASE :sorting
+        WHEN 'nameAsc' THEN name
+    END ASC,
+    CASE :sorting
+        WHEN 'nameDesc' THEN name
+    END DESC
 LIMIT :limit OFFSET :offset;
 
-sizeOfFilteredByNameAsc:
+selectFilteredAndOrderedSize:
 SELECT
-    count(id)
+    count(*) AS size
 FROM
-    Rule
-WHERE
-    name LIKE '%' || :name || '%';
-
-selectFilteredAndOrderedByNameDesc:
-SELECT
-    *, 1 AS deletable
-FROM
-    Rule
-WHERE
-    name LIKE '%' || :name || '%'
-ORDER BY
-    name DESC
-LIMIT :limit OFFSET :offset;
-
-sizeOfFilteredByNameDesc:
-SELECT
-    count(id)
-FROM
-    Rule
+    rule
 WHERE
     name LIKE '%' || :name || '%';
 
@@ -58,13 +50,13 @@ selectSingle:
 SELECT
     *, 1 AS deletable
 FROM
-    Rule
+    rule
 WHERE
     id = :id;
 
 add:
 INSERT INTO
-    Rule(
+    rule(
         name,
         maxSets, winSets,
         maxPoints, winPoints, pointsDifference,
@@ -82,7 +74,7 @@ VALUES
 
 update:
 UPDATE
-    Rule
+    rule
 SET
     name = :name,
     maxSets = :maxSets,
@@ -101,6 +93,6 @@ WHERE
 
 delete:
 DELETE FROM
-    Rule
+    rule
 WHERE
     id = :id;
