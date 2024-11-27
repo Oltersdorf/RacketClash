@@ -31,7 +31,7 @@ internal fun AddOrUpdateTeam(
         }
     ) {
         FormTextField(
-            value = state.name,
+            value = state.team.name,
             label = "Name",
             isError = !state.isSavable,
             onValueChange = model::updateName

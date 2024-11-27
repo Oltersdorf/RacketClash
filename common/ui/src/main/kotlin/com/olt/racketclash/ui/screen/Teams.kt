@@ -1,22 +1,21 @@
 package com.olt.racketclash.ui.screen
 
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.state.SortDirection
-import com.olt.racketclash.teams.Tag
-import com.olt.racketclash.teams.Team
+import com.olt.racketclash.database.team.DeletableTeam
+import com.olt.racketclash.database.team.Sorting
 import com.olt.racketclash.teams.TeamsModel
-import com.olt.racketclash.ui.component.RatioBar
-import com.olt.racketclash.ui.component.SearchBar
-import com.olt.racketclash.ui.component.Tag
+import com.olt.racketclash.ui.component.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Teams(
     database: Database,
@@ -34,10 +33,7 @@ internal fun Teams(
         columns = columns(
             navigateTo = navigateTo,
             tournamentId = tournamentId,
-            onNameSort = model::onNameSort,
-            onSizeSort = model::onSizeSort,
-            onSingleSort = model::onSingleSort,
-            onDoubleSort = model::onDoubleSort
+            onSort = model::onSort
         ),
         currentPage = state.currentPage,
         lastPage = state.lastPage,
@@ -46,42 +42,43 @@ internal fun Teams(
         SearchBar(
             text = state.searchBarText,
             onTextChange = model::updateSearchBar,
-            dropDownItems = state.availableTags,
-            onDropDownItemClick = model::addTag,
-            tags = state.tags,
-            onTagRemove = model::removeTag,
-            tagText = { TagText(it) }
-        )
+            dropDownItems = {
+                state.availableTags.name?.let {
+                    SearchBarMenuItem(name = "Name", text = it, onClick = model::addNameTag)
+                }
+            }
+        ) {
+            state.tags.name?.let {
+                SearchBarTagChip(name = "Name", text = it, onRemove = model::removeNameTag)
+            }
+        }
     }
 }
 
 private fun columns(
     navigateTo: (Screens) -> Unit,
     tournamentId: Long,
-    onNameSort: (SortDirection) -> Unit,
-    onSizeSort: (SortDirection) -> Unit,
-    onSingleSort: (SortDirection) -> Unit,
-    onDoubleSort: (SortDirection) -> Unit,
-): List<LazyTableColumn<Team>> =
+    onSort: (Sorting) -> Unit
+): List<LazyTableColumn<DeletableTeam>> =
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onNameSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onNameSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.NameAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
             }
         }) {
             navigateTo(Screens.Team(teamName = it.name, teamId = it.id, tournamentId = tournamentId))
         },
         LazyTableColumn.Text(name = "Size", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSizeSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onSizeSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.SizeAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.SizeDesc)
             }
         }) { it.size.toString() },
         LazyTableColumn.Builder(name = "Single", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSingleSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onSingleSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.SinglesAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.SinglesDesc)
             }
         }) { team, weight ->
             RatioBar(
@@ -95,8 +92,8 @@ private fun columns(
         },
         LazyTableColumn.Builder(name = "Double", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onDoubleSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onDoubleSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.DoublesAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.DoublesDesc)
             }
         }) { team, weight ->
             RatioBar(
@@ -109,9 +106,3 @@ private fun columns(
             )
         }
     )
-
-@Composable
-private fun TagText(tagType: Tag) =
-    when (tagType) {
-        is Tag.Name -> Tag(name = "Name", text = tagType.text)
-    }
