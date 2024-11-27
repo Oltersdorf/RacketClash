@@ -22,10 +22,7 @@ internal fun AddOrUpdatePlayer(
         title = playerName ?: "New player",
         isLoading = state.isLoading,
         isSavable = state.isSavable,
-        onSave = {
-            model.save()
-            navigateBack()
-        }
+        onSave = { model.save(onComplete = navigateBack) }
     ) {
         FormTextField(
             value = state.player.name,

@@ -44,11 +44,17 @@ class AddOrUpdatePlayerModel(
         }
     }
 
-    fun save() =
+    fun save(onComplete: () -> Unit = {}) =
         onIO {
+            updateState { copy(isLoading = true) }
+
             if (playerId == null)
                 database.players.add(player = state.value.player)
             else
                 database.players.update(player = state.value.player)
+
+            updateState { copy(isLoading = true) }
+
+            onMain { onComplete() }
         }
 }

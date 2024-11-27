@@ -137,11 +137,17 @@ class AddOrUpdateRuleModel(
     fun updatePointPointsForRest(newNumber: Int) =
         updateState { copy(rule = rule.copy(pointPointsForRest = newNumber)) }
 
-    fun save() =
+    fun save(onComplete: () -> Unit = {}) =
         onIO {
+            updateState { copy(isLoading = true) }
+
             if (ruleId == null)
                 database.rules.add(rule = state.value.rule)
             else
                 database.rules.update(rule = state.value.rule)
+
+            updateState { copy(isLoading = false) }
+
+            onMain { onComplete() }
         }
 }

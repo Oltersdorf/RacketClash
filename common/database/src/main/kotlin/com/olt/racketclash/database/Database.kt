@@ -7,6 +7,8 @@ import com.olt.racketclash.database.player.PlayerDatabase
 import com.olt.racketclash.database.player.playerAdapter
 import com.olt.racketclash.database.rule.RuleDatabase
 import com.olt.racketclash.database.rule.ruleAdapter
+import com.olt.racketclash.database.tournament.TournamentDatabase
+import com.olt.racketclash.database.tournament.tournamentAdapter
 import java.io.File
 import java.util.*
 
@@ -30,9 +32,11 @@ class Database internal constructor(
     private val database = RacketClashDatabase(
         driver = driver,
         ruleAdapter = ruleAdapter(),
-        playerAdapter = playerAdapter()
+        playerAdapter = playerAdapter(),
+        tournamentAdapter = tournamentAdapter()
     )
 
-    val rules = RuleDatabase(database = database)
+    val tournaments = TournamentDatabase(database = database)
     val players = PlayerDatabase(database = database)
+    val rules = RuleDatabase(database = database)
 }

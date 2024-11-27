@@ -1,0 +1,106 @@
+import java.time.ZoneId;
+import kotlin.Int;
+
+CREATE TABLE IF NOT EXISTS tournament(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    numberOfCourts INTEGER AS Int NOT NULL,
+    location TEXT NOT NULL,
+    unixStartDateTime INTEGER NOT NULL,
+    unixEndDateTime INTEGER NOT NULL,
+    zoneId TEXT AS ZoneId NOT NULL
+);
+
+selectFilteredAndOrdered:
+WITH filteredAndOrdered AS (
+    SELECT
+        *, 0 AS playersCount, 0 AS categoriesCount, 0 AS deletable
+    FROM
+        tournament
+    WHERE
+        name LIKE '%' || :nameFilter || '%' AND
+        location LIKE '%' || :locationFilter || '%' AND
+    CASE
+        WHEN :yearStartFilter NOT NULL THEN unixStartDateTime >= :yearStartFilter OR unixEndDateTime >= :yearStartFilter
+        ELSE TRUE
+    END AND
+    CASE
+        WHEN :yearEndFilter NOT NULL THEN unixStartDateTime <= :yearEndFilter OR unixEndDateTime <= :yearEndFilter
+        ELSE TRUE
+    END
+)
+SELECT
+    *
+FROM
+    filteredAndOrdered
+ORDER BY
+    CASE :sorting
+        WHEN 'nameAsc' THEN name
+        WHEN 'locationAsc' THEN location
+        WHEN 'courtsAsc' THEN numberOfCourts
+        WHEN 'startDateTimeAsc' THEN unixStartDateTime
+        WHEN 'endDateTimeAsc' THEN unixEndDateTime
+        WHEN 'playersAsc' THEN playersCount
+    END ASC,
+    CASE :sorting
+        WHEN 'nameDesc' THEN name
+    END DESC
+LIMIT :limit OFFSET :offset;
+
+selectFilteredAndOrderedSize:
+SELECT
+    count(*) AS size
+FROM
+    tournament
+WHERE
+    name LIKE '%' || :nameFilter || '%' AND
+    location LIKE '%' || :locationFilter || '%' AND
+    CASE
+        WHEN :yearStartFilter NOT NULL THEN unixStartDateTime >= :yearStartFilter OR unixEndDateTime >= :yearStartFilter
+        ELSE TRUE
+    END AND
+    CASE
+        WHEN :yearEndFilter NOT NULL THEN unixStartDateTime <= :yearEndFilter OR unixEndDateTime <= :yearEndFilter
+        ELSE TRUE
+    END;
+
+selectSingle:
+SELECT
+    *, 0 AS playersCount, 0 AS categoriesCount, 0 AS deletable
+FROM
+    tournament
+WHERE
+    id = :id;
+
+locations:
+SELECT
+    location
+FROM
+    tournament
+WHERE
+    location LIKE '%' || :locationFilter || '%';
+
+add:
+INSERT INTO
+    tournament(name, numberOfCourts, location, unixStartDateTime, unixEndDateTime, zoneId)
+VALUES
+    (:name, :numberOfCourts, :location, :unixStartDateTime, :unixEndDateTime, :zoneId);
+
+update:
+UPDATE
+    tournament
+SET
+    name = :name,
+    numberOfCourts = :numberOfCourts,
+    location = :location,
+    unixStartDateTime = :unixStartDateTime,
+    unixEndDateTime = :unixEndDateTime,
+    zoneId = :zoneId
+WHERE
+    id = :id;
+
+delete:
+DELETE FROM
+    tournament
+WHERE
+    id = :id;

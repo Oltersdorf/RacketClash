@@ -18,8 +18,8 @@ internal fun AddOrUpdateTournament(
     val state by model.state.collectAsState()
     val dateRange = rememberDateRangePickerState(
         initialDisplayMode = DisplayMode.Input,
-        initialSelectedStartDateMillis = state.dateRangeStart,
-        initialSelectedEndDateMillis = state.dateRangeEnd
+        initialSelectedStartDateMillis = state.startDateMillis,
+        initialSelectedEndDateMillis = state.endDateMillis
     )
     model.updateDateRange(start = dateRange.selectedStartDateMillis, end = dateRange.selectedEndDateMillis)
 
@@ -27,13 +27,10 @@ internal fun AddOrUpdateTournament(
         title = tournamentName ?: "New tournament",
         isLoading = state.isLoading,
         isSavable = state.isSavable,
-        onSave = {
-            model.save()
-            navigateBack()
-        }
+        onSave = { model.save(onComplete = navigateBack) }
     ) {
         FormTextField(
-            value = state.name,
+            value = state.tournament.name,
             label = "Name",
             isError = !state.isSavable,
             onValueChange = model::updateName
@@ -41,7 +38,7 @@ internal fun AddOrUpdateTournament(
 
         FormRow {
             FormDropDownTextField(
-                text = state.location,
+                text = state.tournament.location,
                 label = "Location",
                 onTextChange = model::updateLocation,
                 dropDownItems = state.suggestedLocations,
@@ -50,7 +47,7 @@ internal fun AddOrUpdateTournament(
             )
 
             FormNumberSelector(
-                value = state.courts,
+                value = state.tournament.numberOfCourts,
                 label = "Courts",
                 range = 1..Int.MAX_VALUE,
                 onUp = model::updateCourts,
@@ -62,20 +59,20 @@ internal fun AddOrUpdateTournament(
 
         FormRow {
             FormDropDownTextField(
-                text = state.timeStart.toString(),
+                text = state.timeStart,
                 label = "Start time",
                 readOnly = true,
                 dropDownItems = state.suggestedTimes,
-                dropDownItemText = { Text(it.toString()) },
+                dropDownItemText = { Text(it) },
                 onItemClicked = model::updateTimeStart
             )
 
             FormDropDownTextField(
-                text = state.timeEnd.toString(),
+                text = state.timeEnd,
                 label = "End time",
                 readOnly = true,
                 dropDownItems = state.suggestedTimes,
-                dropDownItemText = { Text(it.toString()) },
+                dropDownItemText = { Text(it) },
                 onItemClicked = model::updateTimeEnd
             )
         }

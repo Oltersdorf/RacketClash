@@ -22,10 +22,7 @@ internal fun AddOrUpdateRule(
         title = ruleName ?: "New rule",
         isLoading = state.isLoading,
         isSavable = state.isSavable,
-        onSave = {
-            model.save()
-            navigateBack()
-        }
+        onSave = { model.save(onComplete = navigateBack) }
     ) {
         FormTextField(
             value = state.rule.name,
