@@ -9,11 +9,36 @@ class AddOrUpdateCategoryModel(
     private val tournamentId: Long
 ) : ViewModelState<State>(initialState = State()) {
 
-    fun updateName(newName: String) =
-        updateState { copy(name = newName, isSavable = newName.isNotBlank()) }
-
-    fun save() =
+    init {
         onIO {
-            //save to database
+            if (categoryId == null)
+                updateState { copy(isLoading = false) }
+            else {
+                updateState {
+                    copy(
+                        isLoading = false,
+                        isSavable = true,
+                        category = database.categories.selectSingle(id = categoryId)
+                    )
+                }
+            }
+        }
+    }
+
+    fun updateName(newName: String) =
+        updateState { copy(category = category.copy(name = newName), isSavable = newName.isNotBlank()) }
+
+    fun save(onComplete: () -> Unit = {}) =
+        onIO {
+            updateState { copy(isLoading = true) }
+
+            if (categoryId == null)
+                database.categories.add(category = state.value.category.copy(tournamentId = tournamentId))
+            else
+                database.categories.update(category = state.value.category)
+
+            updateState { copy(isLoading = true) }
+
+            onMain { onComplete() }
         }
 }

@@ -25,13 +25,10 @@ internal fun AddOrUpdateCategory(
         title = categoryName ?: "New category",
         isLoading = state.isLoading,
         isSavable = state.isSavable,
-        onSave = {
-            model.save()
-            navigateBack()
-        }
+        onSave = { model.save(onComplete = navigateBack) }
     ) {
         FormTextField(
-            value = state.name,
+            value = state.category.name,
             label = "Name",
             isError = !state.isSavable,
             onValueChange = model::updateName

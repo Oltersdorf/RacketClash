@@ -1,20 +1,24 @@
 package com.olt.racketclash.ui.screen
 
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.olt.racketclash.categories.CategoriesModel
-import com.olt.racketclash.categories.Category
-import com.olt.racketclash.categories.Tag
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.state.SortDirection
+import com.olt.racketclash.database.category.DeletableCategory
+import com.olt.racketclash.database.category.Sorting
 import com.olt.racketclash.ui.component.SearchBar
+import com.olt.racketclash.ui.component.SearchBarMenuItem
+import com.olt.racketclash.ui.component.SearchBarTagChip
 import com.olt.racketclash.ui.component.Status
-import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.navigate.Screens
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Categories(
     database: Database,
@@ -32,9 +36,8 @@ internal fun Categories(
         columns = columns(
             navigateTo = navigateTo,
             tournamentId = tournamentId,
-            onNameSort = model::onNameSort,
-            onPlayersSort = model::onPlayerSort,
-            onStatusSort = model::onStatusSort,
+            onSort = model::onSort,
+            onDelete = model::deleteCategory
         ),
         currentPage = state.currentPage,
         lastPage = state.lastPage,
@@ -43,49 +46,62 @@ internal fun Categories(
         SearchBar(
             text = state.searchBarText,
             onTextChange = model::updateSearchBar,
-            dropDownItems = state.availableTags,
-            onDropDownItemClick = model::addTag,
-            tags = state.tags,
-            onTagRemove = model::removeTag,
-            tagText = { TagText(it) }
-        )
+            dropDownItems = {
+                state.availableTags.name?.let {
+                    SearchBarMenuItem(name = "Name", text = it, onClick = model::addNameTag)
+                }
+                state.availableTags.finished?.let {
+                    SearchBarMenuItem(name = "Finished") { model.addFinishedTag(value = true) }
+                    SearchBarMenuItem(name = "Not finished") { model.addFinishedTag(value = false) }
+                }
+            }
+        ) {
+            state.tags.name?.let {
+                SearchBarTagChip(name = "Name", text = it, onRemove = model::removeNameTag)
+            }
+            state.tags.finished?.let {
+                if (it)
+                    SearchBarTagChip(name = "Finished", onRemove = model::removeFinishedTag)
+                else
+                    SearchBarTagChip("Not finished", onRemove = model::removeFinishedTag)
+            }
+        }
     }
 }
 
 private fun columns(
     navigateTo: (Screens) -> Unit,
     tournamentId: Long,
-    onNameSort: (SortDirection) -> Unit,
-    onPlayersSort: (SortDirection) -> Unit,
-    onStatusSort: (SortDirection) -> Unit
-): List<LazyTableColumn<Category>> =
+    onSort: (Sorting) -> Unit,
+    onDelete: (Long) -> Unit
+): List<LazyTableColumn<DeletableCategory>> =
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onNameSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onNameSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.NameAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
             }
         }) { navigateTo(Screens.Category(categoryName = it.name, categoryId = it.id, tournamentId = tournamentId)) },
         LazyTableColumn.Text(name = "Players", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onPlayersSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onPlayersSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.PlayersAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.PlayersDesc)
             }
         }) { it.players.toString() },
         LazyTableColumn.Builder(name = "Status", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onStatusSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onStatusSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.StatusAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.StatusDesc)
             }
         }) { category, weight ->
             Status(modifier = Modifier.weight(weight), isOkay = category.finished)
-        }
+        },
+        LazyTableColumn.IconButton(
+            name = "Delete",
+            weight = 0.1f,
+            onClick = { onDelete(it.id) },
+            enabled = { it.deletable },
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete"
+        )
     )
-
-@Composable
-private fun TagText(tagType: Tag) =
-    when (tagType) {
-        is Tag.Name -> Tag(name = "Name", text = tagType.text)
-        Tag.Finished -> Tag(name = "Finished")
-        Tag.NotFinished -> Tag(name = "Not finished")
-    }

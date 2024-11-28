@@ -1,0 +1,80 @@
+CREATE TABLE IF NOT EXISTS category (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    tournamentId INTEGER NOT NULL,
+    FOREIGN KEY (tournamentId) REFERENCES tournament (id)
+);
+
+selectFilteredAndOrdered:
+WITH filteredAndOrdered AS (
+    SELECT
+        *, 1 AS deletable, 0 AS players, 0 AS openGames
+    FROM
+        category
+    WHERE
+        tournamentId = :tournamentId AND
+        name LIKE '%' || :nameFilter || '%' AND
+        CASE
+            WHEN :finishedFilter IS NULL THEN TRUE
+            WHEN :finishedFilter = FALSE THEN openGames = 0
+            ELSE openGames > 0
+        END
+)
+SELECT
+    *
+FROM
+    filteredAndOrdered
+ORDER BY
+    CASE :sorting
+        WHEN 'nameAsc' THEN name
+        WHEN 'playersAsc' THEN players
+        WHEN 'statusAsc' THEN openGames
+    END ASC,
+    CASE :sorting
+        WHEN 'nameDesc' THEN name
+        WHEN 'playersDesc' THEN players
+        WHEN 'statusDesc' THEN openGames
+    END DESC
+LIMIT :limit OFFSET :offset;
+
+selectFilteredAndOrderedSize:
+SELECT
+    COUNT(*) AS size, 0 AS openGames
+FROM
+    category
+WHERE
+    tournamentId = :tournamentId AND
+    name LIKE '%' || :nameFilter || '%' AND
+    CASE
+        WHEN :finishedFilter IS NULL THEN TRUE
+        WHEN :finishedFilter = FALSE THEN openGames = 0
+        ELSE openGames > 0
+    END;
+
+selectSingle:
+SELECT
+    *, 1 AS deletable
+FROM
+    category
+WHERE
+    id = :id;
+
+add:
+INSERT INTO
+    category(name, tournamentId)
+VALUES
+    (:name, :tournamentId);
+
+update:
+UPDATE
+    category
+SET
+    name = :name
+WHERE
+    id = :id;
+
+delete:
+DELETE FROM
+    category
+WHERE
+    id = :id;
