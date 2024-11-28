@@ -35,7 +35,7 @@ class CategoryDatabase(private val database: RacketClashDatabase) {
             .toDeletableCategory()
 
     fun add(category: DeletableCategory) =
-        database.categoryQueries.add(name = category.name, category.tournamentId)
+        database.categoryQueries.add(name = category.name, type = category.type, category.tournamentId)
 
     fun update(category: DeletableCategory) =
         database.categoryQueries.update(

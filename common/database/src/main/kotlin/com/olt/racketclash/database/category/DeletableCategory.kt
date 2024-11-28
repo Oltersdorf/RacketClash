@@ -3,6 +3,7 @@ package com.olt.racketclash.database.category
 data class DeletableCategory(
     val id: Long,
     val name: String,
+    val type: CategoryType,
     val tournamentId: Long,
     val players: Int,
     val finished: Boolean,
@@ -13,6 +14,7 @@ internal fun SelectFilteredAndOrdered.toDeletableCategory() =
     DeletableCategory(
         id = id,
         name = name,
+        type = type,
         tournamentId = tournamentId,
         players = players.toInt(),
         finished = false,
@@ -23,6 +25,7 @@ internal fun SelectSingle.toDeletableCategory() =
     DeletableCategory(
         id = id,
         name = name,
+        type = type,
         tournamentId = tournamentId,
         players = 0,
         finished = false,

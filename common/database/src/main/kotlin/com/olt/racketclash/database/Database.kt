@@ -4,6 +4,7 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.olt.racketclash.database.RacketClashDatabase.Companion.Schema
 import com.olt.racketclash.database.category.CategoryDatabase
+import com.olt.racketclash.database.category.categoryAdapter
 import com.olt.racketclash.database.player.PlayerDatabase
 import com.olt.racketclash.database.player.playerAdapter
 import com.olt.racketclash.database.rule.RuleDatabase
@@ -35,7 +36,8 @@ class Database internal constructor(
         driver = driver,
         ruleAdapter = ruleAdapter(),
         playerAdapter = playerAdapter(),
-        tournamentAdapter = tournamentAdapter()
+        tournamentAdapter = tournamentAdapter(),
+        categoryAdapter = categoryAdapter()
     )
 
     val tournaments = TournamentDatabase(database = database)

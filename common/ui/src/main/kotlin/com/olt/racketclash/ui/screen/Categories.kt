@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.olt.racketclash.categories.CategoriesModel
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.category.CategoryType
 import com.olt.racketclash.database.category.DeletableCategory
 import com.olt.racketclash.database.category.Sorting
 import com.olt.racketclash.ui.component.SearchBar
@@ -76,18 +77,6 @@ private fun columns(
     onDelete: (Long) -> Unit
 ): List<LazyTableColumn<DeletableCategory>> =
     listOf(
-        LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
-            when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.NameAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
-            }
-        }) { navigateTo(Screens.Category(categoryName = it.name, categoryId = it.id, tournamentId = tournamentId)) },
-        LazyTableColumn.Text(name = "Players", weight = 0.1f, onSort = {
-            when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.PlayersAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.PlayersDesc)
-            }
-        }) { it.players.toString() },
         LazyTableColumn.Builder(name = "Status", weight = 0.1f, onSort = {
             when (it) {
                 LazyTableSortDirection.Ascending -> onSort(Sorting.StatusAsc)
@@ -96,6 +85,25 @@ private fun columns(
         }) { category, weight ->
             Status(modifier = Modifier.weight(weight), isOkay = category.finished)
         },
+        LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(Sorting.NameAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
+            }
+        }) { navigateTo(Screens.Category(categoryName = it.name, categoryId = it.id, tournamentId = tournamentId)) },
+        LazyTableColumn.Text(name = "Type", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(Sorting.TypeAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.TypeDesc)
+            }
+        }) { it.type.text() },
+        LazyTableColumn.Text(name = "Players", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(Sorting.PlayersAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.PlayersDesc)
+            }
+        }) { it.players.toString() },
+
         LazyTableColumn.IconButton(
             name = "Delete",
             weight = 0.1f,
@@ -105,3 +113,10 @@ private fun columns(
             contentDescription = "Delete"
         )
     )
+
+private fun CategoryType.text(): String =
+    when (this) {
+        CategoryType.Custom -> "Custom"
+        CategoryType.List -> "List"
+        CategoryType.Tree -> "Tree"
+    }

@@ -1,6 +1,7 @@
 package com.olt.racketclash.addorupdatecategory
 
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.category.CategoryType
 import com.olt.racketclash.state.ViewModelState
 
 class AddOrUpdateCategoryModel(
@@ -27,6 +28,9 @@ class AddOrUpdateCategoryModel(
 
     fun updateName(newName: String) =
         updateState { copy(category = category.copy(name = newName), isSavable = newName.isNotBlank()) }
+
+    fun updateType(newType: CategoryType) =
+        updateState { copy(category = category.copy(type = newType)) }
 
     fun save(onComplete: () -> Unit = {}) =
         onIO {
