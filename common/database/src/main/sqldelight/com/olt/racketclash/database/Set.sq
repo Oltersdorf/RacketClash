@@ -1,0 +1,16 @@
+import kotlin.Int;
+
+CREATE TABLE IF NOT EXISTS gameSet (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    gameId INTEGER NOT NULL,
+    orderNumber INTEGER AS Int NOT NULL,
+    leftPoints INTEGER AS Int NOT NULL,
+    rightPoints INTEGER AS Int NOT NULL,
+    FOREIGN KEY (gameId) REFERENCES game (id)
+);
+
+add:
+INSERT INTO
+    gameSet(gameId, orderNumber, leftPoints, rightPoints)
+VALUES
+    (:gameId, :orderNumber, :leftPoints, :rightPoints);

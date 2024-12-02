@@ -1,9 +1,8 @@
 package com.olt.racketclash.database.tournament
 
-import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.adapter.primitive.IntColumnAdapter
 import com.olt.racketclash.database.Tournament
-import java.time.ZoneId
+import com.olt.racketclash.database.adapter.ZoneIdColumnAdapter
 
 internal fun tournamentAdapter() =
     Tournament.Adapter(
@@ -11,10 +10,3 @@ internal fun tournamentAdapter() =
         zoneIdAdapter = ZoneIdColumnAdapter
     )
 
-private val ZoneIdColumnAdapter = object : ColumnAdapter<ZoneId, String> {
-    override fun decode(databaseValue: String): ZoneId =
-        ZoneId.of(databaseValue)
-
-    override fun encode(value: ZoneId): String =
-        value.id
-}

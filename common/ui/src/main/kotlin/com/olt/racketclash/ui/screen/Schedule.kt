@@ -10,18 +10,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.schedule.Schedule
+import com.olt.racketclash.database.schedule.Sorting
 import com.olt.racketclash.schedule.ScheduleModel
-import com.olt.racketclash.schedule.ScheduledGame
-import com.olt.racketclash.schedule.Tag
-import com.olt.racketclash.state.SortDirection
-import com.olt.racketclash.ui.component.SearchBar
-import com.olt.racketclash.ui.component.SimpleIconButton
-import com.olt.racketclash.ui.component.Status
-import com.olt.racketclash.ui.component.Tag
+import com.olt.racketclash.ui.component.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Schedule(
     database: Database,
@@ -36,11 +33,7 @@ internal fun Schedule(
         isLoading = state.isLoading,
         columns = columns(
             onConfirm = model::onSaveResult,
-            updateResult = model::updateResult,
-            onActiveSort = model::onActiveSort,
-            onScheduleSort = model::onScheduleSort,
-            onTypeSort = model::onTypeSort,
-            onCategorySort = model::onCategorySort
+            onSort = model::onSort
         ),
         currentPage = state.currentPage,
         lastPage = state.lastPage,
@@ -49,67 +42,104 @@ internal fun Schedule(
         SearchBar(
             text = state.searchBarText,
             onTextChange = model::updateSearchBar,
-            dropDownItems = state.availableTags,
-            onDropDownItemClick = model::addTag,
-            tags = state.tags,
-            onTagRemove = model::removeTag,
-            tagText = { TagText(it) }
-        )
+            dropDownItems = {
+                state.availableTags.active?.let {
+                    SearchBarMenuItem(name = "Active") { model.addActiveTag(true) }
+                    SearchBarMenuItem(name = "Not active") { model.addActiveTag(false) }
+                }
+                state.availableTags.singles?.let {
+                    SearchBarMenuItem(name = "Is single") { model.addSinglesTag(true) }
+                    SearchBarMenuItem(name = "is double") { model.addSinglesTag(false) }
+                }
+                state.availableTags.category?.let {
+                    SearchBarMenuItem(name = "Category", text = it, onClick = model::addCategoryTag)
+                }
+                state.availableTags.player?.let {
+                    SearchBarMenuItem(name = "Player", text = it, onClick = model::addPlayerTag)
+                }
+            }
+        ) {
+            state.tags.active?.let {
+                if (it)
+                    SearchBarTagChip(name = "Active", onRemove = model::removeActiveTag)
+                else
+                    SearchBarTagChip(name = "Not active", onRemove = model::removeActiveTag)
+            }
+            state.tags.singles?.let {
+                if (it)
+                    SearchBarTagChip(name = "Is single", onRemove = model::removeSinglesTag)
+                else
+                    SearchBarTagChip(name = "Is double", onRemove = model::removeSinglesTag)
+            }
+            state.tags.category?.let {
+                SearchBarTagChip(name = "Category", text = it, onRemove = model::removeCategoryTag)
+            }
+            state.tags.player?.let {
+                SearchBarTagChip(name = "Player", text = it, onRemove = model::removePlayerTag)
+            }
+        }
     }
 }
 
 private fun columns(
-    onConfirm: (Long) -> Unit,
-    updateResult: (scheduledGameId: Long, set: Int, isLeft: Boolean, resultString: String) -> Unit,
-    onActiveSort: (SortDirection) -> Unit,
-    onScheduleSort: (SortDirection) -> Unit,
-    onTypeSort: (SortDirection) -> Unit,
-    onCategorySort: (SortDirection) -> Unit,
-): List<LazyTableColumn<ScheduledGame>> =
+    onConfirm: (Long, List<Pair<Int, Int>>) -> Unit,
+    onSort: (Sorting) -> Unit
+): List<LazyTableColumn<Schedule>> =
     listOf(
         LazyTableColumn.Builder("Active", weight = 0.05f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onActiveSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onActiveSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.ActiveAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.ActiveDesc)
             }
         }) { scheduledGame, weight ->
             Status(modifier = Modifier.weight(weight), isOkay = scheduledGame.active)
         },
         LazyTableColumn.Text(name = "Schedule", weight = 0.15f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onScheduleSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onActiveSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.ScheduleAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.ScheduleDesc)
             }
-        }) { it.scheduled },
+        }) { it.scheduledFor },
         LazyTableColumn.Text(name = "Type", weight = 0.05f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onTypeSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onActiveSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.TypeAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.TypeDesc)
             }
-        }) { if (it.single) "Single" else "Double" },
+        }) { if (it.playerIdLeftTwo == null) "Single" else "Double" },
         LazyTableColumn.Text(name = "Category", weight = 0.15f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onCategorySort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onActiveSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSort(Sorting.CategoryAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.CategoryDesc)
             }
         }) { it.categoryName },
         LazyTableColumn.Builder(name = "Left", weight = 0.2f) { scheduledGame, weight ->
             Column(modifier = Modifier.weight(weight)) {
-                Text(scheduledGame.playerLeftOneName)
-                if (!scheduledGame.single)
-                    Text(scheduledGame.playerLeftTwoName)
+                Text(scheduledGame.playerNameLeftOne)
+                val leftTwo = scheduledGame.playerNameLeftTwo
+                if (leftTwo != null) Text(leftTwo)
             }
         },
         LazyTableColumn.Builder(name = "Result", weight = 0.2f) { scheduledGame, weight ->
             Column(modifier = Modifier.weight(weight)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    var sets = remember { List(size = scheduledGame.maxSets) { 0 to 0 } }
+
                     Column {
-                        scheduledGame.sets.forEachIndexed { index, set ->
+                        sets.forEachIndexed { setIndex, set ->
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 OutlinedTextField(
                                     modifier = Modifier.width(100.dp),
-                                    value = set.first,
-                                    onValueChange = { updateResult(scheduledGame.id, index, true, it) },
+                                    value = set.first.toString(),
+                                    onValueChange = {
+                                        val number = it.toIntOrNull()
+                                        if (number != null)
+                                            sets = sets.mapIndexed { index, pair ->
+                                                if (index == setIndex)
+                                                    number to pair.second
+                                                else
+                                                    pair
+                                            }
+                                    },
                                     singleLine = true
                                 )
 
@@ -117,8 +147,17 @@ private fun columns(
 
                                 OutlinedTextField(
                                     modifier = Modifier.width(100.dp),
-                                    value = set.second,
-                                    onValueChange = { updateResult(scheduledGame.id, index, false, it) },
+                                    value = set.second.toString(),
+                                    onValueChange = {
+                                        val number = it.toIntOrNull()
+                                        if (number != null)
+                                            sets = sets.mapIndexed { index, pair ->
+                                                if (index == setIndex)
+                                                    pair.first to number
+                                                else
+                                                    pair
+                                            }
+                                    },
                                     singleLine = true
                                 )
                             }
@@ -128,25 +167,15 @@ private fun columns(
                     SimpleIconButton(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Confirm"
-                    ) { onConfirm(scheduledGame.id) }
+                    ) { onConfirm(scheduledGame.id, sets) }
                 }
             }
         },
         LazyTableColumn.Builder(name = "Right", weight = 0.2f) { scheduledGame, weight ->
             Column(modifier = Modifier.weight(weight)) {
-                Text(scheduledGame.playerRightOneName)
-                if (!scheduledGame.single)
-                    Text(scheduledGame.playerRightTwoName)
+                Text(scheduledGame.playerNameRightOne)
+                val rightTwo = scheduledGame.playerNameRightTwo
+                if (rightTwo != null) Text(rightTwo)
             }
         }
     )
-
-@Composable
-private fun TagText(tagType: Tag) =
-    when (tagType) {
-        Tag.Active -> Tag(name = "Active")
-        is Tag.Category -> Tag(name = "Category", text = tagType.text)
-        Tag.Doubles -> Tag(name = "Doubles")
-        is Tag.Player -> Tag(name = "Player", text = tagType.text)
-        Tag.Singles -> Tag(name = "Singles")
-    }

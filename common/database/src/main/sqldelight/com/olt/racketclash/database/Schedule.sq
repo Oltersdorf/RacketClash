@@ -1,0 +1,154 @@
+import java.time.ZoneId;
+import kotlin.Boolean;
+import kotlin.Int;
+
+CREATE TABLE IF NOT EXISTS schedule (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ruleId INTEGER NOT NULL,
+    unixTimeScheduled INTEGER NOT NULL,
+    zoneId TEXT AS ZoneId NOT NULL,
+    active INTEGER AS Boolean NOT NULL,
+    categoryId INTEGER NOT NULL,
+    categoryOrderNumber INTEGER AS Int NOT NULL,
+    playerIdLeftOne INTEGER NOT NULL,
+    playerIdLeftTwo INTEGER,
+    playerIdRightOne INTEGER NOT NULL,
+    playerIdRightTwo INTEGER,
+    FOREIGN KEY (categoryId) REFERENCES category (id),
+    FOREIGN KEY (playerIdLeftOne) REFERENCES player (id),
+    FOREIGN KEY (playerIdLeftTwo) REFERENCES player (id),
+    FOREIGN KEY (playerIdRightOne) REFERENCES player (id),
+    FOREIGN KEY (playerIdRightTwo) REFERENCES player (id)
+);
+
+selectFilteredAndOrdered:
+WITH filteredAndOrdered AS (
+    SELECT
+        schedule.*,
+        rule.name AS ruleName, rule.maxSets,
+        category.name AS categoryName, category.type AS categoryType,
+        p1L.name AS playerNameLeftOne, p2L.name AS playerNameLeftTwo,
+        p1R.name AS playerNameRightOne, p2R.name AS playerNameRightTwo
+    FROM
+        schedule
+    LEFT JOIN
+        rule ON schedule.ruleId = rule.id
+    LEFT JOIN
+        category ON schedule.categoryId = category.id
+    LEFT JOIN
+        player AS p1L ON playerIdLeftOne = p1L.id
+    LEFT JOIN
+        player AS p2L ON playerIdLeftTwo = p2L.id
+    LEFT JOIN
+        player AS p1R ON playerIdRightOne = p1R.id
+    LEFT JOIN
+        player AS p2R ON playerIdRightTwo = p2R.id
+    WHERE
+        tournamentId = :tournamentId AND
+        categoryName LIKE '%' || :categoryNameFilter || '%' AND
+        CASE
+            WHEN :isSingleFilter IS NULL THEN TRUE
+            WHEN :isSingleFilter = 1 THEN playerIdLeftTwo IS NULL
+            ELSE playerIdLeftTwo IS NOT NULL
+        END AND
+        CASE
+            WHEN :isActiveFilter IS NULL THEN TRUE
+            ELSE active = :isActiveFilter
+        END AND (
+            playerNameLeftOne LIKE '%' || :playerNameFilter || '%' OR
+            playerNameLeftTwo LIKE '%' || :playerNameFilter || '%' OR
+            playerNameRightOne LIKE '%' || :playerNameFilter || '%' OR
+            playerNameRightTwo LIKE '%' || :playerNameFilter || '%'
+        )
+)
+SELECT
+    *
+FROM
+    filteredAndOrdered
+ORDER BY
+    CASE :sorting
+        WHEN 'activeAsc' THEN active
+        WHEN 'categoryAsc' THEN categoryName
+        WHEN 'typeAsc' THEN categoryType
+        WHEN 'scheduleAsc' THEN unixTimeScheduled
+    END ASC,
+    CASE :sorting
+        WHEN 'scheduleAsc' THEN categoryOrderNumber
+    END ASC,
+    CASE :sorting
+        WHEN 'activeDesc' THEN active
+        WHEN 'categoryDesc' THEN categoryName
+        WHEN 'typeDesc' THEN categoryType
+        WHEN 'scheduleDesc' THEN unixTimeScheduled
+    END DESC,
+    CASE :sorting
+        WHEN 'scheduleDesc' THEN categoryOrderNumber
+    END ASC
+LIMIT :limit OFFSET :offset;
+
+selectFilteredAndOrderedSize:
+SELECT
+    COUNT(*)
+FROM
+    schedule
+LEFT JOIN
+    category ON schedule.categoryId = category.id
+LEFT JOIN
+    player AS p1L ON playerIdLeftOne = p1L.id
+LEFT JOIN
+    player AS p2L ON playerIdLeftTwo = p2L.id
+LEFT JOIN
+    player AS p1R ON playerIdRightOne = p1R.id
+LEFT JOIN
+    player AS p2R ON playerIdRightTwo = p2R.id
+WHERE
+    tournamentId = :tournamentId AND
+    category.name LIKE '%' || :categoryNameFilter || '%' AND
+    CASE
+        WHEN :isSingleFilter IS NULL THEN TRUE
+        WHEN :isSingleFilter = 1 THEN playerIdLeftTwo IS NULL
+        ELSE playerIdLeftTwo IS NOT NULL
+    END AND
+    CASE
+        WHEN :isActiveFilter IS NULL THEN TRUE
+        ELSE active = :isActiveFilter
+    END AND (
+        p1L.name LIKE '%' || :playerNameFilter || '%' OR
+        p2L.name LIKE '%' || :playerNameFilter || '%' OR
+        p1L.name LIKE '%' || :playerNameFilter || '%' OR
+        p2R.name LIKE '%' || :playerNameFilter || '%'
+    );
+
+add:
+INSERT INTO
+    schedule(
+        ruleId,
+        unixTimeScheduled,
+        zoneId,
+        active,
+        categoryId,
+        categoryOrderNumber,
+        playerIdLeftOne,
+        playerIdLeftTwo,
+        playerIdRightOne,
+        playerIdRightTwo
+    )
+VALUES
+    (
+        :ruleId,
+        :unixTimeScheduled,
+        :zoneId,
+        :active,
+        :categoryId,
+        :categoryOrderNumber,
+        :playerIdLeftOne,
+        :playerIdLeftTwo,
+        :playerIdRightOne,
+        :playerIdRightTwo
+    );
+
+delete:
+DELETE FROM
+    schedule
+WHERE
+    id = :id;

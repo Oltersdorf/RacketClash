@@ -1,0 +1,56 @@
+import java.time.ZoneId;
+import kotlin.Boolean;
+import kotlin.Int;
+
+CREATE TABLE IF NOT EXISTS game (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ruleId INTEGER NOT NULL,
+    isRest INTEGER AS Boolean NOT NULL,
+    unixTimeSubmitted INTEGER NOT NULL,
+    zoneId TEXT AS ZoneId NOT NULL,
+    categoryId INTEGER NOT NULL,
+    categoryOrderNumber INTEGER AS Int NOT NULL,
+    playerIdLeftOne INTEGER NOT NULL,
+    playerIdLeftTwo INTEGER,
+    playerIdRightOne INTEGER,
+    playerIdRightTwo INTEGER,
+    FOREIGN KEY (categoryId) REFERENCES category (id),
+    FOREIGN KEY (playerIdLeftOne) REFERENCES player (id),
+    FOREIGN KEY (playerIdLeftTwo) REFERENCES player (id),
+    FOREIGN KEY (playerIdRightOne) REFERENCES player (id),
+    FOREIGN KEY (playerIdRightTwo) REFERENCES player (id)
+);
+
+add:
+INSERT INTO
+    game(
+        ruleId,
+        isRest,
+        unixTimeSubmitted,
+        zoneId,
+        categoryId,
+        categoryOrderNumber,
+        playerIdLeftOne,
+        playerIdLeftTwo,
+        playerIdRightOne,
+        playerIdRightTwo
+    )
+VALUES
+    (
+        :ruleId,
+        :isRest,
+        :unixTimeScheduled,
+        :zoneId,
+        :categoryId,
+        :categoryOrderNumber,
+        :playerIdLeftOne,
+        :playerIdLeftTwo,
+        :playerIdRightOne,
+        :playerIdRightTwo
+    );
+
+lastInsertedId:
+SELECT
+    last_insert_rowid()
+FROM
+    game;

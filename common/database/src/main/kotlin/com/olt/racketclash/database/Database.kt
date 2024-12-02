@@ -5,10 +5,14 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.olt.racketclash.database.RacketClashDatabase.Companion.Schema
 import com.olt.racketclash.database.category.CategoryDatabase
 import com.olt.racketclash.database.category.categoryAdapter
+import com.olt.racketclash.database.game.gameAdapter
 import com.olt.racketclash.database.player.PlayerDatabase
 import com.olt.racketclash.database.player.playerAdapter
 import com.olt.racketclash.database.rule.RuleDatabase
 import com.olt.racketclash.database.rule.ruleAdapter
+import com.olt.racketclash.database.schedule.ScheduleDatabase
+import com.olt.racketclash.database.schedule.scheduleAdapter
+import com.olt.racketclash.database.set.gameSetAdapter
 import com.olt.racketclash.database.team.TeamDatabase
 import com.olt.racketclash.database.tournament.TournamentDatabase
 import com.olt.racketclash.database.tournament.tournamentAdapter
@@ -37,7 +41,10 @@ class Database internal constructor(
         ruleAdapter = ruleAdapter(),
         playerAdapter = playerAdapter(),
         tournamentAdapter = tournamentAdapter(),
-        categoryAdapter = categoryAdapter()
+        categoryAdapter = categoryAdapter(),
+        scheduleAdapter = scheduleAdapter(),
+        gameAdapter = gameAdapter(),
+        gameSetAdapter = gameSetAdapter()
     )
 
     val tournaments = TournamentDatabase(database = database)
@@ -45,4 +52,5 @@ class Database internal constructor(
     val rules = RuleDatabase(database = database)
     val teams = TeamDatabase(database = database)
     val categories = CategoryDatabase(database = database)
+    val schedule = ScheduleDatabase(database = database)
 }
