@@ -122,7 +122,7 @@ private fun columns(
         LazyTableColumn.Builder(name = "Result", weight = 0.2f) { scheduledGame, weight ->
             Column(modifier = Modifier.weight(weight)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    var sets = remember { List(size = scheduledGame.maxSets) { 0 to 0 } }
+                    var sets by remember { mutableStateOf(List(size = scheduledGame.maxSets) { 0 to 0 }) }
 
                     Column {
                         sets.forEachIndexed { setIndex, set ->
