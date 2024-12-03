@@ -41,7 +41,7 @@ internal fun AddOrUpdateCategory(
             text = state.category.type.text(),
             label = "Type",
             readOnly = true,
-            dropDownItems = listOf(CategoryType.Custom, CategoryType.List, CategoryType.Tree),
+            dropDownItems = listOf(CategoryType.Custom, CategoryType.Table, CategoryType.Tree),
             dropDownItemText = { Text(it.text()) },
             onItemClicked = model::updateType
         )
@@ -51,6 +51,6 @@ internal fun AddOrUpdateCategory(
 private fun CategoryType.text(): String =
     when (this) {
         CategoryType.Custom -> "Custom"
-        CategoryType.List -> "List"
+        CategoryType.Table -> "List"
         CategoryType.Tree -> "Tree"
     }

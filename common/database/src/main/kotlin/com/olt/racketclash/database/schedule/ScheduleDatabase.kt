@@ -44,7 +44,8 @@ class ScheduleDatabase(private val database: RacketClashDatabase) {
         database.gameQueries.add(
             ruleId = scheduledGame.ruleId,
             isRest = false,
-            unixTimeScheduled = Instant.now().epochSecond,
+            unixTimeScheduled = dateTimeConverter.toLong(dateTime = scheduledGame.scheduledFor),
+            unixTimeSubmitted = Instant.now().epochSecond,
             zoneId = dateTimeConverter.defaultZoneId,
             categoryId = scheduledGame.categoryId,
             categoryOrderNumber = scheduledGame.categoryOrderNumber,

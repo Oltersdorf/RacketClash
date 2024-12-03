@@ -9,6 +9,16 @@ CREATE TABLE IF NOT EXISTS gameSet (
     FOREIGN KEY (gameId) REFERENCES game (id)
 );
 
+select:
+SELECT
+    *
+FROM
+    gameSet
+WHERE
+    gameId = :gameId
+ORDER BY
+    orderNumber;
+
 add:
 INSERT INTO
     gameSet(gameId, orderNumber, leftPoints, rightPoints)

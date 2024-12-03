@@ -56,7 +56,7 @@ fun Navigator(
                 is Screens.AddOrUpdateTeam -> AddOrUpdateTeam(database = database, teamId = navLink.teamId, teamName = navLink.teamName, tournamentId = navLink.tournamentId) { navLinks = navLinks.dropLast(1) }
                 is Screens.AddOrUpdateTournament -> AddOrUpdateTournament(database = database, tournamentId = navLink.tournamentId, tournamentName = navLink.tournamentName) { navLinks = navLinks.dropLast(1) }
                 is Screens.Categories -> Categories(database = database, tournamentId = navLink.tournamentId) { screen -> navLinks += screen }
-                is Screens.Category -> TODO()
+                is Screens.Category -> Category(database = database, categoryId = navLink.categoryId) { screen -> navLinks += screen }
                 Screens.Rules -> Rules(database = database) { screen -> navLinks += screen }
                 is Screens.Player -> Player(database = database, playerId = navLink.playerId, playerName = navLink.playerName) { screen -> navLinks += screen }
                 Screens.Players -> Players(database = database) { screen -> navLinks += screen }

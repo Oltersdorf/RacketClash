@@ -90,7 +90,13 @@ private fun columns(
                 LazyTableSortDirection.Ascending -> onSort(Sorting.NameAsc)
                 LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
             }
-        }) { navigateTo(Screens.Category(categoryName = it.name, categoryId = it.id, tournamentId = tournamentId)) },
+        }) {
+            navigateTo(Screens.Category(
+                categoryName = it.name,
+                categoryId = it.id,
+                tournamentId = tournamentId
+            ))
+        },
         LazyTableColumn.Text(name = "Type", weight = 0.1f, onSort = {
             when (it) {
                 LazyTableSortDirection.Ascending -> onSort(Sorting.TypeAsc)
@@ -117,6 +123,6 @@ private fun columns(
 private fun CategoryType.text(): String =
     when (this) {
         CategoryType.Custom -> "Custom"
-        CategoryType.List -> "List"
+        CategoryType.Table -> "List"
         CategoryType.Tree -> "Tree"
     }

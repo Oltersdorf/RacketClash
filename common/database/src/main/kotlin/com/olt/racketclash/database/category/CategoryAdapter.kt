@@ -10,7 +10,7 @@ private val CategoryTypeColumnAdapter = object : ColumnAdapter<CategoryType, Lon
     override fun decode(databaseValue: Long): CategoryType =
         when (databaseValue) {
             0L -> CategoryType.Custom
-            1L -> CategoryType.List
+            1L -> CategoryType.Table
             2L -> CategoryType.Tree
             else -> CategoryType.Custom
         }
@@ -18,7 +18,7 @@ private val CategoryTypeColumnAdapter = object : ColumnAdapter<CategoryType, Lon
     override fun encode(value: CategoryType): Long =
         when (value) {
             CategoryType.Custom -> 0L
-            CategoryType.List -> 1L
+            CategoryType.Table -> 1L
             CategoryType.Tree -> 2L
         }
 }
