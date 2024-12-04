@@ -78,7 +78,6 @@ internal fun Player(
                                 tournament.categories.forEachIndexed { index, category ->
                                     Link(category.name) {
                                         navigateTo(Screens.Category(
-                                            tournamentId = tournament.id,
                                             categoryId = category.id,
                                             categoryName = category.name
                                         ))
@@ -149,7 +148,6 @@ private fun columns(
                 Text(game.tournamentName)
                 Link("(${game.categoryName})") {
                     Screens.Category(
-                        tournamentId = game.tournamentId,
                         categoryId = game.categoryId,
                         categoryName = game.categoryName
                     )

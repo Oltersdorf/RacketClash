@@ -8,6 +8,7 @@ include(
     "common:model:addOrUpdateRule",
     "common:model:addOrUpdateTeam",
     "common:model:addOrUpdateTournament",
+    "common:model:addSchedule",
     "common:model:categories",
     "common:model:category",
     "common:model:player",

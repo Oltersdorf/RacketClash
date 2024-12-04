@@ -64,4 +64,33 @@ class ScheduleDatabase(private val database: RacketClashDatabase) {
             )
         }
     }
+
+    fun add(
+        categoryId: Long,
+        categoryOrderNumber: Int,
+        playerIdLeftOne: Long,
+        playerIdLeftTwo: Long?,
+        playerIdRightOne: Long,
+        playerIdRightTwo: Long?,
+        scheduledFor: Long
+    ) =
+        database.transaction {
+            val category = database.categoryQueries.selectSingle(id = categoryId).executeAsOne()
+            val tournament = database.tournamentQueries.selectSingle(id = category.tournamentId).executeAsOne()
+            val activeGames = database.scheduleQueries.active(categoryId = categoryId).executeAsOne()
+
+            database.scheduleQueries.add(
+                ruleId = 1L,
+                unixTimeScheduled = scheduledFor,
+                zoneId = dateTimeConverter.defaultZoneId,
+                active = activeGames < tournament.numberOfCourts.toLong(),
+                categoryId = categoryId,
+                categoryOrderNumber = categoryOrderNumber,
+                playerIdLeftOne = playerIdLeftOne,
+                playerIdLeftTwo = playerIdLeftTwo,
+                playerIdRightOne = playerIdRightOne,
+                playerIdRightTwo = playerIdRightTwo
+            )
+        }
+
 }

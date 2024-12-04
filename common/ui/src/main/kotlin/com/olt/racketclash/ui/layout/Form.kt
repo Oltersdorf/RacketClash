@@ -9,9 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.ui.component.DropDownTextField
-import com.olt.racketclash.ui.component.Loading
-import com.olt.racketclash.ui.component.NumberSelector
+import com.olt.racketclash.ui.component.*
 
 @Composable
 fun Form(
@@ -90,6 +88,7 @@ fun FormRow(
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(50.dp),
+        verticalAlignment = Alignment.CenterVertically,
         content = content
     )
 }
@@ -210,6 +209,70 @@ fun <T> RowScope.FormDropDownTextField(
         dropDownItemText = dropDownItemText,
         onItemClick = onItemClicked
     )
+}
+
+@Composable
+fun RowScope.FormCheckBox(
+    text: String,
+    checked: Boolean,
+    onCheckChanged: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.weight(0.5f),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckChanged
+        )
+        Text(text = text)
+    }
+}
+
+@Composable
+fun FormButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        shape = RectangleShape
+    ) {
+        Text(text)
+    }
+}
+
+@Composable
+fun <T> FormTable(
+    title: String? = null,
+    onTitleAdd: (() -> Unit)? = null,
+    items: List<T>,
+    isLoading: Boolean = false,
+    columns: List<LazyTableColumn<T>>,
+    currentPage: Int,
+    lastPage: Int,
+    onPageClicked: (Int) -> Unit,
+    searchBar: @Composable () -> Unit
+) {
+    Column {
+        searchBar()
+
+        LazyTableWithScroll(
+            modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerLowest).requiredHeightIn(max = 400.dp),
+            header = title?.let { { LazyTableWithScrollHeader(title = title, onAddClicked = onTitleAdd) } },
+            items = items,
+            isLoading = isLoading,
+            columns = columns
+        )
+
+        if (lastPage != 1)
+            PageSelector(
+                currentPage = currentPage,
+                lastPage = lastPage,
+                onPageClicked = onPageClicked
+            )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

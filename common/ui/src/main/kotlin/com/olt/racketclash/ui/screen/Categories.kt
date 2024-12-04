@@ -36,7 +36,6 @@ internal fun Categories(
         isLoading = state.isLoading,
         columns = columns(
             navigateTo = navigateTo,
-            tournamentId = tournamentId,
             onSort = model::onSort,
             onDelete = model::deleteCategory
         ),
@@ -72,7 +71,6 @@ internal fun Categories(
 
 private fun columns(
     navigateTo: (Screens) -> Unit,
-    tournamentId: Long,
     onSort: (Sorting) -> Unit,
     onDelete: (Long) -> Unit
 ): List<LazyTableColumn<DeletableCategory>> =
@@ -93,8 +91,7 @@ private fun columns(
         }) {
             navigateTo(Screens.Category(
                 categoryName = it.name,
-                categoryId = it.id,
-                tournamentId = tournamentId
+                categoryId = it.id
             ))
         },
         LazyTableColumn.Text(name = "Type", weight = 0.1f, onSort = {

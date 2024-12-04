@@ -28,6 +28,7 @@ import com.olt.racketclash.ui.navigate.Screens
 internal fun Category(
     database: Database,
     categoryId: Long,
+    categoryName: String,
     navigateTo: (Screens) -> Unit
 ) {
     val model = remember { CategoryModel(database = database, categoryId = categoryId) }
@@ -66,7 +67,13 @@ internal fun Category(
         else {
             when (selectedTab) {
                 0 -> when (state.type) {
-                    CategoryType.Custom -> Custom(state = state, updatePage = model::updatePage, navigateTo = navigateTo)
+                    CategoryType.Custom -> Custom(
+                        categoryId = categoryId,
+                        categoryName = categoryName,
+                        state = state,
+                        updatePage = model::updatePage,
+                        navigateTo = navigateTo
+                    )
                     CategoryType.Table -> Table()
                     CategoryType.Tree -> Tree()
                 }
@@ -77,13 +84,15 @@ internal fun Category(
 
 @Composable
 private fun Custom(
+    categoryId: Long,
+    categoryName: String,
     state: State,
     updatePage: (Int) -> Unit,
     navigateTo: (Screens) -> Unit
 ) {
     SearchableLazyTableWithScroll(
         title = "Games",
-        onTitleAdd = { navigateTo(Screens.Players) },
+        onTitleAdd = { navigateTo(Screens.AddSchedule(categoryId = categoryId, categoryName = categoryName)) },
         items = state.games,
         isLoading = false,
         searchBar = {},
