@@ -46,7 +46,7 @@ class AddOrUpdateRuleModel(
             copy(
                 rule = rule.copy(
                     maxSets = newNumber,
-                    winSets = min(rule.maxSets, rule.winSets)
+                    winSets = min(newNumber, rule.winSets)
                 )
             )
         }
@@ -56,7 +56,7 @@ class AddOrUpdateRuleModel(
             copy(
                 rule = rule.copy(
                     winSets = newNumber,
-                    maxSets = max(rule.maxSets, rule.winSets)
+                    maxSets = max(rule.maxSets, newNumber)
                 )
             )
         }
@@ -66,7 +66,7 @@ class AddOrUpdateRuleModel(
             copy(
                 rule = rule.copy(
                     winSets = newNumber,
-                    maxSets = min(rule.maxSets, rule.winSets * 2)
+                    maxSets = min(rule.maxSets, newNumber * 2)
                 )
             )
         }
@@ -79,8 +79,8 @@ class AddOrUpdateRuleModel(
             copy(
                 rule = rule.copy(
                     maxPoints = newNumber,
-                    winPoints = min(rule.winPoints, rule.maxPoints),
-                    pointsDifference = min(rule.pointsDifference, rule.winPoints)
+                    winPoints = min(rule.winPoints, newNumber),
+                    pointsDifference = min(rule.pointsDifference, newNumber)
                 )
             )
         }
@@ -90,7 +90,7 @@ class AddOrUpdateRuleModel(
             copy(
                 rule = rule.copy(
                     winPoints = newNumber,
-                    maxPoints = max(rule.maxPoints, rule.winPoints)
+                    maxPoints = max(rule.maxPoints, newNumber)
                 )
             )
         }
@@ -100,7 +100,7 @@ class AddOrUpdateRuleModel(
             copy(
                 rule = rule.copy(
                     winPoints = newNumber,
-                    pointsDifference = min(rule.pointsDifference, rule.winPoints)
+                    pointsDifference = min(rule.pointsDifference, newNumber)
                 )
             )
         }
@@ -110,8 +110,8 @@ class AddOrUpdateRuleModel(
             copy(
                 rule = rule.copy(
                     pointsDifference = newNumber,
-                    winPoints = max(rule.winPoints, rule.pointsDifference),
-                    maxPoints = max(rule.maxPoints, rule.winPoints)
+                    winPoints = max(rule.winPoints, newNumber),
+                    maxPoints = max(rule.maxPoints, newNumber)
                 )
             )
         }
