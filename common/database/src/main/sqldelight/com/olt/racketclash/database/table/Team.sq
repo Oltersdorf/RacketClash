@@ -49,19 +49,19 @@ ORDER BY
         WHEN 'nameAsc' THEN name
         WHEN 'rankAsc' THEN rank
         WHEN 'sizeAsc' THEN size
-        WHEN 'gamesAsc' THEN gamePointsWon
+        WHEN 'pointsAsc' THEN gamePointsWon
     END ASC,
     CASE :sorting
-        WHEN 'gamesAsc' THEN gamePointsLost
+        WHEN 'pointsAsc' THEN gamePointsLost
     END DESC,
     CASE :sorting
         WHEN 'nameDesc' THEN name
         WHEN 'rankDesc' THEN rank
         WHEN 'sizeDesc' THEN size
-        WHEN 'gamesDesc' THEN gamePointsWon
+        WHEN 'pointsDesc' THEN gamePointsWon
     END DESC,
     CASE :sorting
-        WHEN 'gamesDesc' THEN gamePointsLost
+        WHEN 'pointsDesc' THEN gamePointsLost
     END ASC
 LIMIT :limit OFFSET :offset;
 

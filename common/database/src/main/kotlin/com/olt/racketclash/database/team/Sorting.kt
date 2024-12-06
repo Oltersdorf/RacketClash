@@ -7,6 +7,6 @@ sealed class Sorting(val name: String) {
     data object RankDesc : Sorting("rankDesc")
     data object SizeAsc : Sorting("sizeAsc")
     data object SizeDesc : Sorting("sizeDesc")
-    data object GamesAsc : Sorting("gamesAsc")
-    data object GamesDesc : Sorting("gamesDesc")
+    data object PointsAsc : Sorting("pointsAsc")
+    data object PointsDesc : Sorting("pointsDesc")
 }

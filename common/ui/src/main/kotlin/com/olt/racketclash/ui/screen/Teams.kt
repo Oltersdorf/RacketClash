@@ -87,12 +87,7 @@ private fun columns(
                 LazyTableSortDirection.Descending -> onSort(Sorting.SizeDesc)
             }
         }) { it.size.toString() },
-        LazyTableColumn.Builder(name = "Games", weight = 0.1f, onSort = {
-            when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.GamesAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.GamesDesc)
-            }
-        }) { team, weight ->
+        LazyTableColumn.Builder(name = "Games", weight = 0.1f) { team, weight ->
             RatioBar(
                 modifier = Modifier
                     .weight(weight)
@@ -100,6 +95,20 @@ private fun columns(
                 left = team.gamesWon.toInt(),
                 middle = team.gamesDraw.toInt(),
                 right = team.gamesLost.toInt()
+            )
+        },
+        LazyTableColumn.Builder(name = "Points", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(Sorting.PointsAsc)
+                LazyTableSortDirection.Descending -> onSort(Sorting.PointsDesc)
+            }
+        }) { team, weight ->
+            RatioBar(
+                modifier = Modifier
+                    .weight(weight)
+                    .padding(horizontal = 5.dp),
+                left = team.gamePointsWon.toInt(),
+                right = team.gamePointsLost.toInt()
             )
         }
     )
