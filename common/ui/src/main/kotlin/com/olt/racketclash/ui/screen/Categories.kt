@@ -91,7 +91,8 @@ private fun columns(
         }) {
             navigateTo(Screens.Category(
                 categoryName = it.name,
-                categoryId = it.id
+                categoryId = it.id,
+                tournamentId = it.tournamentId
             ))
         },
         LazyTableColumn.Text(name = "Type", weight = 0.1f, onSort = {

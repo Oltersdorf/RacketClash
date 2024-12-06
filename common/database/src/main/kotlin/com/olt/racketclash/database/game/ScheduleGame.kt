@@ -1,8 +1,8 @@
 package com.olt.racketclash.database.game
 
 import com.olt.racketclash.database.DateTimeConverter
-import com.olt.racketclash.database.GameSet
-import com.olt.racketclash.database.SelectGameSchedule
+import com.olt.racketclash.database.table.GameSet
+import com.olt.racketclash.database.view.SelectGameSchedule
 
 data class ScheduleGame(
     val gameId: Long?,

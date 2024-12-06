@@ -1,7 +1,7 @@
 package com.olt.racketclash.database.category
 
 import app.cash.sqldelight.ColumnAdapter
-import com.olt.racketclash.database.Category
+import com.olt.racketclash.database.table.Category
 
 fun categoryAdapter() =
     Category.Adapter(typeAdapter = CategoryTypeColumnAdapter)

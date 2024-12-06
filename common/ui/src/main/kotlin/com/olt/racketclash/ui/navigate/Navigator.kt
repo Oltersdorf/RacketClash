@@ -51,12 +51,12 @@ fun Navigator(
             when (val navLink = navLinks.lastOrNull()) {
                 is Screens.AddOrUpdateCategory -> AddOrUpdateCategory(database = database, categoryId = navLink.categoryId, categoryName = navLink.categoryName, tournamentId = navLink.tournamentId) { navLinks = navLinks.dropLast(1) }
                 is Screens.AddOrUpdateRule -> AddOrUpdateRule(database = database, ruleId = navLink.ruleId, ruleName = navLink.ruleName) { navLinks = navLinks.dropLast(1) }
-                is Screens.AddSchedule -> AddSchedule(database = database, categoryId = navLink.categoryId, categoryName = navLink.categoryName) { navLinks = navLinks.dropLast(1) }
+                is Screens.AddSchedule -> AddSchedule(database = database, categoryId = navLink.categoryId, categoryName = navLink.categoryName, tournamentId = navLink.tournamentId) { navLinks = navLinks.dropLast(1) }
                 is Screens.AddOrUpdatePlayer -> AddOrUpdatePlayer(database = database, playerId = navLink.playerId, playerName = navLink.playerName) { navLinks = navLinks.dropLast(1) }
                 is Screens.AddOrUpdateTeam -> AddOrUpdateTeam(database = database, teamId = navLink.teamId, teamName = navLink.teamName, tournamentId = navLink.tournamentId) { navLinks = navLinks.dropLast(1) }
                 is Screens.AddOrUpdateTournament -> AddOrUpdateTournament(database = database, tournamentId = navLink.tournamentId, tournamentName = navLink.tournamentName) { navLinks = navLinks.dropLast(1) }
                 is Screens.Categories -> Categories(database = database, tournamentId = navLink.tournamentId) { screen -> navLinks += screen }
-                is Screens.Category -> Category(database = database, categoryId = navLink.categoryId, categoryName = navLink.categoryName) { screen -> navLinks += screen }
+                is Screens.Category -> Category(database = database, categoryId = navLink.categoryId, categoryName = navLink.categoryName, tournamentId = navLink.tournamentId) { screen -> navLinks += screen }
                 Screens.Rules -> Rules(database = database) { screen -> navLinks += screen }
                 is Screens.Player -> Player(database = database, playerId = navLink.playerId, playerName = navLink.playerName) { screen -> navLinks += screen }
                 Screens.Players -> Players(database = database) { screen -> navLinks += screen }

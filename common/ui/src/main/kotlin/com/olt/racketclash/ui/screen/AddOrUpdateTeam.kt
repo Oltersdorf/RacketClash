@@ -4,6 +4,8 @@ import androidx.compose.runtime.*
 import com.olt.racketclash.addorupdateteam.AddOrUpdateTeamModel
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.layout.Form
+import com.olt.racketclash.ui.layout.FormNumberSelector
+import com.olt.racketclash.ui.layout.FormRow
 import com.olt.racketclash.ui.layout.FormTextField
 
 @Composable
@@ -30,11 +32,21 @@ internal fun AddOrUpdateTeam(
             navigateBack()
         }
     ) {
-        FormTextField(
-            value = state.team.name,
-            label = "Name",
-            isError = !state.isSavable,
-            onValueChange = model::updateName
-        )
+        FormRow {
+            FormTextField(
+                value = state.team.name,
+                label = "Name",
+                isError = !state.isSavable,
+                onValueChange = model::updateName
+            )
+
+            FormNumberSelector(
+                value = state.team.rank,
+                label = "Rank",
+                range = 1..Int.MAX_VALUE,
+                onUp = model::updateRank,
+                onDown = model::updateRank
+            )
+        }
     }
 }

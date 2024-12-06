@@ -1,0 +1,61 @@
+CREATE VIEW IF NOT EXISTS subGameStatistics AS
+SELECT
+    rule.gamePointsForWin,
+    rule.gamePointsForDraw,
+    rule.gamePointsForLose,
+    rule.gamePointsForRest,
+    game.isRest,
+    game.id,
+    game.categoryId,
+    game.tournamentId,
+    game.playerIdLeftOne,
+    game.playerIdLeftTwo,
+    game.playerIdRightOne,
+    game.playerIdRightTwo,
+    IIF(isRest, rule.pointPointsForRest, TOTAL(leftPoints)) AS leftPointsWon,
+    IIF(isRest, 0, TOTAL(rightPoints)) AS rightPointsWon,
+    IIF(isRest, rule.setPointsForRest, COUNT(NULLIF(rightPoints > leftPoints, 1))) AS leftSetsWon,
+    IIF(isRest, 0, COUNT(NULLIF(rightPoints < leftPoints, 1))) AS rightSetsWon
+FROM
+    game
+LEFT JOIN
+    gameSet ON gameSet.gameId = game.id
+LEFT JOIN
+    rule ON game.ruleId = rule.id
+GROUP BY
+    game.id;
+
+CREATE VIEW IF NOT EXISTS gameStatistics AS
+SELECT
+	id,
+	categoryId,
+	tournamentId,
+	isRest,
+	playerIdLeftOne,
+    playerIdLeftTwo,
+    playerIdRightOne,
+    playerIdRightTwo,
+    leftPointsWon,
+    rightPointsWon,
+    leftSetsWon,
+    rightSetsWon,
+	IIF(
+        isRest,
+        gamePointsForRest,
+        CASE
+            WHEN leftSetsWon > rightSetsWon THEN gamePointsForWin
+            WHEN leftSetsWon < rightSetsWon THEN gamePointsForLose
+            ELSE gamePointsForDraw
+        END
+    ) AS leftGamePointsWon,
+    IIF(
+        isRest,
+        0,
+        CASE
+            WHEN rightSetsWon > leftSetsWon THEN gamePointsForWin
+            WHEN rightSetsWon < leftSetsWon THEN gamePointsForLose
+            ELSE gamePointsForDraw
+        END
+    ) AS rightGamePointsWon
+FROM
+	subGameStatistics;

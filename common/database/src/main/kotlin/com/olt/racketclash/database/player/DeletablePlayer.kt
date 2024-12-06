@@ -1,5 +1,8 @@
 package com.olt.racketclash.database.player
 
+import com.olt.racketclash.database.table.player.SelectFilteredAndOrdered
+import com.olt.racketclash.database.table.player.SelectSingle
+
 data class DeletablePlayer(
     val id: Long,
     val name: String,

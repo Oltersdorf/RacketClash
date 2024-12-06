@@ -15,6 +15,7 @@ import com.olt.racketclash.database.schedule.ScheduleDatabase
 import com.olt.racketclash.database.schedule.scheduleAdapter
 import com.olt.racketclash.database.set.gameSetAdapter
 import com.olt.racketclash.database.team.TeamDatabase
+import com.olt.racketclash.database.team.teamAdapter
 import com.olt.racketclash.database.tournament.TournamentDatabase
 import com.olt.racketclash.database.tournament.tournamentAdapter
 import java.io.File
@@ -26,11 +27,10 @@ class Database internal constructor(
     constructor(
         path: String
     ) : this(
-        driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
-        /*driver = JdbcSqliteDriver(
+        driver = JdbcSqliteDriver(
             url = "jdbc:sqlite:${File(path, "Database.db").absolutePath}",
             properties = Properties().apply { put("foreign_keys", "true") }
-        )*/
+        )
     )
 
     init {
@@ -42,6 +42,7 @@ class Database internal constructor(
         ruleAdapter = ruleAdapter(),
         playerAdapter = playerAdapter(),
         tournamentAdapter = tournamentAdapter(),
+        teamTableAdapter = teamAdapter(),
         categoryAdapter = categoryAdapter(),
         scheduleAdapter = scheduleAdapter(),
         gameAdapter = gameAdapter(),

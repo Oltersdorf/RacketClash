@@ -1,0 +1,9 @@
+CREATE VIEW IF NOT EXISTS teamPlayer AS
+SELECT
+    player.id AS playerId, player.name AS playerName, teamId, teamTable.name AS teamName
+FROM
+    player
+LEFT JOIN
+    playerToTeam ON player.id = playerToTeam.playerId
+LEFT JOIN
+    teamTable ON teamTable.id = teamId;

@@ -1,0 +1,16 @@
+CREATE VIEW IF NOT EXISTS teamStatisticsRest AS
+SELECT
+    teamTable.id,
+    CAST(TOTAL(rightPointsWon) AS INTEGER) AS restPointsWon,
+    CAST(TOTAL(rightSetsWon) AS INTEGER) AS restSetsWon,
+    CAST(TOTAL(leftGamePointsWon) AS INTEGER) AS restGamePointsWon
+FROM
+    teamTable
+LEFT JOIN
+    gameStatisticsToTeam
+ON
+    playerTeamIdLeftOne = teamTable.id AND
+    gameStatisticsToTeam.isRest = 1 AND
+    gameStatisticsToTeam.tournamentId = teamTable.tournamentId
+GROUP BY
+	teamTable.id;

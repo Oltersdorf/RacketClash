@@ -1,5 +1,8 @@
 package com.olt.racketclash.database.category
 
+import com.olt.racketclash.database.table.category.SelectFilteredAndOrdered
+import com.olt.racketclash.database.table.category.SelectSingle
+
 data class DeletableCategory(
     val id: Long,
     val name: String,

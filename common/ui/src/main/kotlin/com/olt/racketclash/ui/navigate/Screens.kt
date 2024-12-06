@@ -43,12 +43,14 @@ internal sealed class Screens(val name: String) {
 
     data class Category(
         val categoryName: String,
-        val categoryId: Long
+        val categoryId: Long,
+        val tournamentId: Long
     ) : Screens(name = categoryName)
 
     data class AddSchedule(
         val categoryId: Long,
-        val categoryName: String
+        val categoryName: String,
+        val tournamentId: Long
     ) : Screens(name = "Games")
 
     data class Schedule(

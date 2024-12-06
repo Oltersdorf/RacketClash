@@ -49,6 +49,7 @@ class ScheduleDatabase(private val database: RacketClashDatabase) {
             zoneId = dateTimeConverter.defaultZoneId,
             categoryId = scheduledGame.categoryId,
             categoryOrderNumber = scheduledGame.categoryOrderNumber,
+            tournamentId = scheduledGame.tournamentId,
             playerIdLeftOne = scheduledGame.playerIdLeftOne,
             playerIdLeftTwo = scheduledGame.playerIdLeftTwo,
             playerIdRightOne = scheduledGame.playerIdRightOne,
@@ -68,6 +69,7 @@ class ScheduleDatabase(private val database: RacketClashDatabase) {
     fun add(
         categoryId: Long,
         categoryOrderNumber: Int,
+        tournamentId: Long,
         playerIdLeftOne: Long,
         playerIdLeftTwo: Long?,
         playerIdRightOne: Long,
@@ -86,6 +88,7 @@ class ScheduleDatabase(private val database: RacketClashDatabase) {
                 active = activeGames < tournament.numberOfCourts.toLong(),
                 categoryId = categoryId,
                 categoryOrderNumber = categoryOrderNumber,
+                tournamentId = tournamentId,
                 playerIdLeftOne = playerIdLeftOne,
                 playerIdLeftTwo = playerIdLeftTwo,
                 playerIdRightOne = playerIdRightOne,

@@ -1,6 +1,8 @@
 package com.olt.racketclash.database.tournament
 
 import com.olt.racketclash.database.DateTimeConverter
+import com.olt.racketclash.database.table.tournament.SelectFilteredAndOrdered
+import com.olt.racketclash.database.table.tournament.SelectSingle
 
 data class DeletableTournament(
     val id: Long,

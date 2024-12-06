@@ -1,7 +1,7 @@
 package com.olt.racketclash.database.rule
 
 import app.cash.sqldelight.adapter.primitive.IntColumnAdapter
-import com.olt.racketclash.database.Rule
+import com.olt.racketclash.database.table.Rule
 
 internal fun ruleAdapter() =
     Rule.Adapter(

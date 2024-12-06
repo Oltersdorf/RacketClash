@@ -1,6 +1,7 @@
 package com.olt.racketclash.database.schedule
 
 import com.olt.racketclash.database.DateTimeConverter
+import com.olt.racketclash.database.table.schedule.SelectFilteredAndOrdered
 
 data class Schedule(
     val id: Long,
@@ -12,6 +13,7 @@ data class Schedule(
     val categoryId: Long,
     val categoryName: String,
     val categoryOrderNumber: Int,
+    val tournamentId: Long,
     val playerIdLeftOne: Long,
     val playerNameLeftOne: String,
     val playerIdLeftTwo: Long?,
@@ -33,6 +35,7 @@ fun SelectFilteredAndOrdered.toSchedule(dateTimeConverter: DateTimeConverter) =
         categoryId = categoryId,
         categoryName = categoryName ?: "",
         categoryOrderNumber = categoryOrderNumber,
+        tournamentId = tournamentId,
         playerIdLeftOne = playerIdLeftOne,
         playerNameLeftOne = playerNameLeftOne ?: "",
         playerIdLeftTwo = playerIdLeftTwo,

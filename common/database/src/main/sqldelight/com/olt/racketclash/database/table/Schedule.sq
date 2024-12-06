@@ -10,11 +10,13 @@ CREATE TABLE IF NOT EXISTS schedule (
     active INTEGER AS Boolean NOT NULL,
     categoryId INTEGER NOT NULL,
     categoryOrderNumber INTEGER AS Int NOT NULL,
+    tournamentId INTEGER NOT NULL,
     playerIdLeftOne INTEGER NOT NULL,
     playerIdLeftTwo INTEGER,
     playerIdRightOne INTEGER NOT NULL,
     playerIdRightTwo INTEGER,
     FOREIGN KEY (categoryId) REFERENCES category (id),
+    FOREIGN KEY (tournamentId) REFERENCES tournament (id),
     FOREIGN KEY (playerIdLeftOne) REFERENCES player (id),
     FOREIGN KEY (playerIdLeftTwo) REFERENCES player (id),
     FOREIGN KEY (playerIdRightOne) REFERENCES player (id),
@@ -44,7 +46,7 @@ WITH filteredAndOrdered AS (
     LEFT JOIN
         player AS p2R ON playerIdRightTwo = p2R.id
     WHERE
-        tournamentId = :tournamentId AND
+        schedule.tournamentId = :tournamentId AND
         categoryName LIKE '%' || :categoryNameFilter || '%' AND
         CASE
             WHEN :isSingleFilter IS NULL THEN TRUE
@@ -102,7 +104,7 @@ LEFT JOIN
 LEFT JOIN
     player AS p2R ON playerIdRightTwo = p2R.id
 WHERE
-    tournamentId = :tournamentId AND
+    schedule.tournamentId = :tournamentId AND
     category.name LIKE '%' || :categoryNameFilter || '%' AND
     CASE
         WHEN :isSingleFilter IS NULL THEN TRUE
@@ -136,6 +138,7 @@ INSERT INTO
         active,
         categoryId,
         categoryOrderNumber,
+        tournamentId,
         playerIdLeftOne,
         playerIdLeftTwo,
         playerIdRightOne,
@@ -149,6 +152,7 @@ VALUES
         :active,
         :categoryId,
         :categoryOrderNumber,
+        :tournamentId,
         :playerIdLeftOne,
         :playerIdLeftTwo,
         :playerIdRightOne,

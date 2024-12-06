@@ -1,5 +1,8 @@
 package com.olt.racketclash.database.rule
 
+import com.olt.racketclash.database.table.rule.SelectFilteredAndOrdered
+import com.olt.racketclash.database.table.rule.SelectSingle
+
 data class DeletableRule(
     val id: Long,
     val name: String,

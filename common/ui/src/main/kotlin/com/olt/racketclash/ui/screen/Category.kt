@@ -29,6 +29,7 @@ internal fun Category(
     database: Database,
     categoryId: Long,
     categoryName: String,
+    tournamentId: Long,
     navigateTo: (Screens) -> Unit
 ) {
     val model = remember { CategoryModel(database = database, categoryId = categoryId) }
@@ -70,6 +71,7 @@ internal fun Category(
                     CategoryType.Custom -> Custom(
                         categoryId = categoryId,
                         categoryName = categoryName,
+                        tournamentId = tournamentId,
                         state = state,
                         updatePage = model::updatePage,
                         navigateTo = navigateTo
@@ -86,13 +88,20 @@ internal fun Category(
 private fun Custom(
     categoryId: Long,
     categoryName: String,
+    tournamentId: Long,
     state: State,
     updatePage: (Int) -> Unit,
     navigateTo: (Screens) -> Unit
 ) {
     SearchableLazyTableWithScroll(
         title = "Games",
-        onTitleAdd = { navigateTo(Screens.AddSchedule(categoryId = categoryId, categoryName = categoryName)) },
+        onTitleAdd = {
+            navigateTo(Screens.AddSchedule(
+                categoryId = categoryId,
+                categoryName = categoryName,
+                tournamentId = tournamentId
+            ))
+        },
         items = state.games,
         isLoading = false,
         searchBar = {},

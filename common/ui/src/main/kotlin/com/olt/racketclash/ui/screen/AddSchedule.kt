@@ -15,9 +15,10 @@ internal fun AddSchedule(
     database: Database,
     categoryId: Long,
     categoryName: String,
+    tournamentId: Long,
     navigateBack: () -> Unit
 ) {
-    val model = remember { AddScheduleModel(database = database, categoryId = categoryId) }
+    val model = remember { AddScheduleModel(database = database, categoryId = categoryId, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
 
     Form(

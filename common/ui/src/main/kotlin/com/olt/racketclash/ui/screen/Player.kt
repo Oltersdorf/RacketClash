@@ -79,7 +79,8 @@ internal fun Player(
                                     Link(category.name) {
                                         navigateTo(Screens.Category(
                                             categoryId = category.id,
-                                            categoryName = category.name
+                                            categoryName = category.name,
+                                            tournamentId = tournament.id
                                         ))
                                     }
                                     Text(": ${category.rank}${ if (index + 1 < tournament.categories.size) ", " else "" }")
@@ -149,7 +150,8 @@ private fun columns(
                 Link("(${game.categoryName})") {
                     Screens.Category(
                         categoryId = game.categoryId,
-                        categoryName = game.categoryName
+                        categoryName = game.categoryName,
+                        tournamentId = game.tournamentId
                     )
                 }
             }

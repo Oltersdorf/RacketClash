@@ -19,8 +19,13 @@ class TeamsModel(
     fun updateSearchBar(text: String) {
         updateState { copy(searchBarText = text) }
 
+        val number = text.toIntOrNull()
+
         updateState {
-            copy(availableTags = Tags(name = if (tags.name == null) text else null))
+            copy(availableTags = Tags(
+                name = if (tags.name == null) text else null,
+                rank = if (tags.rank == null && number != null) number else null
+            ))
         }
     }
 
@@ -46,6 +51,28 @@ class TeamsModel(
         updateTeamState()
     }
 
+    fun addRankTag() {
+        updateState {
+            copy(
+                availableTags = availableTags.copy(rank = null),
+                tags = tags.copy(rank = availableTags.rank)
+            )
+        }
+
+        updateTeamState()
+    }
+
+    fun removeRankTag() {
+        updateState {
+            copy(
+                tags = tags.copy(rank = null),
+                availableTags = availableTags.copy(rank = searchBarText.toIntOrNull())
+            )
+        }
+
+        updateTeamState()
+    }
+
     fun onSort(sorting: Sorting) =
         updateTeamState(sorting = sorting)
 
@@ -65,6 +92,7 @@ class TeamsModel(
             val (totalSize, sortedTeams) = database.teams.selectFilteredAndOrdered(
                 tournamentId = tournamentId,
                 nameFilter = filters.name ?: "",
+                rankFilter = filters.rank,
                 sorting = sorting,
                 fromIndex = (currentPage - 1) * pageSize,
                 toIndex = currentPage * pageSize

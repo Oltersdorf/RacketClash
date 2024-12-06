@@ -28,6 +28,9 @@ class AddOrUpdateTeamModel(
     fun updateName(newName: String) =
         updateState { copy(team = team.copy(name = newName), isSavable = newName.isNotBlank()) }
 
+    fun updateRank(number: Int) =
+        updateState { copy(team = team.copy(rank = number)) }
+
     fun save(onComplete: () -> Unit = {}) =
         onIO {
             updateState { copy(isLoading = true) }

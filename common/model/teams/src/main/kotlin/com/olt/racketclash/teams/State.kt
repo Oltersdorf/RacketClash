@@ -1,11 +1,11 @@
 package com.olt.racketclash.teams
 
-import com.olt.racketclash.database.team.DeletableTeam
+import com.olt.racketclash.database.table.FilteredAndOrderedTeam
 import com.olt.racketclash.database.team.Sorting
 
 data class State(
     val isLoading: Boolean = true,
-    val teams: List<DeletableTeam> = emptyList(),
+    val teams: List<FilteredAndOrderedTeam> = emptyList(),
     val searchBarText: String = "",
     val availableTags: Tags = Tags(),
     val tags: Tags = Tags(),

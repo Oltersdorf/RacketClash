@@ -1,5 +1,4 @@
-CREATE VIEW IF NOT EXISTS gameSchedule
-AS
+CREATE VIEW IF NOT EXISTS gameSchedule AS
 SELECT
     id AS gameId,
     NULL AS scheduleId,
@@ -42,13 +41,13 @@ SELECT
 FROM
     gameSchedule
 LEFT JOIN
-    playerTeam AS pL1 ON pL1.playerId = playerIdLeftOne
+    teamPlayer AS pL1 ON pL1.playerId = playerIdLeftOne
 LEFT JOIN
-    playerTeam AS pL2 ON pL2.playerId = playerIdLeftTwo
+    teamPlayer AS pL2 ON pL2.playerId = playerIdLeftTwo
 LEFT JOIN
-    playerTeam AS pR1 ON pR1.playerId = playerIdRightOne
+    teamPlayer AS pR1 ON pR1.playerId = playerIdRightOne
 LEFT JOIN
-    playerTeam AS pR2 ON pR2.playerId = playerIdRightTwo
+    teamPlayer AS pR2 ON pR2.playerId = playerIdRightTwo
 WHERE
     categoryId = :categoryId
 ORDER BY

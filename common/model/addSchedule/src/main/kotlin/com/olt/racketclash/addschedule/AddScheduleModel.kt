@@ -5,7 +5,8 @@ import com.olt.racketclash.state.ViewModelState
 
 class AddScheduleModel(
     private val database: Database,
-    private val categoryId: Long
+    private val categoryId: Long,
+    private val tournamentId: Long
 ) : ViewModelState<State>(initialState = State()) {
 
     private val doubleGenerate = EquallyStrongDoublesGenerator()
@@ -70,6 +71,7 @@ class AddScheduleModel(
                 database.schedule.add(
                     categoryId = categoryId,
                     categoryOrderNumber = index,
+                    tournamentId = tournamentId,
                     playerIdLeftOne = scheduledGame.player1LeftId,
                     playerIdLeftTwo = scheduledGame.player2LeftId,
                     playerIdRightOne = scheduledGame.player1RightId,
