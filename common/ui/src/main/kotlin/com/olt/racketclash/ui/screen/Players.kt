@@ -11,9 +11,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.player.DeletablePlayer
 import com.olt.racketclash.players.PlayersModel
 import com.olt.racketclash.database.player.Sorting
+import com.olt.racketclash.database.table.FilteredAndOrderedPlayer
 import com.olt.racketclash.ui.component.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
@@ -88,8 +88,8 @@ internal fun Players(
 private fun columns(
     navigateTo: (Screens) -> Unit,
     onSort: (Sorting) -> Unit,
-    onDelete: (Long) -> Unit
-): List<LazyTableColumn<DeletablePlayer>> =
+    onDelete: (FilteredAndOrderedPlayer) -> Unit
+): List<LazyTableColumn<FilteredAndOrderedPlayer>> =
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.25f, text = { it.name }, onSort = {
             when (it) {
@@ -160,14 +160,14 @@ private fun columns(
                 LazyTableSortDirection.Descending -> onSort(Sorting.SinglesDesc)
             }
         }) { player, weight ->
-            RatioBar(
+            /*RatioBar(
                 modifier = Modifier
                     .weight(weight)
                     .padding(horizontal = 5.dp),
                 left = player.winRatioSingle.first,
                 middle = player.winRatioSingle.second,
                 right = player.winRatioSingle.third
-            )
+            )*/
         },
         LazyTableColumn.Builder(name = "Double", weight = 0.1f, onSort = {
             when (it) {
@@ -175,20 +175,20 @@ private fun columns(
                 LazyTableSortDirection.Descending -> onSort(Sorting.DoublesDesc)
             }
         }) { player, weight ->
-            RatioBar(
+            /*RatioBar(
                 modifier = Modifier
                     .weight(weight)
                     .padding(horizontal = 5.dp),
                 left = player.winRatioDouble.first,
                 middle = player.winRatioDouble.second,
                 right = player.winRatioDouble.third
-            )
+            )*/
         },
         LazyTableColumn.IconButton(
             name = "Delete",
             weight = 0.1f,
-            enabled = { it.deletable },
-            onClick = { onDelete(it.id) },
+            enabled = { it.gamesPlayed + it.gamesScheduled == 0L },
+            onClick = onDelete,
             imageVector = Icons.Default.Delete,
             contentDescription = "Delete"
         )

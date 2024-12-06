@@ -18,10 +18,10 @@ CREATE TABLE IF NOT EXISTS game (
     playerIdRightTwo INTEGER,
     FOREIGN KEY (categoryId) REFERENCES category (id),
     FOREIGN KEY (tournamentId) REFERENCES tournament (id),
-    FOREIGN KEY (playerIdLeftOne) REFERENCES player (id),
-    FOREIGN KEY (playerIdLeftTwo) REFERENCES player (id),
-    FOREIGN KEY (playerIdRightOne) REFERENCES player (id),
-    FOREIGN KEY (playerIdRightTwo) REFERENCES player (id)
+    FOREIGN KEY (playerIdLeftOne) REFERENCES playerTable (id),
+    FOREIGN KEY (playerIdLeftTwo) REFERENCES playerTable (id),
+    FOREIGN KEY (playerIdRightOne) REFERENCES playerTable (id),
+    FOREIGN KEY (playerIdRightTwo) REFERENCES playerTable (id)
 );
 
 add:

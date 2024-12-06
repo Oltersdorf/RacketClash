@@ -36,7 +36,7 @@ internal fun Teams(
             navigateTo = navigateTo,
             tournamentId = tournamentId,
             onSort = model::onSort,
-            delete = model::delete
+            onDelete = model::onDelete
         ),
         currentPage = state.currentPage,
         lastPage = state.lastPage,
@@ -68,7 +68,7 @@ private fun columns(
     navigateTo: (Screens) -> Unit,
     tournamentId: Long,
     onSort: (Sorting) -> Unit,
-    delete: (FilteredAndOrderedTeam) -> Unit
+    onDelete: (FilteredAndOrderedTeam) -> Unit
 ): List<LazyTableColumn<FilteredAndOrderedTeam>> =
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
@@ -118,7 +118,7 @@ private fun columns(
         LazyTableColumn.IconButton(
             name = "Delete",
             weight = 0.1f,
-            onClick = delete,
+            onClick = onDelete,
             enabled = { it.size == 0L },
             imageVector = Icons.Default.Delete,
             contentDescription = "Delete"

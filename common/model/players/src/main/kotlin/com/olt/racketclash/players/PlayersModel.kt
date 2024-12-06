@@ -2,6 +2,7 @@ package com.olt.racketclash.players
 
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.database.player.Sorting
+import com.olt.racketclash.database.table.FilteredAndOrderedPlayer
 import com.olt.racketclash.state.ViewModelState
 import kotlin.math.min
 
@@ -123,10 +124,10 @@ class PlayersModel(
     fun updatePage(pageNumber: Int) =
         updatePlayersState(currentPage = pageNumber)
 
-    fun deletePlayer(id: Long) {
+    fun deletePlayer(player: FilteredAndOrderedPlayer) {
         onIO {
-            updateState { copy(players = players.toMutableList().apply { removeIf { it.id == id } }) }
-            database.players.delete(id = id)
+            database.players.delete(id = player.id)
+            updatePlayersState()
         }
     }
 

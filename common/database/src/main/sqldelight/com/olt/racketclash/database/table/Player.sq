@@ -1,23 +1,34 @@
 import kotlin.Int;
 
-CREATE TABLE IF NOT EXISTS player (
+CREATE TABLE IF NOT EXISTS playerTable (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     birthYear INTEGER AS Int NOT NULL,
     club TEXT NOT NULL
 );
 
-selectFilteredAndOrdered:
+filteredAndOrderedPlayer:
 WITH filteredAndOrdered AS (
     SELECT
-        id, name, birthYear, club,
-        0 AS numberOfTournaments,
+        playerTable.*,
+        COUNT(DISTINCT gameStatistics.tournamentId) AS numberOfTournaments,
         0 AS goldMedals,
         0 AS silverMedals,
         0 AS bronzeMedals,
-        0 AS deletable
+        COUNT(gameStatistics.id) AS gamesPlayed,
+        (SELECT COUNT(DISTINCT schedule.id) FROM schedule WHERE
+            playerIdLeftOne = playerTable.id OR playerIdLeftTwo = playerTable.id OR
+            playerIdRightOne = playerTable.id OR playerIdRightTwo = playerTable.id
+        ) AS gamesScheduled
     FROM
-        player
+        playerTable
+    LEFT JOIN
+        gameStatistics
+    ON
+        gameStatistics.playerIdLeftOne = playerTable.id OR
+        gameStatistics.playerIdLeftTwo = playerTable.id OR
+        gameStatistics.playerIdRightOne = playerTable.id OR
+        gameStatistics.playerIdRightTwo = playerTable.id
     WHERE
         name LIKE '%' || :nameFilter || '%' AND
         club LIKE '%' || :clubFilter || '%' AND
@@ -30,6 +41,8 @@ WITH filteredAndOrdered AS (
             WHEN :hasMedalsFilter = FALSE THEN goldMedals = 0 AND silverMedals = 0 AND bronzeMedals = 0
             ELSE goldMedals > 0 OR silverMedals > 0 OR bronzeMedals > 0
         END
+    GROUP BY
+        playerTable.id
 )
 SELECT
     *
@@ -83,7 +96,7 @@ SELECT
     0 AS silverMedals,
     0 AS bronzeMedals
 FROM
-    player
+    playerTable
 WHERE
     name LIKE '%' || :nameFilter || '%' AND
     ifnull(club, '') LIKE '%' || :clubFilter || '%' AND
@@ -97,31 +110,49 @@ WHERE
         ELSE goldMedals > 0 OR silverMedals > 0 OR bronzeMedals > 0
     END;
 
-selectSingle:
+player:
 SELECT
-    *, 1 AS deletable
+    playerTable.*,
+    COUNT(DISTINCT gameStatistics.tournamentId) AS numberOfTournaments,
+    0 AS goldMedals,
+    0 AS silverMedals,
+    0 AS bronzeMedals,
+    COUNT(gameStatistics.id) AS gamesPlayed,
+    (SELECT COUNT(DISTINCT schedule.id) FROM schedule WHERE
+        playerIdLeftOne = playerTable.id OR playerIdLeftTwo = playerTable.id OR
+        playerIdRightOne = playerTable.id OR playerIdRightTwo = playerTable.id
+    ) AS gamesScheduled
 FROM
-    player
+    playerTable
+LEFT JOIN
+    gameStatistics
+ON
+    gameStatistics.playerIdLeftOne = playerTable.id OR
+    gameStatistics.playerIdLeftTwo = playerTable.id OR
+    gameStatistics.playerIdRightOne = playerTable.id OR
+    gameStatistics.playerIdRightTwo = playerTable.id
 WHERE
-    id = :id;
+    playerTable.id = :id
+GROUP BY
+    playerTable.id;
 
 clubs:
 SELECT
     DISTINCT club
 FROM
-    player
+    playerTable
 WHERE
     club LIKE '%' || :clubFilter || '%';
 
 add:
 INSERT INTO
-    player(name, birthYear, club)
+    playerTable(name, birthYear, club)
 VALUES
     (:name, :birthYear, :club);
 
 update:
 UPDATE
-    player
+    playerTable
 SET
     name = :name,
     birthYear = :birthYear,
@@ -131,6 +162,6 @@ WHERE
 
 delete:
 DELETE FROM
-    player
+    playerTable
 WHERE
     id = :id;

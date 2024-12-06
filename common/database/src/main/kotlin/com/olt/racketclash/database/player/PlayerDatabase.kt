@@ -1,6 +1,8 @@
 package com.olt.racketclash.database.player
 
 import com.olt.racketclash.database.RacketClashDatabase
+import com.olt.racketclash.database.table.FilteredAndOrderedPlayer
+import com.olt.racketclash.database.table.Player
 
 class PlayerDatabase(private val database: RacketClashDatabase) {
 
@@ -12,14 +14,14 @@ class PlayerDatabase(private val database: RacketClashDatabase) {
         sorting: Sorting,
         fromIndex: Int,
         toIndex: Int
-    ): Pair<Long, List<DeletablePlayer>> =
+    ): Pair<Long, List<FilteredAndOrderedPlayer>> =
         database.playerQueries.selectFilteredAndOrderedSize(
             nameFilter = nameFilter,
             birthYearFilter = birthYearFilter,
             clubFilter = clubFilter,
             hasMedalsFilter = hasMedalsFilter?.let { if (it) 1L else 0L }
         ).executeAsOne().size to
-        database.playerQueries.selectFilteredAndOrdered(
+        database.playerQueries.filteredAndOrderedPlayer(
             nameFilter = nameFilter,
             birthYearFilter = birthYearFilter,
             clubFilter = clubFilter,
@@ -27,23 +29,23 @@ class PlayerDatabase(private val database: RacketClashDatabase) {
             sorting = sorting.name,
             offset = fromIndex.toLong(),
             limit = toIndex.toLong()
-        ).executeAsList().map { it.toDeletablePlayer() }
+        ).executeAsList()
 
 
-    fun selectSingle(id: Long): DeletablePlayer =
-        database.playerQueries.selectSingle(id = id).executeAsOne().toDeletablePlayer()
+    fun selectSingle(id: Long): Player =
+        database.playerQueries.player(id = id).executeAsOne()
 
     fun clubs(clubFilter: String) =
         database.playerQueries.clubs(clubFilter = clubFilter).executeAsList()
 
-    fun add(player: DeletablePlayer) =
+    fun add(player: Player) =
         database.playerQueries.add(
             name = player.name,
             birthYear = player.birthYear,
             club = player.club
         )
 
-    fun update(player: DeletablePlayer) =
+    fun update(player: Player) =
         database.playerQueries.update(
             id = player.id,
             name = player.name,

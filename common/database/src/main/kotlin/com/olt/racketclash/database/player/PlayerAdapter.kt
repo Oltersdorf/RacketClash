@@ -1,7 +1,7 @@
 package com.olt.racketclash.database.player
 
 import app.cash.sqldelight.adapter.primitive.IntColumnAdapter
-import com.olt.racketclash.database.table.Player
+import com.olt.racketclash.database.table.PlayerTable
 
 internal fun playerAdapter() =
-    Player.Adapter(birthYearAdapter = IntColumnAdapter)
+    PlayerTable.Adapter(birthYearAdapter = IntColumnAdapter)

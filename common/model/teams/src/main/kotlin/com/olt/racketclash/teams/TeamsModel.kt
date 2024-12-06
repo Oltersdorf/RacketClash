@@ -80,12 +80,13 @@ class TeamsModel(
     fun updatePage(pageNumber: Int) =
         updateTeamState(currentPage = pageNumber)
 
-    fun delete(team: FilteredAndOrderedTeam) =
-        onDefault {
-            updateState { copy(teams = teams - team) }
-
+    fun onDelete(team: FilteredAndOrderedTeam) {
+        updateState { copy(teams = teams - team) }
+        onIO {
+            database.teams.delete(id = team.id)
             updateTeamState()
         }
+    }
 
     private fun updateTeamState(
         sorting: Sorting = state.value.sorting,

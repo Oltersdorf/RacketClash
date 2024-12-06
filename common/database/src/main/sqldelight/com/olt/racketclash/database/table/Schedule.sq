@@ -17,10 +17,10 @@ CREATE TABLE IF NOT EXISTS schedule (
     playerIdRightTwo INTEGER,
     FOREIGN KEY (categoryId) REFERENCES category (id),
     FOREIGN KEY (tournamentId) REFERENCES tournament (id),
-    FOREIGN KEY (playerIdLeftOne) REFERENCES player (id),
-    FOREIGN KEY (playerIdLeftTwo) REFERENCES player (id),
-    FOREIGN KEY (playerIdRightOne) REFERENCES player (id),
-    FOREIGN KEY (playerIdRightTwo) REFERENCES player (id)
+    FOREIGN KEY (playerIdLeftOne) REFERENCES playerTable (id),
+    FOREIGN KEY (playerIdLeftTwo) REFERENCES playerTable (id),
+    FOREIGN KEY (playerIdRightOne) REFERENCES playerTable (id),
+    FOREIGN KEY (playerIdRightTwo) REFERENCES playerTable (id)
 );
 
 selectFilteredAndOrdered:
@@ -38,13 +38,13 @@ WITH filteredAndOrdered AS (
     LEFT JOIN
         category ON schedule.categoryId = category.id
     LEFT JOIN
-        player AS p1L ON playerIdLeftOne = p1L.id
+        playerTable AS p1L ON playerIdLeftOne = p1L.id
     LEFT JOIN
-        player AS p2L ON playerIdLeftTwo = p2L.id
+        playerTable AS p2L ON playerIdLeftTwo = p2L.id
     LEFT JOIN
-        player AS p1R ON playerIdRightOne = p1R.id
+        playerTable AS p1R ON playerIdRightOne = p1R.id
     LEFT JOIN
-        player AS p2R ON playerIdRightTwo = p2R.id
+        playerTable AS p2R ON playerIdRightTwo = p2R.id
     WHERE
         schedule.tournamentId = :tournamentId AND
         categoryName LIKE '%' || :categoryNameFilter || '%' AND
@@ -96,13 +96,13 @@ FROM
 LEFT JOIN
     category ON schedule.categoryId = category.id
 LEFT JOIN
-    player AS p1L ON playerIdLeftOne = p1L.id
+    playerTable AS p1L ON playerIdLeftOne = p1L.id
 LEFT JOIN
-    player AS p2L ON playerIdLeftTwo = p2L.id
+    playerTable AS p2L ON playerIdLeftTwo = p2L.id
 LEFT JOIN
-    player AS p1R ON playerIdRightOne = p1R.id
+    playerTable AS p1R ON playerIdRightOne = p1R.id
 LEFT JOIN
-    player AS p2R ON playerIdRightTwo = p2R.id
+    playerTable AS p2R ON playerIdRightTwo = p2R.id
 WHERE
     schedule.tournamentId = :tournamentId AND
     category.name LIKE '%' || :categoryNameFilter || '%' AND
