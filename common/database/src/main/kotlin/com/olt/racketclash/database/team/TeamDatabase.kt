@@ -33,15 +33,29 @@ class TeamDatabase(private val database: RacketClashDatabase) {
             .team(id = id)
             .executeAsOne()
 
-    fun add(team: Team, tournamentId: Long) =
-        database.teamQueries.add(name = team.name, rank = team.rank, tournamentId = tournamentId)
+    fun add(team: Team, tournamentId: Long, players: Set<Long>) =
+        database.transaction {
+            database.teamQueries.add(name = team.name, rank = team.rank, tournamentId = tournamentId)
+            val teamId = database.teamQueries.lastInsertedId().executeAsOne()
+            players.forEach {
+                database.playerToTeamQueries.add(playerId = it, teamId = teamId)
+            }
+        }
 
-    fun update(team: Team) =
-        database.teamQueries.update(
-            id = team.id,
-            name = team.name,
-            rank = team.rank
-        )
+
+    fun update(team: Team, players: Set<Long>) =
+        database.transaction {
+            database.teamQueries.update(
+                id = team.id,
+                name = team.name,
+                rank = team.rank
+            )
+            database.playerToTeamQueries.deleteByTeam(teamId = team.id)
+            players.forEach {
+                database.playerToTeamQueries.add(playerId = it, teamId = team.id)
+            }
+        }
+
 
     fun delete(id: Long) =
         database.teamQueries.delete(id = id)

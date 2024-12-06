@@ -2,6 +2,8 @@ package com.olt.racketclash.ui.screen
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -33,7 +35,8 @@ internal fun Teams(
         columns = columns(
             navigateTo = navigateTo,
             tournamentId = tournamentId,
-            onSort = model::onSort
+            onSort = model::onSort,
+            delete = model::delete
         ),
         currentPage = state.currentPage,
         lastPage = state.lastPage,
@@ -64,7 +67,8 @@ internal fun Teams(
 private fun columns(
     navigateTo: (Screens) -> Unit,
     tournamentId: Long,
-    onSort: (Sorting) -> Unit
+    onSort: (Sorting) -> Unit,
+    delete: (FilteredAndOrderedTeam) -> Unit
 ): List<LazyTableColumn<FilteredAndOrderedTeam>> =
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
@@ -110,5 +114,13 @@ private fun columns(
                 left = team.gamePointsWon.toInt(),
                 right = team.gamePointsLost.toInt()
             )
-        }
+        },
+        LazyTableColumn.IconButton(
+            name = "Delete",
+            weight = 0.1f,
+            onClick = delete,
+            enabled = { it.size == 0L },
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete"
+        )
     )

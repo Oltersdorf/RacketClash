@@ -1,7 +1,27 @@
 CREATE TABLE IF NOT EXISTS playerToTeam(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
     playerId INTEGER NOT NULL,
     teamId INTEGER NOT NULL,
+    PRIMARY KEY (playerId, teamId),
     FOREIGN KEY (playerId) REFERENCES player (id),
     FOREIGN KEY (teamId) REFERENCES teamTable (id)
 );
+
+add:
+INSERT INTO
+    playerToTeam (playerId, teamId)
+VALUES
+    (:playerId, :teamId);
+
+deleteByTeam:
+DELETE FROM
+    playerToTeam
+WHERE
+    teamId = :teamId;
+
+playerIn:
+SELECT
+    playerId
+FROM
+    playerToTeam
+WHERE
+    teamId = :teamId;

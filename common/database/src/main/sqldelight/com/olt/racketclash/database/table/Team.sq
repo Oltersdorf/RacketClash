@@ -124,3 +124,9 @@ DELETE FROM
     teamTable
 WHERE
     id = :id;
+
+lastInsertedId:
+SELECT
+    last_insert_rowid()
+FROM
+    teamTable;

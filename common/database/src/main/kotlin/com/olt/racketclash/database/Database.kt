@@ -9,6 +9,7 @@ import com.olt.racketclash.database.game.GameDatabase
 import com.olt.racketclash.database.game.gameAdapter
 import com.olt.racketclash.database.player.PlayerDatabase
 import com.olt.racketclash.database.player.playerAdapter
+import com.olt.racketclash.database.playertoteam.PlayerToTeamDatabase
 import com.olt.racketclash.database.rule.RuleDatabase
 import com.olt.racketclash.database.rule.ruleAdapter
 import com.olt.racketclash.database.schedule.ScheduleDatabase
@@ -56,4 +57,5 @@ class Database internal constructor(
     val categories = CategoryDatabase(database = database)
     val schedule = ScheduleDatabase(database = database)
     val game = GameDatabase(database = database)
+    val playerToTeam = PlayerToTeamDatabase(database = database)
 }

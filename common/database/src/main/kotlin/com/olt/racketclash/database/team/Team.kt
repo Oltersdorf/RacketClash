@@ -6,7 +6,7 @@ fun emptyTeam() =
     Team(
         id = 0L,
         name = "",
-        rank = 0,
+        rank = 1,
         tournamentId = 0L,
         size = 0,
         gamesWon = 0L,

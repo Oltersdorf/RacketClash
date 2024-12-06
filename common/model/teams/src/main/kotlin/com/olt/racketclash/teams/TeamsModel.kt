@@ -1,6 +1,7 @@
 package com.olt.racketclash.teams
 
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.table.FilteredAndOrderedTeam
 import com.olt.racketclash.database.team.Sorting
 import com.olt.racketclash.state.ViewModelState
 import kotlin.math.min
@@ -79,6 +80,12 @@ class TeamsModel(
     fun updatePage(pageNumber: Int) =
         updateTeamState(currentPage = pageNumber)
 
+    fun delete(team: FilteredAndOrderedTeam) =
+        onDefault {
+            updateState { copy(teams = teams - team) }
+
+            updateTeamState()
+        }
 
     private fun updateTeamState(
         sorting: Sorting = state.value.sorting,
