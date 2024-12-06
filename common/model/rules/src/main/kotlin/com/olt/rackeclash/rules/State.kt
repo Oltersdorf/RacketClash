@@ -1,11 +1,11 @@
 package com.olt.rackeclash.rules
 
-import com.olt.racketclash.database.rule.DeletableRule
 import com.olt.racketclash.database.rule.Sorting
+import com.olt.racketclash.database.table.FilteredAndOrderedRule
 
 data class State(
     val isLoading: Boolean = true,
-    val rules: List<DeletableRule> = emptyList(),
+    val rules: List<FilteredAndOrderedRule> = emptyList(),
     val searchBarText: String = "",
     val availableTags: Tags = Tags(),
     val tags: Tags = Tags(),

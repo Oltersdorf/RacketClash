@@ -40,7 +40,7 @@ class Database internal constructor(
 
     private val database = RacketClashDatabase(
         driver = driver,
-        ruleAdapter = ruleAdapter(),
+        ruleTableAdapter = ruleAdapter(),
         playerAdapter = playerAdapter(),
         tournamentAdapter = tournamentAdapter(),
         teamTableAdapter = teamAdapter(),

@@ -7,7 +7,7 @@ import androidx.compose.runtime.*
 import com.olt.rackeclash.rules.RulesModel
 import com.olt.racketclash.database.rule.Sorting
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.rule.DeletableRule
+import com.olt.racketclash.database.table.FilteredAndOrderedRule
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.SearchBarMenuItem
 import com.olt.racketclash.ui.component.SearchBarTagChip
@@ -58,8 +58,8 @@ internal fun Rules(
 private fun columns(
     navigateTo: (Screens) -> Unit,
     onSort: (Sorting) -> Unit,
-    onDelete: (Long) -> Unit
-): List<LazyTableColumn<DeletableRule>> =
+    onDelete: (FilteredAndOrderedRule) -> Unit
+): List<LazyTableColumn<FilteredAndOrderedRule>> =
     listOf(
         LazyTableColumn.Link(name = "Name", text = { it.name }, weight = 0.6f, onSort = {
             when (it) {
@@ -84,8 +84,8 @@ private fun columns(
         LazyTableColumn.IconButton(
             name = "Delete",
             weight = 0.1f,
-            onClick = { onDelete(it.id) },
-            enabled = { it.deletable },
+            onClick = onDelete,
+            enabled = { it.used == 0L },
             imageVector = Icons.Default.Delete,
             contentDescription = "Delete"
         )

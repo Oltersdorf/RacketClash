@@ -1,6 +1,8 @@
 package com.olt.racketclash.database.rule
 
 import com.olt.racketclash.database.RacketClashDatabase
+import com.olt.racketclash.database.table.FilteredAndOrderedRule
+import com.olt.racketclash.database.table.Rule
 
 class RuleDatabase(private val database: RacketClashDatabase) {
 
@@ -9,19 +11,19 @@ class RuleDatabase(private val database: RacketClashDatabase) {
         sorting: Sorting,
         fromIndex: Int,
         toIndex: Int
-    ): Pair<Long, List<DeletableRule>> =
+    ): Pair<Long, List<FilteredAndOrderedRule>> =
         database.ruleQueries.selectFilteredAndOrderedSize(name = nameFilter).executeAsOne() to
-        database.ruleQueries.selectFilteredAndOrdered(
+        database.ruleQueries.filteredAndOrderedRule(
             name = nameFilter,
             sorting = sorting.name,
             offset = fromIndex.toLong(),
             limit = toIndex.toLong()
-        ).executeAsList().map { it.toDeletableRule() }
+        ).executeAsList()
 
-    fun selectSingle(id: Long): DeletableRule =
-        database.ruleQueries.selectSingle(id = id).executeAsOne().toDeletableRule()
+    fun selectSingle(id: Long): Rule =
+        database.ruleQueries.rule(id = id).executeAsOne()
 
-    fun add(rule: DeletableRule) =
+    fun add(rule: Rule) =
         database.ruleQueries.add(
             name = rule.name,
             maxSets = rule.maxSets,
@@ -37,7 +39,7 @@ class RuleDatabase(private val database: RacketClashDatabase) {
             pointPointsForRest = rule.pointPointsForRest
         )
 
-    fun update(rule: DeletableRule) =
+    fun update(rule: Rule) =
         database.ruleQueries.update(
             id = rule.id,
             name = rule.name,

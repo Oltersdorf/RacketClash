@@ -1,10 +1,10 @@
 package com.olt.racketclash.database.rule
 
 import app.cash.sqldelight.adapter.primitive.IntColumnAdapter
-import com.olt.racketclash.database.table.Rule
+import com.olt.racketclash.database.table.RuleTable
 
 internal fun ruleAdapter() =
-    Rule.Adapter(
+    RuleTable.Adapter(
         maxSetsAdapter = IntColumnAdapter,
         winSetsAdapter = IntColumnAdapter,
         maxPointsAdapter = IntColumnAdapter,

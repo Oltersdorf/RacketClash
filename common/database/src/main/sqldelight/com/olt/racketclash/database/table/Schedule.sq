@@ -27,14 +27,14 @@ selectFilteredAndOrdered:
 WITH filteredAndOrdered AS (
     SELECT
         schedule.*,
-        rule.name AS ruleName, rule.maxSets,
+        ruleTable.name AS ruleName, ruleTable.maxSets,
         category.name AS categoryName, category.type AS categoryType,
         p1L.name AS playerNameLeftOne, p2L.name AS playerNameLeftTwo,
         p1R.name AS playerNameRightOne, p2R.name AS playerNameRightTwo
     FROM
         schedule
     LEFT JOIN
-        rule ON schedule.ruleId = rule.id
+        ruleTable ON schedule.ruleId = ruleTable.id
     LEFT JOIN
         category ON schedule.categoryId = category.id
     LEFT JOIN

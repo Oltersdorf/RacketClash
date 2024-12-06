@@ -2,6 +2,7 @@ package com.olt.rackeclash.rules
 
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.database.rule.Sorting
+import com.olt.racketclash.database.table.FilteredAndOrderedRule
 import com.olt.racketclash.state.ViewModelState
 import kotlin.math.min
 
@@ -51,10 +52,10 @@ class RulesModel(
     fun updatePage(pageNumber: Int) =
         updateRulesState(currentPage = pageNumber)
 
-    fun deleteRule(id: Long) {
+    fun deleteRule(rule: FilteredAndOrderedRule) {
         onIO {
-            updateState { copy(rules = rules.toMutableList().apply { removeIf { it.id == id } }) }
-            database.rules.delete(id = id)
+            updateState { copy(rules = rules - rule) }
+            database.rules.delete(id = rule.id)
         }
     }
 

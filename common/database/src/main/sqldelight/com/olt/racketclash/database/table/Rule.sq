@@ -1,6 +1,6 @@
 import kotlin.Int;
 
-CREATE TABLE IF NOT EXISTS rule (
+CREATE TABLE IF NOT EXISTS ruleTable (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     maxSets INTEGER AS Int NOT NULL,
@@ -16,12 +16,14 @@ CREATE TABLE IF NOT EXISTS rule (
     pointPointsForRest INTEGER AS Int NOT NULL
 );
 
-selectFilteredAndOrdered:
+filteredAndOrderedRule:
 WITH filteredAndOrdered AS (
     SELECT
-        *, 0 AS deletable
+        *,
+        (SELECT COUNT(*) FROM game WHERE game.ruleId = id) +
+        (SELECT COUNT(*) FROM schedule WHERE schedule.ruleId = id) AS used
     FROM
-        rule
+        ruleTable
     WHERE
         name LIKE '%' || :name || '%'
 )
@@ -42,21 +44,23 @@ selectFilteredAndOrderedSize:
 SELECT
     count(*) AS size
 FROM
-    rule
+    ruleTable
 WHERE
     name LIKE '%' || :name || '%';
 
-selectSingle:
+rule:
 SELECT
-    *, 1 AS deletable
+    *,
+    (SELECT COUNT(*) FROM game WHERE game.ruleId = id) +
+    (SELECT COUNT(*) FROM schedule WHERE schedule.ruleId = id) AS used
 FROM
-    rule
+    ruleTable
 WHERE
     id = :id;
 
 add:
 INSERT INTO
-    rule(
+    ruleTable(
         name,
         maxSets, winSets,
         maxPoints, winPoints, pointsDifference,
@@ -74,7 +78,7 @@ VALUES
 
 update:
 UPDATE
-    rule
+    ruleTable
 SET
     name = :name,
     maxSets = :maxSets,
@@ -93,6 +97,6 @@ WHERE
 
 delete:
 DELETE FROM
-    rule
+    ruleTable
 WHERE
     id = :id;
