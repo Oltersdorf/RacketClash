@@ -3,10 +3,14 @@ package com.olt.racketclash.desktop
 import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.window.*
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.RacketClashUI
 import com.olt.racketclash.ui.theme.RacketClashMaterialTheme
+import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.Point
 import java.awt.Toolkit
@@ -51,7 +55,12 @@ fun main() {
                     isDarkMode = isDarkMode,
                     onSwitchDarkMode = switchDarkMode,
                     database = database,
-                    racketClashTopBar = { WindowDraggableArea(content = it) }
+                    racketClashTopBar = {
+                        WindowDraggableArea(
+                            modifier = Modifier.pointerHoverIcon(icon = PointerIcon(Cursor(Cursor.MOVE_CURSOR))),
+                            content = it
+                        )
+                    }
                 )
             }
         }
