@@ -22,7 +22,7 @@ import com.olt.racketclash.ui.component.Loading
 import com.olt.racketclash.ui.component.Status
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
-import com.olt.racketclash.ui.navigate.Screens
+import com.olt.racketclash.ui.Screens
 
 @Composable
 internal fun Category(
@@ -96,7 +96,8 @@ private fun Custom(
     SearchableLazyTableWithScroll(
         title = "Games",
         onTitleAdd = {
-            navigateTo(Screens.AddSchedule(
+            navigateTo(
+                Screens.AddSchedule(
                 categoryId = categoryId,
                 categoryName = categoryName,
                 tournamentId = tournamentId

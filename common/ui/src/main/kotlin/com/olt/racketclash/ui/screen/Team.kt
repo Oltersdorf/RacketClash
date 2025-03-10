@@ -13,7 +13,7 @@ import com.olt.racketclash.ui.component.RatioBar
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.*
-import com.olt.racketclash.ui.navigate.Screens
+import com.olt.racketclash.ui.Screens
 
 @Composable
 internal fun Team(

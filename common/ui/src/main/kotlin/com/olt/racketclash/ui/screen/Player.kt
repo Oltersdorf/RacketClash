@@ -16,7 +16,7 @@ import com.olt.racketclash.ui.component.RatioBar
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.*
-import com.olt.racketclash.ui.navigate.Screens
+import com.olt.racketclash.ui.Screens
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -64,7 +64,8 @@ internal fun Player(
                         val teamName = tournament.teamName
                         if (teamId != null && teamName != null)
                             Link(teamName) {
-                                navigateTo(Screens.Team(
+                                navigateTo(
+                                    Screens.Team(
                                     tournamentId = tournament.id,
                                     teamId = teamId,
                                     teamName = teamName
@@ -77,7 +78,8 @@ internal fun Player(
                             FlowRow {
                                 tournament.categories.forEachIndexed { index, category ->
                                     Link(category.name) {
-                                        navigateTo(Screens.Category(
+                                        navigateTo(
+                                            Screens.Category(
                                             categoryId = category.id,
                                             categoryName = category.name,
                                             tournamentId = tournament.id

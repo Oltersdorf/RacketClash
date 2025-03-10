@@ -17,7 +17,7 @@ import com.olt.racketclash.ui.component.Status
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
-import com.olt.racketclash.ui.navigate.Screens
+import com.olt.racketclash.ui.Screens
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -89,7 +89,8 @@ private fun columns(
                 LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
             }
         }) {
-            navigateTo(Screens.Category(
+            navigateTo(
+                Screens.Category(
                 categoryName = it.name,
                 categoryId = it.id,
                 tournamentId = it.tournamentId

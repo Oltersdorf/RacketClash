@@ -2,7 +2,7 @@ package com.olt.racketclash.ui.screen
 
 import androidx.compose.runtime.Composable
 import com.olt.racketclash.ui.layout.LinkNavigationList
-import com.olt.racketclash.ui.navigate.Screens
+import com.olt.racketclash.ui.Screens
 
 @Composable
 internal fun Tournament(

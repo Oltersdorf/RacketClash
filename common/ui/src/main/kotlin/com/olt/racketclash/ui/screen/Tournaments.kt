@@ -14,7 +14,7 @@ import com.olt.racketclash.ui.component.SearchBarTagChip
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
-import com.olt.racketclash.ui.navigate.Screens
+import com.olt.racketclash.ui.Screens
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.navigate
+package com.olt.racketclash.ui
 
 internal sealed class Screens(val name: String) {
     data object RacketClash : Screens(name = "Racket Clash")

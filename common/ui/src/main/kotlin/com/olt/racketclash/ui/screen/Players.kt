@@ -18,7 +18,7 @@ import com.olt.racketclash.ui.component.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
-import com.olt.racketclash.ui.navigate.Screens
+import com.olt.racketclash.ui.Screens
 import com.olt.racketclash.ui.theme.AdditionalMaterialTheme
 import org.jetbrains.compose.resources.painterResource
 import racketclash.common.ui.generated.resources.Res

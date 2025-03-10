@@ -10,7 +10,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.ui.component.Link
-import com.olt.racketclash.ui.navigate.Screens
+import com.olt.racketclash.ui.Screens
 
 @Composable
 internal fun TextNavigationList(
