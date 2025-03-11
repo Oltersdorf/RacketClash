@@ -11,12 +11,13 @@ include(
     "common:model:addSchedule",
     "common:model:categories",
     "common:model:category",
-    "common:model:player",
     "common:model:players",
+    "common:model:player",
     "common:model:rules",
     "common:model:schedule",
     "common:model:team",
     "common:model:teams",
     "common:model:tournaments",
+    "common:model:start",
     "desktop"
 )

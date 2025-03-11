@@ -5,7 +5,7 @@ import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.screen.*
 import com.olt.racketclash.ui.screen.Rules
 import com.olt.racketclash.ui.screen.Players
-import com.olt.racketclash.ui.screen.RacketClash
+import com.olt.racketclash.ui.screen.Start
 import com.olt.racketclash.ui.screen.Tournaments
 
 @Composable
@@ -26,7 +26,7 @@ internal fun Navigator(
         Screens.Rules -> Rules(database = database) { screen -> navLinks += screen }
         is Screens.Player -> Player(database = database, playerId = navLink.playerId, playerName = navLink.playerName) { screen -> navLinks += screen }
         Screens.Players -> Players(database = database) { screen -> navLinks += screen }
-        Screens.RacketClash -> RacketClash { screen -> navLinks += screen }
+        Screens.RacketClash -> Start(database = database) { screen -> navLinks += screen }
         is Screens.Schedule -> Schedule(database = database, tournamentId = navLink.tournamentId)
         is Screens.Team -> Team(database = database, teamId = navLink.teamId, teamName = navLink.teamName, tournamentId = navLink.tournamentId) { screen -> navLinks += screen }
         is Screens.Teams -> Teams(database = database, tournamentId = navLink.tournamentId) { screen -> navLinks += screen }
