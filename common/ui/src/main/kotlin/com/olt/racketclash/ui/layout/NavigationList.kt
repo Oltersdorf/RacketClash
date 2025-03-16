@@ -13,24 +13,6 @@ import com.olt.racketclash.ui.component.Link
 import com.olt.racketclash.ui.Screens
 
 @Composable
-internal fun TextNavigationList(
-    title: String,
-    navList: List<Screens>,
-    onClick: (Screens) -> Unit
-) {
-    NavigationList(
-        navList = navList,
-        onClick = onClick
-    ) {
-        Text(
-            modifier = Modifier.padding(20.dp),
-            text = title,
-            fontSize = MaterialTheme.typography.displayLarge.fontSize
-        )
-    }
-}
-
-@Composable
 internal fun LinkNavigationList(
     title: String,
     navList: List<Screens>,
