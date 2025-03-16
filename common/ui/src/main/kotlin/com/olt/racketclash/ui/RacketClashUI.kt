@@ -3,11 +3,15 @@ package com.olt.racketclash.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.component.SimpleIconButton
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import racketclash.common.ui.generated.resources.*
 import racketclash.common.ui.generated.resources.Res
@@ -25,6 +29,9 @@ fun RacketClashUI(
     database: Database,
     racketClashTopBar: @Composable (@Composable () -> Unit) -> Unit
 ) {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -36,6 +43,18 @@ fun RacketClashUI(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ),
+                    navigationIcon = {
+                        SimpleIconButton(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Menu"
+                        ) {
+                            scope.launch {
+                                drawerState.apply {
+                                    if (isClosed) open() else close()
+                                }
+                            }
+                        }
+                    },
                     actions = {
                         TopAppBarActions(
                             onMinimize = onMinimize,
@@ -50,7 +69,7 @@ fun RacketClashUI(
         },
     ) {
         Box(modifier = Modifier.fillMaxSize().padding(it)) {
-            Navigator(database = database)
+            Navigator(drawerState = drawerState, database = database)
         }
     }
 }

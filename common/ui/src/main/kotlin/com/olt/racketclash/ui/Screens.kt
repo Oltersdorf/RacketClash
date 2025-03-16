@@ -1,7 +1,7 @@
 package com.olt.racketclash.ui
 
 internal sealed class Screens(val name: String) {
-    data object RacketClash : Screens(name = "Racket Clash")
+    data object Start : Screens(name = "Racket Clash")
 
     data object Tournaments : Screens(name = "Tournaments")
 
