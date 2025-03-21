@@ -6,6 +6,7 @@ import com.olt.racketclash.addorupdatecategory.AddOrUpdateCategoryModel
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.database.category.CategoryType
 import com.olt.racketclash.ui.layout.Form
+import com.olt.racketclash.ui.layout.FormButton
 import com.olt.racketclash.ui.layout.FormDropDownTextField
 import com.olt.racketclash.ui.layout.FormTextField
 
@@ -27,8 +28,12 @@ internal fun AddOrUpdateCategory(
     Form(
         title = categoryName ?: "New category",
         isLoading = state.isLoading,
-        isSavable = state.isSavable,
-        onSave = { model.save(onComplete = navigateBack) }
+        confirmButton = {
+            FormButton(
+                text = "Save",
+                enabled = state.isSavable
+            ) { model.save(onComplete = navigateBack) }
+        }
     ) {
         FormTextField(
             value = state.category.name,

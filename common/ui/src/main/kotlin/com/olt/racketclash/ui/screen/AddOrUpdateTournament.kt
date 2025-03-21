@@ -26,8 +26,12 @@ internal fun AddOrUpdateTournament(
     Form(
         title = tournamentName ?: "New tournament",
         isLoading = state.isLoading,
-        isSavable = state.isSavable,
-        onSave = { model.save(onComplete = navigateBack) }
+        confirmButton = {
+            FormButton(
+                text = "Save",
+                enabled = state.isSavable
+            ) { model.save(onComplete = navigateBack) }
+        }
     ) {
         FormTextField(
             value = state.tournament.name,

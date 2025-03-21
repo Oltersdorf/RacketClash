@@ -24,8 +24,12 @@ internal fun AddSchedule(
     Form(
         title = categoryName,
         isLoading = state.isLoading,
-        isSavable = state.isSavable,
-        onSave = { model.onSave(callback = navigateBack) }
+        confirmButton = {
+            FormButton(
+                text = "Save",
+                enabled = state.isSavable
+            ) { model.onSave(callback = navigateBack) }
+        }
     ) {
         FormRow {
             FormNumberSelector(

@@ -14,59 +14,53 @@ import com.olt.racketclash.start.StartModel
 import com.olt.racketclash.ui.Screens
 import com.olt.racketclash.ui.component.Link
 import com.olt.racketclash.ui.component.Loading
-import com.olt.racketclash.ui.layout.RacketClashScaffold
+import com.olt.racketclash.ui.layout.RacketClashScrollableScaffold
 
 @Composable
 internal fun Start(database: Database, navigateTo: (Screens) -> Unit) {
     val model = remember { StartModel(database = database) }
     val state by model.state.collectAsState()
 
-    RacketClashScaffold(
-        header = {
-            Text(
-                text = "Start",
-                fontSize = MaterialTheme.typography.headlineSmall.fontSize,
-                modifier = Modifier.padding(start = 20.dp, bottom = 10.dp)
-            )
-        }
-    ) {
-        ListPreviewBox(
-            name = "Tournaments",
-            isLoading = state.isLoading,
-            items = state.tournaments,
-            onNavigateMore = { navigateTo(Screens.Tournaments) }
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                Link(it.name) { navigateTo(Screens.Tournament(tournamentName = it.name, tournamentId = it.id)) }
-                Text(
-                    text = "(${it.startDateTime} to ${it.endDateTime})",
-                    fontSize = MaterialTheme.typography.labelMedium.fontSize
-                )
+    RacketClashScrollableScaffold(title = "Start") {
+        Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
+            ListPreviewBox(
+                name = "Tournaments",
+                isLoading = state.isLoading,
+                items = state.tournaments,
+                onNavigateMore = { navigateTo(Screens.Tournaments) }
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Link(it.name) { navigateTo(Screens.Tournament(tournamentName = it.name, tournamentId = it.id)) }
+                    Text(
+                        text = "(${it.startDateTime} to ${it.endDateTime})",
+                        fontSize = MaterialTheme.typography.labelMedium.fontSize
+                    )
+                }
             }
-        }
 
-        ListPreviewBox(
-            name = "Players",
-            isLoading = state.isLoading,
-            items = state.players,
-            onNavigateMore = { navigateTo(Screens.Players) }
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                Link(it.name) { navigateTo(Screens.Player(playerName = it.name, playerId = it.id)) }
-                Text(
-                    text = "(${it.club})",
-                    fontSize = MaterialTheme.typography.labelMedium.fontSize
-                )
+            ListPreviewBox(
+                name = "Players",
+                isLoading = state.isLoading,
+                items = state.players,
+                onNavigateMore = { navigateTo(Screens.Players) }
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Link(it.name) { navigateTo(Screens.Player(playerName = it.name, playerId = it.id)) }
+                    Text(
+                        text = "(${it.club})",
+                        fontSize = MaterialTheme.typography.labelMedium.fontSize
+                    )
+                }
             }
-        }
 
-        ListPreviewBox(
-            name = "Rules",
-            isLoading = state.isLoading,
-            items = state.rules,
-            onNavigateMore = { navigateTo(Screens.Rules) }
-        ) {
-            Text(it.name)
+            ListPreviewBox(
+                name = "Rules",
+                isLoading = state.isLoading,
+                items = state.rules,
+                onNavigateMore = { navigateTo(Screens.Rules) }
+            ) {
+                Text(it.name)
+            }
         }
     }
 }

@@ -12,7 +12,6 @@ import com.olt.racketclash.addorupdateteam.AddOrUpdateTeamModel
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.database.player.Sorting
 import com.olt.racketclash.database.table.FilteredAndOrderedPlayer
-import com.olt.racketclash.ui.component.RatioBar
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.SearchBarMenuItem
 import com.olt.racketclash.ui.component.SearchBarTagChip
@@ -41,8 +40,12 @@ internal fun AddOrUpdateTeam(
     Form(
         title = teamName ?: "New team",
         isLoading = state.isLoading,
-        isSavable = state.isSavable,
-        onSave = { model.save(onComplete = navigateBack) }
+        confirmButton = {
+            FormButton(
+                text = "Save",
+                enabled = state.isSavable
+            ) { model.save(onComplete = navigateBack) }
+        }
     ) {
         FormRow {
             FormTextField(

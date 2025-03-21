@@ -3,10 +3,7 @@ package com.olt.racketclash.ui.screen
 import androidx.compose.runtime.*
 import com.olt.rackeclash.addorupdaterule.AddOrUpdateRuleModel
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.ui.layout.Form
-import com.olt.racketclash.ui.layout.FormNumberSelector
-import com.olt.racketclash.ui.layout.FormRow
-import com.olt.racketclash.ui.layout.FormTextField
+import com.olt.racketclash.ui.layout.*
 
 @Composable
 internal fun AddOrUpdateRule(
@@ -21,8 +18,12 @@ internal fun AddOrUpdateRule(
     Form(
         title = ruleName ?: "New rule",
         isLoading = state.isLoading,
-        isSavable = state.isSavable,
-        onSave = { model.save(onComplete = navigateBack) }
+        confirmButton = {
+            FormButton(
+                text = "Save",
+                enabled = state.isSavable
+            ) { model.save(onComplete = navigateBack) }
+        }
     ) {
         FormTextField(
             value = state.rule.name,

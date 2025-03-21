@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.ui.component.*
@@ -15,69 +16,75 @@ import com.olt.racketclash.ui.component.*
 fun Form(
     title: String,
     isLoading: Boolean = false,
-    isSavable: Boolean = true,
-    onSave: () -> Unit,
+    abortButton: @Composable RowScope.() -> Unit = {},
+    confirmButton: @Composable RowScope.() -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Box(modifier = Modifier
-        .fillMaxWidth(0.6f)
-        .background(color = MaterialTheme.colorScheme.surfaceContainer)
-    ) {
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp)
-            .align(Alignment.Center)
-        ) {
-            Text(
-                text = title,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                fontSize = MaterialTheme.typography.displayLarge.fontSize
-            )
+    Column(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
+        Text(
+            text = title,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            fontSize = MaterialTheme.typography.displayLarge.fontSize
+        )
 
-            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+        HorizontalDivider(modifier = Modifier.fillMaxWidth())
 
-            Box(modifier = Modifier.fillMaxWidth().padding(top = 50.dp)) {
-                val verticalScrollState = rememberScrollState()
-                val canScroll = verticalScrollState.canScrollBackward || verticalScrollState.canScrollForward
+        Box(modifier = Modifier.fillMaxWidth().padding(top = 50.dp)) {
+            val verticalScrollState = rememberScrollState()
+            val canScroll = verticalScrollState.canScrollBackward || verticalScrollState.canScrollForward
 
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(verticalScrollState)
-                        .padding(end = if (canScroll) 14.dp else 0.dp),
-                    verticalArrangement = Arrangement.spacedBy(50.dp)
-                ) {
-                    if (isLoading)
-                        Loading()
-                    else {
-                        content()
+            Column(
+                modifier = Modifier
+                    .verticalScroll(verticalScrollState)
+                    .padding(end = if (canScroll) 14.dp else 0.dp),
+                verticalArrangement = Arrangement.spacedBy(50.dp)
+            ) {
+                if (isLoading)
+                    Loading()
+                else {
+                    content()
 
-                        Button(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .requiredHeight(OutlinedTextFieldDefaults.MinHeight),
-                            shape = RectangleShape,
-                            enabled = isSavable,
-                            onClick = onSave
-                        ) {
-                            Text(text = "Save")
-                        }
+                    Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
+                        abortButton()
+                        confirmButton()
                     }
                 }
+            }
 
-                if (canScroll) {
-                    VerticalScrollbar(
-                        modifier = Modifier.align(Alignment.CenterEnd),
-                        adapter = rememberScrollbarAdapter(verticalScrollState),
-                        style = LocalScrollbarStyle.current.copy(
-                            hoverColor = MaterialTheme.colorScheme.primary,
-                            unhoverColor = MaterialTheme.colorScheme.primary,
-                            shape = RectangleShape
-                        )
+            if (canScroll) {
+                VerticalScrollbar(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    adapter = rememberScrollbarAdapter(verticalScrollState),
+                    style = LocalScrollbarStyle.current.copy(
+                        hoverColor = MaterialTheme.colorScheme.primary,
+                        unhoverColor = MaterialTheme.colorScheme.primary,
+                        shape = RectangleShape
                     )
-                }
+                )
             }
         }
+    }
+}
+
+@Composable
+fun RowScope.FormButton(
+    text: String,
+    enabled: Boolean = true,
+    icon: ImageVector? = null,
+    contentDescription: String? = null,
+    onClick: () -> Unit
+) {
+    Button(
+        modifier = Modifier
+            .weight(1.0f)
+            .requiredHeight(OutlinedTextFieldDefaults.MinHeight),
+        shape = RectangleShape,
+        enabled = enabled,
+        onClick = onClick
+    ) {
+        icon?.let { Icon(imageVector = it, contentDescription = contentDescription) }
+        Text(text = text)
     }
 }
 
