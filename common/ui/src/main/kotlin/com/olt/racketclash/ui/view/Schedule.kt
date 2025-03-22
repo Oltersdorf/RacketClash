@@ -13,7 +13,7 @@ import com.olt.racketclash.database.Database
 import com.olt.racketclash.database.schedule.Schedule
 import com.olt.racketclash.database.schedule.Sorting
 import com.olt.racketclash.schedule.ScheduleModel
-import com.olt.racketclash.ui.component.*
+import com.olt.racketclash.ui.material.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll

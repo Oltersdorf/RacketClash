@@ -8,9 +8,9 @@ import com.olt.racketclash.database.Database
 import com.olt.racketclash.team.Player
 import com.olt.racketclash.team.Tag
 import com.olt.racketclash.team.TeamModel
-import com.olt.racketclash.ui.component.RatioBar
-import com.olt.racketclash.ui.component.SearchBar
-import com.olt.racketclash.ui.component.Tag
+import com.olt.racketclash.ui.material.RatioBar
+import com.olt.racketclash.ui.material.SearchBar
+import com.olt.racketclash.ui.material.Tag
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.View
 

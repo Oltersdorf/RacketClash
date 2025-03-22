@@ -12,9 +12,9 @@ import com.olt.racketclash.addorupdateteam.AddOrUpdateTeamModel
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.database.player.Sorting
 import com.olt.racketclash.database.table.FilteredAndOrderedPlayer
-import com.olt.racketclash.ui.component.SearchBar
-import com.olt.racketclash.ui.component.SearchBarMenuItem
-import com.olt.racketclash.ui.component.SearchBarTagChip
+import com.olt.racketclash.ui.material.SearchBar
+import com.olt.racketclash.ui.material.SearchBarMenuItem
+import com.olt.racketclash.ui.material.SearchBarTagChip
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.theme.AdditionalMaterialTheme
 import org.jetbrains.compose.resources.painterResource

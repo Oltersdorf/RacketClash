@@ -19,9 +19,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.ui.component.Link
-import com.olt.racketclash.ui.component.Loading
-import com.olt.racketclash.ui.component.SimpleIconButton
+import com.olt.racketclash.ui.material.Link
+import com.olt.racketclash.ui.material.Loading
+import com.olt.racketclash.ui.material.SimpleIconButton
 
 private sealed class LazyTableSortState {
     data object Up : LazyTableSortState()

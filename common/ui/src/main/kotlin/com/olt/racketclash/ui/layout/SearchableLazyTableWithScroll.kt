@@ -6,8 +6,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.olt.racketclash.ui.component.LazyTableWithScrollHeader
-import com.olt.racketclash.ui.component.PageSelector
+import com.olt.racketclash.ui.material.LazyTableWithScrollHeader
+import com.olt.racketclash.ui.material.PageSelector
 
 @Composable
 fun <T> SearchableLazyTableWithScroll(

@@ -8,9 +8,9 @@ import com.olt.racketclash.database.Database
 import com.olt.racketclash.database.tournament.DeletableTournament
 import com.olt.racketclash.database.tournament.Sorting
 import com.olt.racketclash.tournaments.TournamentsModel
-import com.olt.racketclash.ui.component.SearchBar
-import com.olt.racketclash.ui.component.SearchBarMenuItem
-import com.olt.racketclash.ui.component.SearchBarTagChip
+import com.olt.racketclash.ui.material.SearchBar
+import com.olt.racketclash.ui.material.SearchBarMenuItem
+import com.olt.racketclash.ui.material.SearchBarTagChip
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll

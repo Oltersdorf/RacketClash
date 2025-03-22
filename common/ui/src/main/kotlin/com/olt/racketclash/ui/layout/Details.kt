@@ -11,9 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.ui.component.Loading
-import com.olt.racketclash.ui.component.RatioBar
-import com.olt.racketclash.ui.component.SimpleIconButton
+import com.olt.racketclash.ui.material.Loading
+import com.olt.racketclash.ui.material.RatioBar
+import com.olt.racketclash.ui.material.SimpleIconButton
 
 @Composable
 fun Details(

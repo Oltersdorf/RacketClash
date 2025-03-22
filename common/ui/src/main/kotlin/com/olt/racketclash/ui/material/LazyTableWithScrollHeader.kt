@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.component
+package com.olt.racketclash.ui.material
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding

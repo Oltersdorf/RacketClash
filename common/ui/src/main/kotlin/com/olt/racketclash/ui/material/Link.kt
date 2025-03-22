@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.component
+package com.olt.racketclash.ui.material
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource

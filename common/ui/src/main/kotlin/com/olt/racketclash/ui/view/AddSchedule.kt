@@ -6,8 +6,8 @@ import androidx.compose.runtime.*
 import com.olt.racketclash.addschedule.AddScheduleModel
 import com.olt.racketclash.addschedule.Player
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.ui.component.Loading
-import com.olt.racketclash.ui.component.SearchBar
+import com.olt.racketclash.ui.material.Loading
+import com.olt.racketclash.ui.material.SearchBar
 import com.olt.racketclash.ui.layout.*
 
 @Composable

@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.ui.component.Link
+import com.olt.racketclash.ui.material.Link
 import com.olt.racketclash.ui.View
 
 @Composable

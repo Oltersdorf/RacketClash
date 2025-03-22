@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.ui.component.*
+import com.olt.racketclash.ui.material.*
 
 @Composable
 fun Form(

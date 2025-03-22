@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.ui.component.SimpleIconButton
+import com.olt.racketclash.ui.material.SimpleIconButton
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import racketclash.common.ui.generated.resources.*

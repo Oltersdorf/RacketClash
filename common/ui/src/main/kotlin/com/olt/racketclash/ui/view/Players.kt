@@ -14,7 +14,7 @@ import com.olt.racketclash.database.Database
 import com.olt.racketclash.players.PlayersModel
 import com.olt.racketclash.database.player.Sorting
 import com.olt.racketclash.database.table.FilteredAndOrderedPlayer
-import com.olt.racketclash.ui.component.*
+import com.olt.racketclash.ui.material.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll

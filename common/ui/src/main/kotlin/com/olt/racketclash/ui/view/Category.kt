@@ -18,8 +18,8 @@ import com.olt.racketclash.category.CategoryModel
 import com.olt.racketclash.category.State
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.database.category.CategoryType
-import com.olt.racketclash.ui.component.Loading
-import com.olt.racketclash.ui.component.Status
+import com.olt.racketclash.ui.material.Loading
+import com.olt.racketclash.ui.material.Status
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.View

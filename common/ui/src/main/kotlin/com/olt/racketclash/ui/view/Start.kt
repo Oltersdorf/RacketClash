@@ -12,8 +12,8 @@ import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.state.start.StartModel
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.component.Link
-import com.olt.racketclash.ui.component.Loading
+import com.olt.racketclash.ui.material.Link
+import com.olt.racketclash.ui.material.Loading
 import com.olt.racketclash.ui.layout.RacketClashScrollableScaffold
 
 @Composable

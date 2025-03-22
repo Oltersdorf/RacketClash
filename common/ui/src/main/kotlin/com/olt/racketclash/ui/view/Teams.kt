@@ -11,7 +11,7 @@ import com.olt.racketclash.database.Database
 import com.olt.racketclash.database.table.FilteredAndOrderedTeam
 import com.olt.racketclash.database.team.Sorting
 import com.olt.racketclash.teams.TeamsModel
-import com.olt.racketclash.ui.component.*
+import com.olt.racketclash.ui.material.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll

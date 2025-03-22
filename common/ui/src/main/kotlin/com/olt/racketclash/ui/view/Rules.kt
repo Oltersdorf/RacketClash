@@ -18,7 +18,7 @@ import com.olt.racketclash.database.table.FilteredAndOrderedRule
 import com.olt.racketclash.state.rule.RuleListModel
 import com.olt.racketclash.state.rule.RulesModel
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.component.*
+import com.olt.racketclash.ui.material.*
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.layout.RacketClashScaffold
 import kotlin.math.ceil

@@ -10,10 +10,10 @@ import com.olt.racketclash.database.Database
 import com.olt.racketclash.player.Game
 import com.olt.racketclash.player.PlayerModel
 import com.olt.racketclash.player.Tag
-import com.olt.racketclash.ui.component.Link
-import com.olt.racketclash.ui.component.RatioBar
-import com.olt.racketclash.ui.component.SearchBar
-import com.olt.racketclash.ui.component.Tag
+import com.olt.racketclash.ui.material.Link
+import com.olt.racketclash.ui.material.RatioBar
+import com.olt.racketclash.ui.material.SearchBar
+import com.olt.racketclash.ui.material.Tag
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.View
 
