@@ -10,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.start.StartModel
+import com.olt.racketclash.state.start.StartModel
 import com.olt.racketclash.ui.Screens
 import com.olt.racketclash.ui.component.Link
 import com.olt.racketclash.ui.component.Loading

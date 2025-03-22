@@ -18,6 +18,5 @@ include(
     "common:model:team",
     "common:model:teams",
     "common:model:tournaments",
-    "common:model:start",
     "desktop"
 )

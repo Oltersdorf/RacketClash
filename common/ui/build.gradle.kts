@@ -31,5 +31,4 @@ dependencies {
     implementation(project(":common:model:team"))
     implementation(project(":common:model:teams"))
     implementation(project(":common:model:tournaments"))
-    implementation(project(":common:model:start"))
 }

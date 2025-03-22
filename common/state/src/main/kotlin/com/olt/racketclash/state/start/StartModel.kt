@@ -1,4 +1,4 @@
-package com.olt.racketclash.start
+package com.olt.racketclash.state.start
 
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.database.rule.Filter
@@ -9,7 +9,7 @@ import com.olt.racketclash.database.tournament.Sorting as TournamentSorting
 
 class StartModel(
     private val database: Database
-) : ViewModelState<State>(initialState = State()) {
+) : ViewModelState<StartState>(initialState = StartState()) {
 
     init {
         onIO {
@@ -21,7 +21,7 @@ class StartModel(
                     sorting = TournamentSorting.NameAsc,
                     fromIndex = 0,
                     toIndex = 5
-                ).second.take(5)
+                ).second
 
                 val players = database.players.selectFilteredAndOrdered(
                     nameFilter = "",
@@ -31,14 +31,14 @@ class StartModel(
                     sorting = PlayerSorting.NameAsc,
                     fromIndex = 0,
                     toIndex = 5
-                ).second.take(5)
+                ).second
 
                 val rules = database.rules.selectFilteredAndOrdered(
                     filter = Filter(),
                     sorting = RuleSorting.NameAsc,
                     fromIndex = 0,
                     toIndex = 5
-                ).second.take(5)
+                ).second
 
                 copy(
                     isLoading = false,
