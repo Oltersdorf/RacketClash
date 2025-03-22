@@ -1,16 +1,36 @@
 package com.olt.racketclash.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.ui.material.SimpleIconButton
+import com.olt.racketclash.ui.view.AddOrUpdateCategory
+import com.olt.racketclash.ui.view.AddOrUpdatePlayer
+import com.olt.racketclash.ui.view.AddOrUpdateRule
+import com.olt.racketclash.ui.view.AddOrUpdateTeam
+import com.olt.racketclash.ui.view.AddOrUpdateTournament
+import com.olt.racketclash.ui.view.AddSchedule
+import com.olt.racketclash.ui.view.Categories
+import com.olt.racketclash.ui.view.Category
+import com.olt.racketclash.ui.view.Player
+import com.olt.racketclash.ui.view.Players
+import com.olt.racketclash.ui.view.Rules
+import com.olt.racketclash.ui.view.Schedule
+import com.olt.racketclash.ui.view.Start
+import com.olt.racketclash.ui.view.Team
+import com.olt.racketclash.ui.view.Teams
+import com.olt.racketclash.ui.view.Tournament
+import com.olt.racketclash.ui.view.Tournaments
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import racketclash.common.ui.generated.resources.*
@@ -29,6 +49,7 @@ fun RacketClashUI(
     database: Database,
     racketClashTopBar: @Composable (@Composable () -> Unit) -> Unit
 ) {
+    var viewHistory by remember { mutableStateOf<List<View>>(listOf(View.Start)) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -44,13 +65,21 @@ fun RacketClashUI(
                         titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ),
                     navigationIcon = {
-                        SimpleIconButton(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu"
-                        ) {
-                            scope.launch {
-                                drawerState.apply {
-                                    if (isClosed) open() else close()
+                        Row {
+                            SimpleIconButton(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                enabled = viewHistory.size >= 2
+                            ) { viewHistory = viewHistory.dropLast(1) }
+
+                            SimpleIconButton(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu"
+                            ) {
+                                scope.launch {
+                                    drawerState.apply {
+                                        if (isClosed) open() else close()
+                                    }
                                 }
                             }
                         }
@@ -67,9 +96,33 @@ fun RacketClashUI(
                 )
             }
         },
-    ) {
-        Box(modifier = Modifier.fillMaxSize().padding(it)) {
-            Navigator(drawerState = drawerState, database = database)
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            NavigationDrawer(
+                drawerState = drawerState,
+                currentView = viewHistory.last(),
+                setViewHistory = { viewHistory = listOf(it) }
+            ) {
+                when (val cv = viewHistory.last()) {
+                    is View.AddOrUpdateCategory -> AddOrUpdateCategory(database = database, categoryId = cv.categoryId, categoryName = cv.categoryName, tournamentId = cv.tournamentId) { viewHistory += View.Categories(tournamentId = cv.tournamentId) }
+                    is View.AddOrUpdateRule -> AddOrUpdateRule(database = database, ruleId = cv.ruleId, ruleName = cv.ruleName) { viewHistory += View.Rules }
+                    is View.AddSchedule -> AddSchedule(database = database, categoryId = cv.categoryId, categoryName = cv.categoryName, tournamentId = cv.tournamentId) { viewHistory += View.Schedule(tournamentId = cv.tournamentId) }
+                    is View.AddOrUpdatePlayer -> AddOrUpdatePlayer(database = database, playerId = cv.playerId, playerName = cv.playerName) { viewHistory += View.Players }
+                    is View.AddOrUpdateTeam -> AddOrUpdateTeam(database = database, teamId = cv.teamId, teamName = cv.teamName, tournamentId = cv.tournamentId) { viewHistory += View.Teams(tournamentId = cv.tournamentId) }
+                    is View.AddOrUpdateTournament -> AddOrUpdateTournament(database = database, tournamentId = cv.tournamentId, tournamentName = cv.tournamentName) { viewHistory += View.Tournaments }
+                    is View.Categories -> Categories(database = database, tournamentId = cv.tournamentId) { viewHistory += it }
+                    is View.Category -> Category(database = database, categoryId = cv.categoryId, categoryName = cv.categoryName, tournamentId = cv.tournamentId) { viewHistory += it }
+                    View.Rules -> Rules(database = database) { viewHistory += it }
+                    is View.Player -> Player(database = database, playerId = cv.playerId, playerName = cv.playerName) { viewHistory += it }
+                    View.Players -> Players(database = database) { viewHistory += it }
+                    View.Start -> Start(database = database) { viewHistory += it }
+                    is View.Schedule -> Schedule(database = database, tournamentId = cv.tournamentId)
+                    is View.Team -> Team(database = database, teamId = cv.teamId, teamName = cv.teamName, tournamentId = cv.tournamentId) { viewHistory += it }
+                    is View.Teams -> Teams(database = database, tournamentId = cv.tournamentId) { viewHistory += it }
+                    is View.Tournament -> Tournament(tournamentId = cv.tournamentId, tournamentName = cv.tournamentName) { viewHistory += it }
+                    View.Tournaments -> Tournaments(database = database) { viewHistory += it }
+                }
+            }
         }
     }
 }
@@ -91,6 +144,11 @@ private fun TopAppBarActions(
         onClick = onSwitchDarkMode
     )
 
+    VerticalDivider(
+        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+        thickness = 2.dp
+    )
+
     SimpleIconButton(
         painter = painterResource(Res.drawable.minimize),
         contentDescription = "Minimize",
@@ -107,5 +165,73 @@ private fun TopAppBarActions(
         painter = painterResource(Res.drawable.close),
         contentDescription = "Close",
         onClick = onClose
+    )
+}
+
+@Composable
+private fun NavigationDrawer(
+    drawerState: DrawerState,
+    currentView: View,
+    setViewHistory: (View) -> Unit,
+    content: @Composable () -> Unit
+) {
+    ModalNavigationDrawer(
+        content = content,
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(
+                drawerShape = RectangleShape
+            ) {
+                Text(
+                    text = "Racket Clash",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleLarge
+                )
+
+                NavigationDrawerItem(
+                    shape = RectangleShape,
+                    label = { Text("Start") },
+                    selected = currentView is View.Start,
+                    onClick = { setViewHistory(View.Start) }
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
+
+                NavigationDrawerItem(
+                    shape = RectangleShape,
+                    label = { Text("Tournaments") },
+                    selected = currentView is View.Tournaments,
+                    onClick = { setViewHistory(View.Tournaments) }
+                )
+                NavigationDrawerItem(
+                    shape = RectangleShape,
+                    label = { Text("Players") },
+                    selected = currentView is View.Players,
+                    onClick = { setViewHistory(View.Players) }
+                )
+                NavigationDrawerItem(
+                    shape = RectangleShape,
+                    label = { Text("Rules") },
+                    selected = currentView is View.Rules,
+                    onClick = { setViewHistory(View.Rules) }
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
+
+                NavigationDrawerItem(
+                    shape = RectangleShape,
+                    label = { Text("Settings") },
+                    selected = false,
+                    onClick = { }
+                )
+
+                NavigationDrawerItem(
+                    shape = RectangleShape,
+                    label = { Text("About") },
+                    selected = false,
+                    onClick = { }
+                )
+            }
+        }
     )
 }
