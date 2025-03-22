@@ -1,7 +1,6 @@
 package com.olt.racketclash.team
 
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.state.SortDirection
 import com.olt.racketclash.state.ViewModelState
 
 class TeamModel(
@@ -44,27 +43,27 @@ class TeamModel(
         }
     }
 
-    fun onNameSort(direction: SortDirection) =
+    fun onNameSort() =
         onIO {
             //update players
         }
 
-    fun onBirthYearSort(direction: SortDirection) =
+    fun onBirthYearSort() =
         onIO {
             //update players
         }
 
-    fun onClubSort(direction: SortDirection) =
+    fun onClubSort() =
         onIO {
             //update players
         }
 
-    fun onSinglesSort(direction: SortDirection) =
+    fun onSinglesSort() =
         onIO {
             //update players
         }
 
-    fun onDoublesSort(direction: SortDirection) =
+    fun onDoublesSort() =
         onIO {
             //update players
         }

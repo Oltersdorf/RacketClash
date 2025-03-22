@@ -11,11 +11,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.olt.rackeclash.rules.RulesModel
-import com.olt.rackeclash.rules.State
 import com.olt.racketclash.database.rule.Sorting
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.rule.Filter
 import com.olt.racketclash.database.table.FilteredAndOrderedRule
+import com.olt.racketclash.state.rule.RuleListModel
+import com.olt.racketclash.state.rule.RulesModel
 import com.olt.racketclash.ui.Screens
 import com.olt.racketclash.ui.component.*
 import com.olt.racketclash.ui.layout.*
@@ -30,52 +31,61 @@ internal fun Rules(
     database: Database,
     navigateTo: (Screens) -> Unit
 ) {
-    val model = remember { RulesModel(database = database, pageSize = 50) }
+    val model = remember { RulesModel(database = database) }
     val state by model.state.collectAsState()
-    var showSearchOverlay by remember { mutableStateOf(false) }
+    var showFilterOverlay by remember { mutableStateOf(false) }
     var showAddOverlay by remember { mutableStateOf(false) }
 
     RacketClashScaffold(
         title = "Rules",
-        headerContent = { SearchTags(state = state, model = model) },
+        headerContent = { FilterTags(filter = state.filter, applyFilter = model::applyFilter) },
         actions = {
             SimpleIconButton(
                 imageVector = Icons.Default.Search,
-                contentDescription = "Search"
+                contentDescription = "Filter"
             ) {
                 showAddOverlay = false
-                showSearchOverlay = !showSearchOverlay
+                showFilterOverlay = !showFilterOverlay
             }
 
             SimpleIconButton(
                 imageVector = Icons.Default.Add,
                 contentDescription = "Add"
             ) {
-                showSearchOverlay = false
+                showFilterOverlay = false
                 showAddOverlay = !showAddOverlay
             }
         },
         overlay = {
-            SearchOverlay(state = state, model = model, visible = showSearchOverlay) { showSearchOverlay = false }
-            AddOverlay(state = state, model = model, visible = showAddOverlay) { showAddOverlay = false }
+            FilterOverlay(
+                filter = state.filter,
+                applyFilter = model::applyFilter,
+                visible = showFilterOverlay
+            ) { showFilterOverlay = false }
+            AddOverlay(
+                model = model,
+                visible = showAddOverlay
+            ) { showAddOverlay = false }
         }
     ) {
-        Body(state = state, model = model, navigateTo = navigateTo)
+        Body(model = model.rules, navigateTo = navigateTo)
     }
 }
 
 @Composable
-private fun SearchTags(
-    state: State,
-    model: RulesModel
+private fun FilterTags(
+    filter: Filter,
+    applyFilter: (Filter) -> Unit
 ) {
-    if (state.nameSearch.isNotBlank()) SearchChip(name = "Name", text = state.nameSearch) { model.search(name = "") }
+    if (filter.name.isNotBlank()) FilterChip(name = "Name", text = filter.name) {
+        applyFilter(filter.copy(name = ""))
+    }
 }
 
 @Composable
-private fun SearchOverlay(
-    state: State,
-    model: RulesModel,
+private fun FilterOverlay(
+    filter: Filter,
+    applyFilter: (Filter) -> Unit,
     visible: Boolean,
     dismissOverlay: () -> Unit
 ) {
@@ -83,7 +93,7 @@ private fun SearchOverlay(
         visible = visible,
         onDismiss = dismissOverlay
     ) {
-        var name by remember { mutableStateOf(state.nameSearch) }
+        var name by remember { mutableStateOf(filter.name) }
 
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -91,8 +101,7 @@ private fun SearchOverlay(
             shadowElevation = 1.dp
         ) {
             Form(
-                title = "Search",
-                isLoading = state.isLoading,
+                title = "Filter",
                 abortButton = {
                     FormButton(
                         text = "Close",
@@ -103,13 +112,12 @@ private fun SearchOverlay(
                 },
                 confirmButton = {
                     FormButton(
-                        text = "Search",
-                        enabled = !state.isLoading,
+                        text = "Filter",
                         icon = Icons.Default.Search,
-                        contentDescription = "Search"
+                        contentDescription = "Filter"
                     ) {
                         dismissOverlay()
-                        model.search(name = name)
+                        applyFilter(filter.copy(name = name))
                     }
                 }
             ) {
@@ -121,7 +129,6 @@ private fun SearchOverlay(
 
 @Composable
 private fun AddOverlay(
-    state: State,
     model: RulesModel,
     visible: Boolean,
     dismissOverlay: () -> Unit
@@ -145,7 +152,6 @@ private fun AddOverlay(
 
         Form(
             title = "New rule",
-            isLoading = state.isLoading,
             abortButton = {
                 FormButton(
                     text = "Close",
@@ -157,7 +163,7 @@ private fun AddOverlay(
             confirmButton = {
                 FormButton(
                     text = "Save",
-                    enabled = !state.isLoading && name.isNotBlank()
+                    enabled = name.isNotBlank()
                 ) {
                     dismissOverlay()
                     model.addRule(
@@ -306,10 +312,11 @@ private fun AddOverlay(
 
 @Composable
 private fun Body(
-    state: State,
-    model: RulesModel,
+    model: RuleListModel,
     navigateTo: (Screens) -> Unit
 ) {
+    val state by model.state.collectAsState()
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Surface(
             modifier = Modifier.weight(1.0f, fill = false),
@@ -318,12 +325,12 @@ private fun Body(
             shadowElevation = 1.dp
         ) {
             LazyTableWithScroll(
-                items = state.rules,
+                items = state.items,
                 isLoading = state.isLoading,
                 columns = columns(
                     navigateTo = navigateTo,
-                    onSort = model::onSort,
-                    onDelete = model::deleteRule
+                    onSort = model::sort,
+                    onDelete = model::deleteItem
                 )
             )
         }
@@ -331,7 +338,7 @@ private fun Body(
         PageSelector(
             currentPage = state.currentPage,
             lastPage = state.lastPage,
-            onPageClicked = model::updatePage
+            onPageClicked = model::selectPage
         )
     }
 }

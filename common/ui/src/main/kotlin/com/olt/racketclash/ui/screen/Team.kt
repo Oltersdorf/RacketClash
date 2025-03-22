@@ -5,7 +5,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.state.SortDirection
 import com.olt.racketclash.team.Player
 import com.olt.racketclash.team.Tag
 import com.olt.racketclash.team.TeamModel
@@ -76,35 +75,35 @@ internal fun Team(
 
 private fun columns(
     navigateTo: (Screens) -> Unit,
-    onNameSort: (SortDirection) -> Unit,
-    onBirthYearSort: (SortDirection) -> Unit,
-    onClubSort: (SortDirection) -> Unit,
-    onSinglesSort: (SortDirection) -> Unit,
-    onDoublesSort: (SortDirection) -> Unit
+    onNameSort: () -> Unit,
+    onBirthYearSort: () -> Unit,
+    onClubSort: () -> Unit,
+    onSinglesSort: () -> Unit,
+    onDoublesSort: () -> Unit
 ): List<LazyTableColumn<Player>> =
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.4f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onNameSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onNameSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onNameSort()
+                LazyTableSortDirection.Descending -> onNameSort()
             }
         }) { navigateTo(Screens.Player(playerName = it.name, playerId = it.id)) },
         LazyTableColumn.Text(name = "Birth year", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onBirthYearSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onBirthYearSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onBirthYearSort()
+                LazyTableSortDirection.Descending -> onBirthYearSort()
             }
         }) { it.birthYear.toString() },
         LazyTableColumn.Text(name = "Club", weight = 0.4f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onClubSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onClubSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onClubSort()
+                LazyTableSortDirection.Descending -> onClubSort()
             }
         }) { it.club },
         LazyTableColumn.Builder(name = "Single", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSinglesSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onSinglesSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onSinglesSort()
+                LazyTableSortDirection.Descending -> onSinglesSort()
             }
         }) { player, weight ->
             RatioBar(
@@ -118,8 +117,8 @@ private fun columns(
         },
         LazyTableColumn.Builder(name = "Double", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onDoublesSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onDoublesSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onDoublesSort()
+                LazyTableSortDirection.Descending -> onDoublesSort()
             }
         }) { player, weight ->
             RatioBar(

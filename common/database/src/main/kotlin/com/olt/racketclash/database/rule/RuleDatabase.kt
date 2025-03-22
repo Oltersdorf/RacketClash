@@ -7,14 +7,14 @@ import com.olt.racketclash.database.table.Rule
 class RuleDatabase(private val database: RacketClashDatabase) {
 
     fun selectFilteredAndOrdered(
-        nameFilter: String,
+        filter: Filter,
         sorting: Sorting,
         fromIndex: Int,
         toIndex: Int
     ): Pair<Long, List<FilteredAndOrderedRule>> =
-        database.ruleQueries.selectFilteredAndOrderedSize(name = nameFilter).executeAsOne() to
+        database.ruleQueries.selectFilteredAndOrderedSize(name = filter.name).executeAsOne() to
         database.ruleQueries.filteredAndOrderedRule(
-            name = nameFilter,
+            name = filter.name,
             sorting = sorting.name,
             offset = fromIndex.toLong(),
             limit = toIndex.toLong()

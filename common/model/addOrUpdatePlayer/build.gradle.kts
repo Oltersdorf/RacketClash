@@ -9,6 +9,6 @@ repositories {
 
 dependencies {
     implementation(project(":common:database"))
-    implementation(project(":common:util:state"))
+    implementation(project(":common:state"))
     implementation(libs.compose.navigation)
 }

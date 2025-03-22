@@ -1,6 +1,7 @@
 package com.olt.racketclash.start
 
 import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.rule.Filter
 import com.olt.racketclash.database.rule.Sorting as RuleSorting
 import com.olt.racketclash.state.ViewModelState
 import com.olt.racketclash.database.player.Sorting as PlayerSorting
@@ -33,7 +34,7 @@ class StartModel(
                 ).second.take(5)
 
                 val rules = database.rules.selectFilteredAndOrdered(
-                    nameFilter = "",
+                    filter = Filter(),
                     sorting = RuleSorting.NameAsc,
                     fromIndex = 0,
                     toIndex = 5

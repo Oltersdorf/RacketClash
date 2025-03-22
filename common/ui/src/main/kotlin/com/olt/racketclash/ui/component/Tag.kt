@@ -27,7 +27,7 @@ fun Tag(
 }
 
 @Composable
-fun SearchChip(
+fun FilterChip(
     name: String,
     text: String,
     onClick: () -> Unit

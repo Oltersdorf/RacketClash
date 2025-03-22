@@ -10,7 +10,6 @@ import com.olt.racketclash.database.Database
 import com.olt.racketclash.player.Game
 import com.olt.racketclash.player.PlayerModel
 import com.olt.racketclash.player.Tag
-import com.olt.racketclash.state.SortDirection
 import com.olt.racketclash.ui.component.Link
 import com.olt.racketclash.ui.component.RatioBar
 import com.olt.racketclash.ui.component.SearchBar
@@ -126,22 +125,22 @@ internal fun Player(
 
 private fun columns(
     navigateTo: (Screens) -> Unit,
-    onDateSort: (SortDirection) -> Unit,
-    onTournamentSort: (SortDirection) -> Unit,
-    onCategorySort: (SortDirection) -> Unit,
+    onDateSort: () -> Unit,
+    onTournamentSort: () -> Unit,
+    onCategorySort: () -> Unit,
     playerId: Long
 ): List<LazyTableColumn<Game>> =
     listOf(
         LazyTableColumn.Text(name = "Date", weight = 0.08f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onDateSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onDateSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onDateSort()
+                LazyTableSortDirection.Descending -> onDateSort()
             }
         }) { it.date },
         LazyTableColumn.Builder(name = "Tournament", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onTournamentSort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onTournamentSort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onTournamentSort()
+                LazyTableSortDirection.Descending -> onTournamentSort()
             }
         }) { game, weight ->
             Row(
@@ -160,8 +159,8 @@ private fun columns(
         },
         LazyTableColumn.Text(name = "Game Rule", weight = 0.08f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onCategorySort(SortDirection.Ascending)
-                LazyTableSortDirection.Descending -> onCategorySort(SortDirection.Descending)
+                LazyTableSortDirection.Ascending -> onCategorySort()
+                LazyTableSortDirection.Descending -> onCategorySort()
             }
         }) { it.ruleName },
         LazyTableColumn.Builder(name = "Left", weight = 0.1f) { game, weight ->

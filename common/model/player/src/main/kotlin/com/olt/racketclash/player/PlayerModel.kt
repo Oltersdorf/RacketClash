@@ -1,7 +1,6 @@
 package com.olt.racketclash.player
 
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.state.SortDirection
 import com.olt.racketclash.state.ViewModelState
 
 class PlayerModel(
@@ -43,17 +42,17 @@ class PlayerModel(
         }
     }
 
-    fun onDateSort(direction: SortDirection) =
+    fun onDateSort() =
         onIO {
             //update games
         }
 
-    fun onTournamentSort(direction: SortDirection) =
+    fun onTournamentSort() =
         onIO {
             //update games
         }
 
-    fun onCategorySort(direction: SortDirection) =
+    fun onCategorySort() =
         onIO {
             //update games
         }

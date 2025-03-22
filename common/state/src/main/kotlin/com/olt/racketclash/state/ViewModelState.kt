@@ -16,15 +16,15 @@ abstract class ViewModelState<S>(
     private val _state: MutableStateFlow<S> = MutableStateFlow(initialState)
     val state: StateFlow<S> = _state.asStateFlow()
 
-    fun updateState(block: S.() -> S) =
+    protected fun updateState(block: S.() -> S) =
         _state.update(block)
 
-    fun onIO(block: suspend CoroutineScope.() -> Unit) =
+    protected fun onIO(block: suspend CoroutineScope.() -> Unit) =
         viewModelScope.launch(context = Dispatchers.IO, block = block)
 
-    fun onDefault(block: suspend CoroutineScope.() -> Unit) =
+    protected fun onDefault(block: suspend CoroutineScope.() -> Unit) =
         viewModelScope.launch(context = Dispatchers.Default, block = block)
 
-    fun onMain(block: suspend CoroutineScope.() -> Unit) =
+    protected fun onMain(block: suspend CoroutineScope.() -> Unit) =
         viewModelScope.launch(context = Dispatchers.Main, block = block)
 }
