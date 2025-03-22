@@ -2,7 +2,6 @@ rootProject.name = "RacketClash"
 include(
     "common:database",
     "common:ui",
-    "common:util:state",
     "common:state",
     "common:model:addOrUpdateCategory",
     "common:model:addOrUpdatePlayer",
