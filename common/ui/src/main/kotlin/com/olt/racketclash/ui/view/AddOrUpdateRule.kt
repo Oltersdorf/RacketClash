@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.screen
+package com.olt.racketclash.ui.view
 
 import androidx.compose.runtime.*
 import com.olt.rackeclash.addorupdaterule.AddOrUpdateRuleModel

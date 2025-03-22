@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.screen
+package com.olt.racketclash.ui.view
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
@@ -12,7 +12,7 @@ import com.olt.racketclash.ui.component.RatioBar
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.*
-import com.olt.racketclash.ui.Screens
+import com.olt.racketclash.ui.View
 
 @Composable
 internal fun Team(
@@ -20,14 +20,14 @@ internal fun Team(
     teamId: Long,
     teamName: String,
     tournamentId: Long,
-    navigateTo: (Screens) -> Unit
+    navigateTo: (View) -> Unit
 ) {
     val model = remember { TeamModel(database = database, teamId = teamId, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
 
     Details(
         isLoading = state.isLoading,
-        onEdit = { navigateTo(Screens.AddOrUpdateTeam(teamId = teamId, teamName = teamName, tournamentId = tournamentId)) }
+        onEdit = { navigateTo(View.AddOrUpdateTeam(teamId = teamId, teamName = teamName, tournamentId = tournamentId)) }
     ) {
         DetailSection(title = "Description") {
             DetailText(title = "Name", text = "$teamName (${state.numberOfPlayers} Players)")
@@ -74,7 +74,7 @@ internal fun Team(
 }
 
 private fun columns(
-    navigateTo: (Screens) -> Unit,
+    navigateTo: (View) -> Unit,
     onNameSort: () -> Unit,
     onBirthYearSort: () -> Unit,
     onClubSort: () -> Unit,
@@ -87,7 +87,7 @@ private fun columns(
                 LazyTableSortDirection.Ascending -> onNameSort()
                 LazyTableSortDirection.Descending -> onNameSort()
             }
-        }) { navigateTo(Screens.Player(playerName = it.name, playerId = it.id)) },
+        }) { navigateTo(View.Player(playerName = it.name, playerId = it.id)) },
         LazyTableColumn.Text(name = "Birth year", weight = 0.1f, onSort = {
             when (it) {
                 LazyTableSortDirection.Ascending -> onBirthYearSort()

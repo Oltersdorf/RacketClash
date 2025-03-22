@@ -1,26 +1,26 @@
-package com.olt.racketclash.ui.screen
+package com.olt.racketclash.ui.view
 
 import androidx.compose.runtime.Composable
 import com.olt.racketclash.ui.layout.LinkNavigationList
-import com.olt.racketclash.ui.Screens
+import com.olt.racketclash.ui.View
 
 @Composable
 internal fun Tournament(
     tournamentId: Long,
     tournamentName: String,
-    navigateTo: (Screens) -> Unit
+    navigateTo: (View) -> Unit
 ) {
     LinkNavigationList(
         title = tournamentName,
         navList = listOf(
-            Screens.Teams(tournamentId = tournamentId),
-            Screens.Categories(tournamentId = tournamentId),
-            Screens.Schedule(tournamentId = tournamentId)
+            View.Teams(tournamentId = tournamentId),
+            View.Categories(tournamentId = tournamentId),
+            View.Schedule(tournamentId = tournamentId)
         ),
         onClick = navigateTo,
         onLinkClick = {
             navigateTo(
-                Screens.AddOrUpdateTournament(
+                View.AddOrUpdateTournament(
                     tournamentId = tournamentId,
                     tournamentName = tournamentName
                 )

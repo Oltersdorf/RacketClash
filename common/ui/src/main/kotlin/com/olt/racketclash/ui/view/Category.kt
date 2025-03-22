@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.screen
+package com.olt.racketclash.ui.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,7 +22,7 @@ import com.olt.racketclash.ui.component.Loading
 import com.olt.racketclash.ui.component.Status
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
-import com.olt.racketclash.ui.Screens
+import com.olt.racketclash.ui.View
 
 @Composable
 internal fun Category(
@@ -30,7 +30,7 @@ internal fun Category(
     categoryId: Long,
     categoryName: String,
     tournamentId: Long,
-    navigateTo: (Screens) -> Unit
+    navigateTo: (View) -> Unit
 ) {
     val model = remember { CategoryModel(database = database, categoryId = categoryId) }
     val state by model.state.collectAsState()
@@ -91,13 +91,13 @@ private fun Custom(
     tournamentId: Long,
     state: State,
     updatePage: (Int) -> Unit,
-    navigateTo: (Screens) -> Unit
+    navigateTo: (View) -> Unit
 ) {
     SearchableLazyTableWithScroll(
         title = "Games",
         onTitleAdd = {
             navigateTo(
-                Screens.AddSchedule(
+                View.AddSchedule(
                 categoryId = categoryId,
                 categoryName = categoryName,
                 tournamentId = tournamentId

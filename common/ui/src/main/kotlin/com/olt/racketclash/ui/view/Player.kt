@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.screen
+package com.olt.racketclash.ui.view
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
@@ -15,7 +15,7 @@ import com.olt.racketclash.ui.component.RatioBar
 import com.olt.racketclash.ui.component.SearchBar
 import com.olt.racketclash.ui.component.Tag
 import com.olt.racketclash.ui.layout.*
-import com.olt.racketclash.ui.Screens
+import com.olt.racketclash.ui.View
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -23,14 +23,14 @@ internal fun Player(
     database: Database,
     playerId: Long,
     playerName: String,
-    navigateTo: (Screens) -> Unit
+    navigateTo: (View) -> Unit
 ) {
     val model = remember { PlayerModel(database = database, playerId = playerId) }
     val state by model.state.collectAsState()
 
     Details(
         isLoading = state.isLoading,
-        onEdit = { navigateTo(Screens.AddOrUpdatePlayer(playerName = playerName, playerId = playerId)) }
+        onEdit = { navigateTo(View.AddOrUpdatePlayer(playerName = playerName, playerId = playerId)) }
     ) {
         DetailSection(title = "Description") {
             DetailText(title = "Name", text = "$playerName (Year: ${state.birthYear})")
@@ -64,7 +64,7 @@ internal fun Player(
                         if (teamId != null && teamName != null)
                             Link(teamName) {
                                 navigateTo(
-                                    Screens.Team(
+                                    View.Team(
                                     tournamentId = tournament.id,
                                     teamId = teamId,
                                     teamName = teamName
@@ -78,7 +78,7 @@ internal fun Player(
                                 tournament.categories.forEachIndexed { index, category ->
                                     Link(category.name) {
                                         navigateTo(
-                                            Screens.Category(
+                                            View.Category(
                                             categoryId = category.id,
                                             categoryName = category.name,
                                             tournamentId = tournament.id
@@ -124,7 +124,7 @@ internal fun Player(
 }
 
 private fun columns(
-    navigateTo: (Screens) -> Unit,
+    navigateTo: (View) -> Unit,
     onDateSort: () -> Unit,
     onTournamentSort: () -> Unit,
     onCategorySort: () -> Unit,
@@ -149,7 +149,7 @@ private fun columns(
             ) {
                 Text(game.tournamentName)
                 Link("(${game.categoryName})") {
-                    Screens.Category(
+                    View.Category(
                         categoryId = game.categoryId,
                         categoryName = game.categoryName,
                         tournamentId = game.tournamentId
@@ -169,7 +169,7 @@ private fun columns(
                     Text(game.playerLeftOneName)
                 else
                     Link(game.playerLeftOneName) {
-                        navigateTo(Screens.Player(playerId = game.playerLeftOneId, playerName = game.playerLeftOneName))
+                        navigateTo(View.Player(playerId = game.playerLeftOneId, playerName = game.playerLeftOneName))
                     }
 
                 val playerLeftTwoId = game.playerLeftTwoId
@@ -179,7 +179,7 @@ private fun columns(
                         Text(playerLeftTwoName)
                     else
                         Link(playerLeftTwoName) {
-                            navigateTo(Screens.Player(playerId = playerLeftTwoId, playerName = playerLeftTwoName))
+                            navigateTo(View.Player(playerId = playerLeftTwoId, playerName = playerLeftTwoName))
                         }
                 }
             }
@@ -203,7 +203,7 @@ private fun columns(
                     Text(game.playerRightOneName)
                 else
                     Link(game.playerRightOneName) {
-                        navigateTo(Screens.Player(playerId = game.playerRightOneId, playerName = game.playerRightOneName))
+                        navigateTo(View.Player(playerId = game.playerRightOneId, playerName = game.playerRightOneName))
                     }
 
                 val playerRightTwoId = game.playerRightTwoId
@@ -213,7 +213,7 @@ private fun columns(
                         Text(playerRightTwoName)
                     else
                         Link(playerRightTwoName) {
-                            navigateTo(Screens.Player(playerId = playerRightTwoId, playerName = playerRightTwoName))
+                            navigateTo(View.Player(playerId = playerRightTwoId, playerName = playerRightTwoName))
                         }
                 }
             }

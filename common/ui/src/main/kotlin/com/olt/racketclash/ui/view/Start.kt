@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.screen
+package com.olt.racketclash.ui.view
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -11,13 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.state.start.StartModel
-import com.olt.racketclash.ui.Screens
+import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.component.Link
 import com.olt.racketclash.ui.component.Loading
 import com.olt.racketclash.ui.layout.RacketClashScrollableScaffold
 
 @Composable
-internal fun Start(database: Database, navigateTo: (Screens) -> Unit) {
+internal fun Start(database: Database, navigateTo: (View) -> Unit) {
     val model = remember { StartModel(database = database) }
     val state by model.state.collectAsState()
 
@@ -27,10 +27,10 @@ internal fun Start(database: Database, navigateTo: (Screens) -> Unit) {
                 name = "Tournaments",
                 isLoading = state.isLoading,
                 items = state.tournaments,
-                onNavigateMore = { navigateTo(Screens.Tournaments) }
+                onNavigateMore = { navigateTo(View.Tournaments) }
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Link(it.name) { navigateTo(Screens.Tournament(tournamentName = it.name, tournamentId = it.id)) }
+                    Link(it.name) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) }
                     Text(
                         text = "(${it.startDateTime} to ${it.endDateTime})",
                         fontSize = MaterialTheme.typography.labelMedium.fontSize
@@ -42,10 +42,10 @@ internal fun Start(database: Database, navigateTo: (Screens) -> Unit) {
                 name = "Players",
                 isLoading = state.isLoading,
                 items = state.players,
-                onNavigateMore = { navigateTo(Screens.Players) }
+                onNavigateMore = { navigateTo(View.Players) }
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Link(it.name) { navigateTo(Screens.Player(playerName = it.name, playerId = it.id)) }
+                    Link(it.name) { navigateTo(View.Player(playerName = it.name, playerId = it.id)) }
                     Text(
                         text = "(${it.club})",
                         fontSize = MaterialTheme.typography.labelMedium.fontSize
@@ -57,7 +57,7 @@ internal fun Start(database: Database, navigateTo: (Screens) -> Unit) {
                 name = "Rules",
                 isLoading = state.isLoading,
                 items = state.rules,
-                onNavigateMore = { navigateTo(Screens.Rules) }
+                onNavigateMore = { navigateTo(View.Rules) }
             ) {
                 Text(it.name)
             }

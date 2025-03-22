@@ -10,14 +10,14 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.ui.component.Link
-import com.olt.racketclash.ui.Screens
+import com.olt.racketclash.ui.View
 
 @Composable
 internal fun LinkNavigationList(
     title: String,
-    navList: List<Screens>,
+    navList: List<View>,
     onLinkClick: () -> Unit,
-    onClick: (Screens) -> Unit
+    onClick: (View) -> Unit
 ) {
     NavigationList(
         navList = navList,
@@ -34,8 +34,8 @@ internal fun LinkNavigationList(
 
 @Composable
 private fun NavigationList(
-    navList: List<Screens>,
-    onClick: (Screens) -> Unit,
+    navList: List<View>,
+    onClick: (View) -> Unit,
     title: @Composable () -> Unit
 ) {
     Column(

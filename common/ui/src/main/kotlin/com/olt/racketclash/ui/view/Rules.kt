@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.screen
+package com.olt.racketclash.ui.view
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
@@ -17,7 +17,7 @@ import com.olt.racketclash.database.rule.Filter
 import com.olt.racketclash.database.table.FilteredAndOrderedRule
 import com.olt.racketclash.state.rule.RuleListModel
 import com.olt.racketclash.state.rule.RulesModel
-import com.olt.racketclash.ui.Screens
+import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.component.*
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.layout.RacketClashScaffold
@@ -29,7 +29,7 @@ import kotlin.math.roundToInt
 @Composable
 internal fun Rules(
     database: Database,
-    navigateTo: (Screens) -> Unit
+    navigateTo: (View) -> Unit
 ) {
     val model = remember { RulesModel(database = database) }
     val state by model.state.collectAsState()
@@ -313,7 +313,7 @@ private fun AddOverlay(
 @Composable
 private fun Body(
     model: RuleListModel,
-    navigateTo: (Screens) -> Unit
+    navigateTo: (View) -> Unit
 ) {
     val state by model.state.collectAsState()
 
@@ -344,7 +344,7 @@ private fun Body(
 }
 
 private fun columns(
-    navigateTo: (Screens) -> Unit,
+    navigateTo: (View) -> Unit,
     onSort: (Sorting) -> Unit,
     onDelete: (FilteredAndOrderedRule) -> Unit
 ): List<LazyTableColumn<FilteredAndOrderedRule>> =
@@ -355,7 +355,7 @@ private fun columns(
                 LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
             }
         }) {
-            navigateTo(Screens.AddOrUpdateRule(ruleName = it.name, ruleId = it.id))
+            navigateTo(View.AddOrUpdateRule(ruleName = it.name, ruleId = it.id))
         },
         LazyTableColumn.Text(name = "Sets", weight = 0.1f) {
             "${it.winSets}/${it.maxSets}"

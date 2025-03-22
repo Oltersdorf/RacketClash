@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.screen
+package com.olt.racketclash.ui.view
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -18,7 +18,7 @@ import com.olt.racketclash.ui.component.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
-import com.olt.racketclash.ui.Screens
+import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.theme.AdditionalMaterialTheme
 import org.jetbrains.compose.resources.painterResource
 import racketclash.common.ui.generated.resources.Res
@@ -28,14 +28,14 @@ import racketclash.common.ui.generated.resources.medal
 @Composable
 internal fun Players(
     database: Database,
-    navigateTo: (Screens) -> Unit
+    navigateTo: (View) -> Unit
 ) {
     val model = remember { PlayersModel(database = database) }
     val state by model.state.collectAsState()
 
     SearchableLazyTableWithScroll(
         title = "Players",
-        onTitleAdd = { navigateTo(Screens.AddOrUpdatePlayer(playerName = null, playerId = null)) },
+        onTitleAdd = { navigateTo(View.AddOrUpdatePlayer(playerName = null, playerId = null)) },
         items = state.players,
         isLoading = state.isLoading,
         columns = columns(
@@ -86,7 +86,7 @@ internal fun Players(
 }
 
 private fun columns(
-    navigateTo: (Screens) -> Unit,
+    navigateTo: (View) -> Unit,
     onSort: (Sorting) -> Unit,
     onDelete: (FilteredAndOrderedPlayer) -> Unit
 ): List<LazyTableColumn<FilteredAndOrderedPlayer>> =
@@ -96,7 +96,7 @@ private fun columns(
                 LazyTableSortDirection.Ascending -> onSort(Sorting.NameAsc)
                 LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
             }
-        }) { navigateTo(Screens.Player(playerName = it.name, playerId = it.id)) },
+        }) { navigateTo(View.Player(playerName = it.name, playerId = it.id)) },
         LazyTableColumn.Text(name = "Birth year", weight = 0.1f, onSort = {
             when (it) {
                 LazyTableSortDirection.Ascending -> onSort(Sorting.BirthYearAsc)

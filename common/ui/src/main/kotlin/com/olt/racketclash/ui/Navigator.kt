@@ -7,18 +7,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.Database
-import com.olt.racketclash.ui.screen.*
-import com.olt.racketclash.ui.screen.Rules
-import com.olt.racketclash.ui.screen.Players
-import com.olt.racketclash.ui.screen.Start
-import com.olt.racketclash.ui.screen.Tournaments
+import com.olt.racketclash.ui.view.Players
+import com.olt.racketclash.ui.view.*
+import com.olt.racketclash.ui.view.AddOrUpdatePlayer
+import com.olt.racketclash.ui.view.AddSchedule
+import com.olt.racketclash.ui.view.Player
+import com.olt.racketclash.ui.view.Rules
+import com.olt.racketclash.ui.view.Start
+import com.olt.racketclash.ui.view.Tournaments
 
 @Composable
 internal fun Navigator(
     drawerState: DrawerState,
     database: Database
 ) {
-    var currentScreen by remember { mutableStateOf<Screens>(Screens.Start) }
+    var currentView by remember { mutableStateOf<View>(View.Start) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -35,8 +38,8 @@ internal fun Navigator(
                 NavigationDrawerItem(
                     shape = RectangleShape,
                     label = { Text("Start") },
-                    selected = currentScreen is Screens.Start,
-                    onClick = { currentScreen = Screens.Start }
+                    selected = currentView is View.Start,
+                    onClick = { currentView = View.Start }
                 )
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
@@ -44,20 +47,20 @@ internal fun Navigator(
                 NavigationDrawerItem(
                     shape = RectangleShape,
                     label = { Text("Tournaments") },
-                    selected = currentScreen is Screens.Tournaments,
-                    onClick = { currentScreen = Screens.Tournaments }
+                    selected = currentView is View.Tournaments,
+                    onClick = { currentView = View.Tournaments }
                 )
                 NavigationDrawerItem(
                     shape = RectangleShape,
                     label = { Text("Players") },
-                    selected = currentScreen is Screens.Players,
-                    onClick = { currentScreen = Screens.Players }
+                    selected = currentView is View.Players,
+                    onClick = { currentView = View.Players }
                 )
                 NavigationDrawerItem(
                     shape = RectangleShape,
                     label = { Text("Rules") },
-                    selected = currentScreen is Screens.Rules,
-                    onClick = { currentScreen = Screens.Rules }
+                    selected = currentView is View.Rules,
+                    onClick = { currentView = View.Rules }
                 )
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
@@ -78,24 +81,24 @@ internal fun Navigator(
             }
         }
     ) {
-        when (val cs = currentScreen) {
-            is Screens.AddOrUpdateCategory -> AddOrUpdateCategory(database = database, categoryId = cs.categoryId, categoryName = cs.categoryName, tournamentId = cs.tournamentId) { currentScreen = Screens.Categories(tournamentId = cs.tournamentId) }
-            is Screens.AddOrUpdateRule -> AddOrUpdateRule(database = database, ruleId = cs.ruleId, ruleName = cs.ruleName) { currentScreen = Screens.Rules }
-            is Screens.AddSchedule -> AddSchedule(database = database, categoryId = cs.categoryId, categoryName = cs.categoryName, tournamentId = cs.tournamentId) { currentScreen = Screens.Schedule(tournamentId = cs.tournamentId) }
-            is Screens.AddOrUpdatePlayer -> AddOrUpdatePlayer(database = database, playerId = cs.playerId, playerName = cs.playerName) { currentScreen = Screens.Players }
-            is Screens.AddOrUpdateTeam -> AddOrUpdateTeam(database = database, teamId = cs.teamId, teamName = cs.teamName, tournamentId = cs.tournamentId) { currentScreen = Screens.Teams(tournamentId = cs.tournamentId) }
-            is Screens.AddOrUpdateTournament -> AddOrUpdateTournament(database = database, tournamentId = cs.tournamentId, tournamentName = cs.tournamentName) { currentScreen = Screens.Tournaments }
-            is Screens.Categories -> Categories(database = database, tournamentId = cs.tournamentId) { currentScreen = it }
-            is Screens.Category -> Category(database = database, categoryId = cs.categoryId, categoryName = cs.categoryName, tournamentId = cs.tournamentId) { currentScreen = it }
-            Screens.Rules -> Rules(database = database) { currentScreen = it }
-            is Screens.Player -> Player(database = database, playerId = cs.playerId, playerName = cs.playerName) { currentScreen = it }
-            Screens.Players -> Players(database = database) { currentScreen = it }
-            Screens.Start -> Start(database = database) { currentScreen = it }
-            is Screens.Schedule -> Schedule(database = database, tournamentId = cs.tournamentId)
-            is Screens.Team -> Team(database = database, teamId = cs.teamId, teamName = cs.teamName, tournamentId = cs.tournamentId) { currentScreen = it }
-            is Screens.Teams -> Teams(database = database, tournamentId = cs.tournamentId) { currentScreen = it }
-            is Screens.Tournament -> Tournament(tournamentId = cs.tournamentId, tournamentName = cs.tournamentName) { currentScreen = it }
-            Screens.Tournaments -> Tournaments(database = database) { currentScreen = it }
+        when (val cv = currentView) {
+            is View.AddOrUpdateCategory -> AddOrUpdateCategory(database = database, categoryId = cv.categoryId, categoryName = cv.categoryName, tournamentId = cv.tournamentId) { currentView = View.Categories(tournamentId = cv.tournamentId) }
+            is View.AddOrUpdateRule -> AddOrUpdateRule(database = database, ruleId = cv.ruleId, ruleName = cv.ruleName) { currentView = View.Rules }
+            is View.AddSchedule -> AddSchedule(database = database, categoryId = cv.categoryId, categoryName = cv.categoryName, tournamentId = cv.tournamentId) { currentView = View.Schedule(tournamentId = cv.tournamentId) }
+            is View.AddOrUpdatePlayer -> AddOrUpdatePlayer(database = database, playerId = cv.playerId, playerName = cv.playerName) { currentView = View.Players }
+            is View.AddOrUpdateTeam -> AddOrUpdateTeam(database = database, teamId = cv.teamId, teamName = cv.teamName, tournamentId = cv.tournamentId) { currentView = View.Teams(tournamentId = cv.tournamentId) }
+            is View.AddOrUpdateTournament -> AddOrUpdateTournament(database = database, tournamentId = cv.tournamentId, tournamentName = cv.tournamentName) { currentView = View.Tournaments }
+            is View.Categories -> Categories(database = database, tournamentId = cv.tournamentId) { currentView = it }
+            is View.Category -> Category(database = database, categoryId = cv.categoryId, categoryName = cv.categoryName, tournamentId = cv.tournamentId) { currentView = it }
+            View.Rules -> Rules(database = database) { currentView = it }
+            is View.Player -> Player(database = database, playerId = cv.playerId, playerName = cv.playerName) { currentView = it }
+            View.Players -> Players(database = database) { currentView = it }
+            View.Start -> Start(database = database) { currentView = it }
+            is View.Schedule -> Schedule(database = database, tournamentId = cv.tournamentId)
+            is View.Team -> Team(database = database, teamId = cv.teamId, teamName = cv.teamName, tournamentId = cv.tournamentId) { currentView = it }
+            is View.Teams -> Teams(database = database, tournamentId = cv.tournamentId) { currentView = it }
+            is View.Tournament -> Tournament(tournamentId = cv.tournamentId, tournamentName = cv.tournamentName) { currentView = it }
+            View.Tournaments -> Tournaments(database = database) { currentView = it }
         }
     }
 }

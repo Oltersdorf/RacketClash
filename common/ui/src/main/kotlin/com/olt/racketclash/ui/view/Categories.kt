@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.screen
+package com.olt.racketclash.ui.view
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material.icons.Icons
@@ -17,21 +17,21 @@ import com.olt.racketclash.ui.component.Status
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
-import com.olt.racketclash.ui.Screens
+import com.olt.racketclash.ui.View
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Categories(
     database: Database,
     tournamentId: Long,
-    navigateTo: (Screens) -> Unit
+    navigateTo: (View) -> Unit
 ) {
     val model = remember { CategoriesModel(database = database, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
 
     SearchableLazyTableWithScroll(
         title = "Categories",
-        onTitleAdd = { navigateTo(Screens.AddOrUpdateCategory(categoryName = null, categoryId = null, tournamentId = tournamentId)) },
+        onTitleAdd = { navigateTo(View.AddOrUpdateCategory(categoryName = null, categoryId = null, tournamentId = tournamentId)) },
         items = state.categories,
         isLoading = state.isLoading,
         columns = columns(
@@ -70,7 +70,7 @@ internal fun Categories(
 }
 
 private fun columns(
-    navigateTo: (Screens) -> Unit,
+    navigateTo: (View) -> Unit,
     onSort: (Sorting) -> Unit,
     onDelete: (Long) -> Unit
 ): List<LazyTableColumn<DeletableCategory>> =
@@ -90,7 +90,7 @@ private fun columns(
             }
         }) {
             navigateTo(
-                Screens.Category(
+                View.Category(
                 categoryName = it.name,
                 categoryId = it.id,
                 tournamentId = it.tournamentId

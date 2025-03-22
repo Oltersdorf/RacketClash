@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.screen
+package com.olt.racketclash.ui.view
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.padding
@@ -15,21 +15,21 @@ import com.olt.racketclash.ui.component.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
-import com.olt.racketclash.ui.Screens
+import com.olt.racketclash.ui.View
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Teams(
     database: Database,
     tournamentId: Long,
-    navigateTo: (Screens) -> Unit
+    navigateTo: (View) -> Unit
 ) {
     val model = remember { TeamsModel(database = database, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
 
     SearchableLazyTableWithScroll(
         title = "Teams",
-        onTitleAdd = { navigateTo(Screens.AddOrUpdateTeam(teamId = null, teamName = null, tournamentId = tournamentId)) },
+        onTitleAdd = { navigateTo(View.AddOrUpdateTeam(teamId = null, teamName = null, tournamentId = tournamentId)) },
         items = state.teams,
         isLoading = state.isLoading,
         columns = columns(
@@ -65,7 +65,7 @@ internal fun Teams(
 }
 
 private fun columns(
-    navigateTo: (Screens) -> Unit,
+    navigateTo: (View) -> Unit,
     tournamentId: Long,
     onSort: (Sorting) -> Unit,
     onDelete: (FilteredAndOrderedTeam) -> Unit
@@ -77,7 +77,7 @@ private fun columns(
                 LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
             }
         }) {
-            navigateTo(Screens.Team(teamName = it.name, teamId = it.id, tournamentId = tournamentId))
+            navigateTo(View.Team(teamName = it.name, teamId = it.id, tournamentId = tournamentId))
         },
         LazyTableColumn.Text(name = "Rank", weight = 0.1f, onSort = {
             when (it) {

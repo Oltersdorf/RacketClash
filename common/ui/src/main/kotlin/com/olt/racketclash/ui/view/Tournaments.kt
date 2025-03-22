@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.screen
+package com.olt.racketclash.ui.view
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material.icons.Icons
@@ -14,20 +14,20 @@ import com.olt.racketclash.ui.component.SearchBarTagChip
 import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
-import com.olt.racketclash.ui.Screens
+import com.olt.racketclash.ui.View
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Tournaments(
     database: Database,
-    navigateTo: (Screens) -> Unit
+    navigateTo: (View) -> Unit
 ) {
     val model = remember { TournamentsModel(database = database) }
     val state by model.state.collectAsState()
 
     SearchableLazyTableWithScroll(
         title = "Tournaments",
-        onTitleAdd = { navigateTo(Screens.AddOrUpdateTournament(tournamentName = null, tournamentId = null)) },
+        onTitleAdd = { navigateTo(View.AddOrUpdateTournament(tournamentName = null, tournamentId = null)) },
         items = state.tournaments,
         isLoading = state.isLoading,
         columns = columns(
@@ -68,7 +68,7 @@ internal fun Tournaments(
 }
 
 private fun columns(
-    navigateTo: (Screens) -> Unit,
+    navigateTo: (View) -> Unit,
     onSort: (Sorting) -> Unit,
     onDelete: (Long) -> Unit
 ): List<LazyTableColumn<DeletableTournament>> =
@@ -78,7 +78,7 @@ private fun columns(
                 LazyTableSortDirection.Ascending -> onSort(Sorting.NameAsc)
                 LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
             }
-        }) { navigateTo(Screens.Tournament(tournamentName = it.name, tournamentId = it.id)) },
+        }) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) },
         LazyTableColumn.Text(name = "Location", weight = 0.2f, onSort = {
             when (it) {
                 LazyTableSortDirection.Ascending -> onSort(Sorting.LocationAsc)
