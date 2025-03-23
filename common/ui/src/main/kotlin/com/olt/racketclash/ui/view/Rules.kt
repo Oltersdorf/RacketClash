@@ -3,7 +3,6 @@ package com.olt.racketclash.ui.view
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -15,30 +14,25 @@ import com.olt.racketclash.database.rule.Sorting
 import com.olt.racketclash.database.Database
 import com.olt.racketclash.database.rule.Filter
 import com.olt.racketclash.database.table.FilteredAndOrderedRule
-import com.olt.racketclash.state.rule.RuleListModel
-import com.olt.racketclash.state.rule.RulesModel
+import com.olt.racketclash.state.list.ListState
+import com.olt.racketclash.state.rule.RuleTableModel
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.material.*
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.layout.RacketClashScaffold
-import kotlin.math.ceil
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 @Composable
 internal fun Rules(
     database: Database,
     navigateTo: (View) -> Unit
 ) {
-    val model = remember { RulesModel(database = database) }
+    val model = remember { RuleTableModel(database = database) }
     val state by model.state.collectAsState()
     var showFilterOverlay by remember { mutableStateOf(false) }
     var showAddOverlay by remember { mutableStateOf(false) }
 
     RacketClashScaffold(
         title = "Rules",
-        headerContent = { FilterTags(filter = state.filter, applyFilter = model::applyFilter) },
         actions = {
             SimpleIconButton(
                 imageVector = Icons.Default.Search,
@@ -57,267 +51,41 @@ internal fun Rules(
             }
         },
         overlay = {
-            FilterOverlay(
+            FilterRuleOverlay(
                 filter = state.filter,
-                applyFilter = model::applyFilter,
+                applyFilter = model::filter,
                 visible = showFilterOverlay
             ) { showFilterOverlay = false }
-            AddOverlay(
-                model = model,
-                visible = showAddOverlay
+
+            AddOrUpdateRuleOverlay(
+                visible = showAddOverlay,
+                onConfirm = { model.add(item = it) }
             ) { showAddOverlay = false }
         }
     ) {
-        Body(model = model.rules, navigateTo = navigateTo)
-    }
-}
-
-@Composable
-private fun FilterTags(
-    filter: Filter,
-    applyFilter: (Filter) -> Unit
-) {
-    if (filter.name.isNotBlank()) FilterChip(name = "Name", text = filter.name) {
-        applyFilter(filter.copy(name = ""))
-    }
-}
-
-@Composable
-private fun FilterOverlay(
-    filter: Filter,
-    applyFilter: (Filter) -> Unit,
-    visible: Boolean,
-    dismissOverlay: () -> Unit
-) {
-    Overlay(
-        visible = visible,
-        onDismiss = dismissOverlay
-    ) {
-        var name by remember { mutableStateOf(filter.name) }
-
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            shadowElevation = 1.dp
-        ) {
-            Form(
-                title = "Filter",
-                abortButton = {
-                    FormButton(
-                        text = "Close",
-                        icon = Icons.Default.Close,
-                        contentDescription = "Close",
-                        onClick = dismissOverlay
-                    )
-                },
-                confirmButton = {
-                    FormButton(
-                        text = "Filter",
-                        icon = Icons.Default.Search,
-                        contentDescription = "Filter"
-                    ) {
-                        dismissOverlay()
-                        applyFilter(filter.copy(name = name))
-                    }
-                }
-            ) {
-                FormTextField(value = name, label = "Name") { name = it }
-            }
-        }
-    }
-}
-
-@Composable
-private fun AddOverlay(
-    model: RulesModel,
-    visible: Boolean,
-    dismissOverlay: () -> Unit
-) {
-    Overlay(
-        visible = visible,
-        onDismiss = dismissOverlay
-    ) {
-        var name by remember { mutableStateOf("") }
-        var maxSets by remember { mutableStateOf(3) }
-        var winSets by remember { mutableStateOf(2) }
-        var maxPoints by remember { mutableStateOf(30) }
-        var winPoints by remember { mutableStateOf(21) }
-        var pointsDifference by remember { mutableStateOf(2) }
-        var gamePointsForWin by remember { mutableStateOf(2) }
-        var gamePointsForLose by remember { mutableStateOf(0) }
-        var gamePointsForDraw by remember { mutableStateOf(1) }
-        var gamePointsForRest by remember { mutableStateOf(2) }
-        var setPointsForRest by remember { mutableStateOf(0) }
-        var pointPointsForRest by remember { mutableStateOf(0) }
-
-        Form(
-            title = "New rule",
-            abortButton = {
-                FormButton(
-                    text = "Close",
-                    icon = Icons.Default.Close,
-                    contentDescription = "Close",
-                    onClick = dismissOverlay
-                )
-            },
-            confirmButton = {
-                FormButton(
-                    text = "Save",
-                    enabled = name.isNotBlank()
-                ) {
-                    dismissOverlay()
-                    model.addRule(
-                        name = name,
-                        maxSets = maxSets,
-                        winSets = winSets,
-                        maxPoints = maxPoints,
-                        winPoints = winPoints,
-                        pointsDifference = pointsDifference,
-                        gamePointsForWin = gamePointsForWin,
-                        gamePointsForLose = gamePointsForLose,
-                        gamePointsForDraw = gamePointsForDraw,
-                        gamePointsForRest = gamePointsForRest,
-                        setPointsForRest = setPointsForRest,
-                        pointPointsForRest = pointPointsForRest
-                    )
-                }
-            }
-        ) {
-            FormTextField(value = name, label = "Name", isError = name.isBlank()) { name = it }
-
-            FormRow {
-                FormNumberSelector(
-                    value = maxSets,
-                    label = "Max sets",
-                    range = 1..Int.MAX_VALUE,
-                    onUp = {
-                        maxSets = it
-                        winSets = max(winSets, ceil(it.toDouble() / 2).roundToInt())
-                    },
-                    onDown = {
-                        maxSets = it
-                        winSets = min(it, winSets)
-                    }
-                )
-
-                FormNumberSelector(
-                    value = winSets,
-                    label = "Win sets",
-                    range = 1..Int.MAX_VALUE,
-                    onUp = {
-                        winSets = it
-                        maxSets = max(maxSets, it)
-                    },
-                    onDown = {
-                        winSets = it
-                        maxSets = min(maxSets, it * 2)
-                    }
-                )
-            }
-
-            FormRow {
-                FormNumberSelector(
-                    value = maxPoints,
-                    label = "Max points",
-                    range = 1..Int.MAX_VALUE,
-                    onUp = { maxPoints = it },
-                    onDown = {
-                        maxPoints = it
-                        winPoints = min(winPoints, it)
-                        pointsDifference = min(pointsDifference, it)
-                    }
-                )
-
-                FormNumberSelector(
-                    value = winPoints,
-                    label = "Win points",
-                    range = 1..Int.MAX_VALUE,
-                    onUp = {
-                        winPoints = it
-                        maxPoints = max(maxPoints, it)
-                    },
-                    onDown = {
-                        winPoints = it
-                        pointsDifference = min(pointsDifference, it)
-                    }
-                )
-
-                FormNumberSelector(
-                    value = pointsDifference,
-                    label = "Points difference",
-                    range = 0..Int.MAX_VALUE,
-                    onUp = {
-                        pointsDifference = it
-                        winPoints = max(winPoints, it)
-                        maxPoints = max(maxPoints, it)
-                    },
-                    onDown = { pointsDifference = it }
-                )
-            }
-
-            FormRow {
-                FormNumberSelector(
-                    value = gamePointsForWin,
-                    label = "Game points for win",
-                    range = 0..Int.MAX_VALUE,
-                    onUp = { gamePointsForWin = it },
-                    onDown = { gamePointsForWin = it }
-                )
-
-                FormNumberSelector(
-                    value = gamePointsForLose,
-                    label = "Game points for lose",
-                    range = 0..Int.MAX_VALUE,
-                    onUp = { gamePointsForLose = it },
-                    onDown = { gamePointsForLose = it }
-                )
-
-                FormNumberSelector(
-                    value = gamePointsForDraw,
-                    label = "Game points for draw",
-                    range = 0..Int.MAX_VALUE,
-                    onUp = { gamePointsForDraw = it },
-                    onDown = { gamePointsForDraw = it }
-                )
-            }
-
-            FormRow {
-                FormNumberSelector(
-                    value = gamePointsForRest,
-                    label = "Game points for rest",
-                    range = 0..Int.MAX_VALUE,
-                    onUp = { gamePointsForRest = it },
-                    onDown = { gamePointsForRest = it }
-                )
-
-                FormNumberSelector(
-                    value = setPointsForRest,
-                    label = "Set points for rest",
-                    range = 0..Int.MAX_VALUE,
-                    onUp = { setPointsForRest = it },
-                    onDown = { setPointsForRest = it }
-                )
-
-                FormNumberSelector(
-                    value = pointPointsForRest,
-                    label = "Point points for rest",
-                    range = 0..Int.MAX_VALUE,
-                    onUp = { pointPointsForRest = it },
-                    onDown = { pointPointsForRest = it }
-                )
-            }
-        }
+        Body(
+            state = state,
+            sort = model::sort,
+            filter = model::filter,
+            delete = model::delete,
+            selectPage = model::selectPage,
+            navigateTo = navigateTo
+        )
     }
 }
 
 @Composable
 private fun Body(
-    model: RuleListModel,
+    state: ListState<FilteredAndOrderedRule, Sorting, Filter>,
+    sort: (Sorting) -> Unit,
+    filter: (Filter) -> Unit,
+    delete: (FilteredAndOrderedRule) -> Unit,
+    selectPage: (Int) -> Unit,
     navigateTo: (View) -> Unit
 ) {
-    val state by model.state.collectAsState()
+    Column {
+        FilterRuleTags(filter = state.filter, applyFilter = filter)
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Surface(
             modifier = Modifier.weight(1.0f, fill = false),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -329,16 +97,17 @@ private fun Body(
                 isLoading = state.isLoading,
                 columns = columns(
                     navigateTo = navigateTo,
-                    onSort = model::sort,
-                    onDelete = model::deleteItem
+                    onSort = sort,
+                    onDelete = delete
                 )
             )
         }
 
         PageSelector(
+            modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
             currentPage = state.currentPage,
             lastPage = state.lastPage,
-            onPageClicked = model::selectPage
+            onPageClicked = selectPage
         )
     }
 }
@@ -355,7 +124,7 @@ private fun columns(
                 LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
             }
         }) {
-            navigateTo(View.AddOrUpdateRule(ruleName = it.name, ruleId = it.id))
+            navigateTo(View.Rule(id = it.id))
         },
         LazyTableColumn.Text(name = "Sets", weight = 0.1f) {
             "${it.winSets}/${it.maxSets}"

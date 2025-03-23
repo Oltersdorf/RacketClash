@@ -5,35 +5,57 @@ import java.lang.Long.min
 
 abstract class ListModel<Item, Sorting, Filter>(
     initialSorting: Sorting,
-    private val filter: () -> Filter
-) : ViewModelState<ListState<Item, Sorting>>(initialState = ListState(sorting = initialSorting)) {
+    initialFilter: Filter
+) : ViewModelState<ListState<Item, Sorting, Filter>>(
+        initialState = ListState(
+            sorting = initialSorting,
+            filter = initialFilter
+        )
+) {
 
     init { updateList() }
 
-    fun deleteItem(item: Item) {
+    fun add(item: Item) {
         onIO {
-            updateState { copy(items = items - item) }
+            databaseAdd(item = item)
+            updateList(updatedPage = state.value.currentPage)
+        }
+    }
+
+    fun delete(item: Item) {
+        onIO {
             databaseDelete(item = item)
+
+            val currentPage = state.value.currentPage
+            val targetPage =
+                if (state.value.items.size == 1 && currentPage != 1)
+                    currentPage - 1
+                else
+                    currentPage
+
+            updateList(updatedPage = targetPage)
         }
     }
 
     fun sort(sorting: Sorting) =
         updateList(updatedState = state.value.copy(sorting = sorting))
 
+    fun filter(filter: Filter) =
+        updateList(updatedState = state.value.copy(filter = filter))
+
     fun selectPage(pageNumber: Int) =
         updateList(updatedPage = pageNumber)
 
     internal fun updateList(
-        updatedState: ListState<Item, Sorting> = state.value,
-        updatedPage: Int = 1,
-        filter: Filter = filter()
+        updatedState: ListState<Item, Sorting, Filter> = state.value,
+        updatedPage: Int = 1
     ) {
         onIO {
             updateState { updatedState.copy(isLoading = true) }
 
             val (totalSize, newList) = databaseSelect(
                 sorting = updatedState.sorting,
-                filter = filter,
+                filter = updatedState.filter,
                 fromIndex = (updatedPage - 1) * updatedState.maxSize,
                 toIndex = updatedPage * updatedState.maxSize
             )
@@ -48,6 +70,8 @@ abstract class ListModel<Item, Sorting, Filter>(
             }
         }
     }
+
+    protected abstract fun databaseAdd(item: Item)
 
     protected abstract fun databaseDelete(item: Item)
 

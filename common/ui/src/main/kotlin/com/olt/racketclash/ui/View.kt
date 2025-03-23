@@ -71,8 +71,5 @@ internal sealed class View(val name: String) {
 
     data object Rules : View(name = "Rules")
 
-    data class AddOrUpdateRule(
-        val ruleName: String?,
-        val ruleId: Long?
-    ) : View(name = ruleName ?: "New rule")
+    data class Rule(val id: Long) : View("Rule")
 }

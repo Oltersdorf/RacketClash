@@ -18,7 +18,6 @@ dependencies {
     implementation(project(":common:state"))
     implementation(project(":common:model:addOrUpdateCategory"))
     implementation(project(":common:model:addOrUpdatePlayer"))
-    implementation(project(":common:model:addOrUpdateRule"))
     implementation(project(":common:model:addOrUpdateTeam"))
     implementation(project(":common:model:addOrUpdateTournament"))
     implementation(project(":common:model:addSchedule"))

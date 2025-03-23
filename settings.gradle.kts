@@ -5,7 +5,6 @@ include(
     "common:state",
     "common:model:addOrUpdateCategory",
     "common:model:addOrUpdatePlayer",
-    "common:model:addOrUpdateRule",
     "common:model:addOrUpdateTeam",
     "common:model:addOrUpdateTournament",
     "common:model:addSchedule",

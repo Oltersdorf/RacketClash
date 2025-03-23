@@ -6,14 +6,12 @@ import com.olt.racketclash.database.rule.Sorting
 import com.olt.racketclash.database.table.FilteredAndOrderedRule
 import com.olt.racketclash.state.list.ListModel
 
-class RuleListModel(
-    private val database: Database,
-    filter: () -> Filter
-): ListModel<FilteredAndOrderedRule, Sorting, Filter>(
+class RuleTableModel(
+    private val database: Database
+) : ListModel<FilteredAndOrderedRule, Sorting, Filter>(
     initialSorting = Sorting.NameAsc,
-    filter = filter
+    initialFilter = Filter()
 ) {
-
     override fun databaseDelete(item: FilteredAndOrderedRule) =
         database.rules.delete(id = item.id)
 
@@ -29,4 +27,7 @@ class RuleListModel(
             fromIndex = fromIndex,
             toIndex = toIndex
         )
+
+    override fun databaseAdd(item: FilteredAndOrderedRule) =
+        database.rules.add(rule = item)
 }

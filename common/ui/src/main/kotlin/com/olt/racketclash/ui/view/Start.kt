@@ -59,7 +59,13 @@ internal fun Start(database: Database, navigateTo: (View) -> Unit) {
                 items = state.rules,
                 onNavigateMore = { navigateTo(View.Rules) }
             ) {
-                Text(it.name)
+                Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Link(it.name) { navigateTo(View.Rule(id = it.id)) }
+                    Text(
+                        text = "(used: ${it.used}, sets: ${it.winSets}/${it.maxSets}, points: ${it.winPoints}/${it.maxPoints} +/- ${it.pointsDifference}, rating: W:${it.gamePointsForWin} / D:${it.gamePointsForDraw} / L:${it.gamePointsForLose}, rest: G:${it.gamePointsForRest} / S:${it.setPointsForRest} / P:${it.pointPointsForRest})",
+                        fontSize = MaterialTheme.typography.labelMedium.fontSize
+                    )
+                }
             }
         }
     }

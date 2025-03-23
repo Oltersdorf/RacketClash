@@ -39,7 +39,23 @@ class RuleDatabase(private val database: RacketClashDatabase) {
             pointPointsForRest = rule.pointPointsForRest
         )
 
-    fun update(rule: Rule) =
+    fun add(rule: FilteredAndOrderedRule) =
+        database.ruleQueries.add(
+            name = rule.name,
+            maxSets = rule.maxSets,
+            winSets = rule.winSets,
+            maxPoints = rule.maxPoints,
+            winPoints = rule.winPoints,
+            pointsDifference = rule.pointsDifference,
+            gamePointsForWin = rule.gamePointsForWin,
+            gamePointsForLose = rule.gamePointsForLose,
+            gamePointsForDraw = rule.gamePointsForDraw,
+            gamePointsForRest = rule.gamePointsForRest,
+            setPointsForRest = rule.setPointsForRest,
+            pointPointsForRest = rule.pointPointsForRest
+        )
+
+    fun update(rule: FilteredAndOrderedRule) =
         database.ruleQueries.update(
             id = rule.id,
             name = rule.name,
