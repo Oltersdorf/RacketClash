@@ -1,15 +1,16 @@
 package com.olt.racketclash.state.list
 
+import com.olt.racketclash.database.api.FilteredSortedList
 import com.olt.racketclash.state.ViewModelState
 import java.lang.Long.min
 
-abstract class ListModel<Item, Sorting, Filter>(
+abstract class ListModel<Item, Filter, Sorting>(
+    initialFilter: Filter,
     initialSorting: Sorting,
-    initialFilter: Filter
-) : ViewModelState<ListState<Item, Sorting, Filter>>(
+) : ViewModelState<ListState<Item, Filter, Sorting>>(
         initialState = ListState(
-            sorting = initialSorting,
-            filter = initialFilter
+            filter = initialFilter,
+            sorting = initialSorting
         )
 ) {
 
@@ -47,38 +48,40 @@ abstract class ListModel<Item, Sorting, Filter>(
         updateList(updatedPage = pageNumber)
 
     internal fun updateList(
-        updatedState: ListState<Item, Sorting, Filter> = state.value,
+        updatedState: ListState<Item, Filter, Sorting> = state.value,
         updatedPage: Int = 1
     ) {
         onIO {
             updateState { updatedState.copy(isLoading = true) }
 
-            val (totalSize, newList) = databaseSelect(
+            val itemList = databaseSelect(
                 sorting = updatedState.sorting,
                 filter = updatedState.filter,
-                fromIndex = (updatedPage - 1) * updatedState.maxSize,
-                toIndex = updatedPage * updatedState.maxSize
+                fromIndex = (updatedPage - 1) * updatedState.maxSize.toLong(),
+                toIndex = updatedPage * updatedState.maxSize.toLong()
             )
 
             updateState {
                 copy(
                     isLoading = false,
-                    items = newList,
+                    items = itemList.items,
+                    filter = itemList.filter,
+                    sorting = itemList.sorting,
                     currentPage = updatedPage,
-                    lastPage = min((totalSize / (maxSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
+                    lastPage = min((itemList.totalSize / (maxSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
                 )
             }
         }
     }
 
-    protected abstract fun databaseAdd(item: Item)
+    protected abstract suspend fun databaseAdd(item: Item)
 
-    protected abstract fun databaseDelete(item: Item)
+    protected abstract suspend fun databaseDelete(item: Item)
 
-    protected abstract fun databaseSelect(
+    protected abstract suspend fun databaseSelect(
+        filter: Filter,
         sorting: Sorting,
-        filter: Filter?,
-        fromIndex: Int,
-        toIndex: Int
-    ): Pair<Long, List<Item>>
+        fromIndex: Long,
+        toIndex: Long
+    ): FilteredSortedList<Item, Filter, Sorting>
 }

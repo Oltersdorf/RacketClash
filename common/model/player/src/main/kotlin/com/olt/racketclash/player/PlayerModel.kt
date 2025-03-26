@@ -1,10 +1,10 @@
 package com.olt.racketclash.player
 
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.api.PlayerDatabase
 import com.olt.racketclash.state.ViewModelState
 
 class PlayerModel(
-    private val database: Database,
+    private val database: PlayerDatabase,
     private val playerId: Long
 ) : ViewModelState<State>(initialState = State()) {
 

@@ -1,13 +1,14 @@
 package com.olt.racketclash.teams
 
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.table.FilteredAndOrderedTeam
-import com.olt.racketclash.database.team.Sorting
+import com.olt.racketclash.database.api.Team
+import com.olt.racketclash.database.api.TeamDatabase
+import com.olt.racketclash.database.api.TeamFilter
+import com.olt.racketclash.database.api.TeamSorting
 import com.olt.racketclash.state.ViewModelState
 import kotlin.math.min
 
 class TeamsModel(
-    private val database: Database,
+    private val database: TeamDatabase,
     private val tournamentId: Long
 ) : ViewModelState<State>(initialState = State()) {
 
@@ -74,22 +75,22 @@ class TeamsModel(
         updateTeamState()
     }
 
-    fun onSort(sorting: Sorting) =
+    fun onSort(sorting: TeamSorting) =
         updateTeamState(sorting = sorting)
 
     fun updatePage(pageNumber: Int) =
         updateTeamState(currentPage = pageNumber)
 
-    fun onDelete(team: FilteredAndOrderedTeam) {
+    fun onDelete(team: Team) {
         updateState { copy(teams = teams - team) }
         onIO {
-            database.teams.delete(id = team.id)
+            database.delete(id = team.id)
             updateTeamState()
         }
     }
 
     private fun updateTeamState(
-        sorting: Sorting = state.value.sorting,
+        sorting: TeamSorting = state.value.sorting,
         currentPage: Int = 1
     ) =
         onIO {
@@ -97,22 +98,23 @@ class TeamsModel(
 
             val filters = state.value.tags
 
-            val (totalSize, sortedTeams) = database.teams.selectFilteredAndOrdered(
-                tournamentId = tournamentId,
-                nameFilter = filters.name ?: "",
-                rankFilter = filters.rank,
+            val teams = database.selectList(
+                filter = TeamFilter(
+                    tournamentId = tournamentId,
+                    name = filters.name ?: ""
+                ),
                 sorting = sorting,
-                fromIndex = (currentPage - 1) * pageSize,
-                toIndex = currentPage * pageSize
+                fromIndex = (currentPage - 1) * pageSize.toLong(),
+                toIndex = currentPage * pageSize.toLong()
             )
 
             updateState {
                 copy(
                     isLoading = false,
-                    teams = sortedTeams,
+                    teams = teams.items,
                     sorting = sorting,
                     currentPage = currentPage,
-                    lastPage = min((totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
+                    lastPage = min((teams.totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
                 )
             }
         }

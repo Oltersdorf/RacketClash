@@ -1,12 +1,13 @@
 package com.olt.racketclash.addorupdateteam
 
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.player.Sorting
+import com.olt.racketclash.database.api.*
 import com.olt.racketclash.state.ViewModelState
 import kotlin.math.min
 
 class AddOrUpdateTeamModel(
-    private val database: Database,
+    private val teamDatabase: TeamDatabase,
+    private val teamPlayerDatabase: TeamPlayerDatabase,
+    private val playerDatabase: PlayerDatabase,
     private val teamId: Long?,
     private val tournamentId: Long
 ) : ViewModelState<State>(initialState = State()) {
@@ -18,12 +19,15 @@ class AddOrUpdateTeamModel(
             if (teamId == null)
                 updateState { copy(isLoading = false) }
             else {
+                val playersIds = teamPlayerDatabase.selectPlayers(teamId = teamId)
+                val team = teamDatabase.selectSingle(id = teamId)
+
                 updateState {
                     copy(
                         isSavable = true,
                         isLoading = false,
-                        team = database.teams.selectSingle(id = teamId),
-                        selectedPlayers = database.playerToTeam.playerIn(teamId = teamId)
+                        team = team,
+                        selectedPlayers = playersIds
                     )
                 }
             }
@@ -146,7 +150,7 @@ class AddOrUpdateTeamModel(
     fun onRemoveSelect(playerId: Long) =
         updateState { copy(selectedPlayers = selectedPlayers - playerId) }
 
-    fun onSort(sorting: Sorting) =
+    fun onSort(sorting: PlayerSorting) =
         updatePlayersState(sorting = sorting)
 
     fun changePage(number: Int) =
@@ -157,9 +161,9 @@ class AddOrUpdateTeamModel(
             updateState { copy(isLoading = true) }
 
             if (teamId == null)
-                database.teams.add(team = state.value.team, tournamentId = tournamentId, players = state.value.selectedPlayers)
+                teamDatabase.add(team = state.value.team.copy(tournamentId = tournamentId), playerIds = state.value.selectedPlayers)
             else
-                database.teams.update(team = state.value.team, players = state.value.selectedPlayers)
+                teamDatabase.update(team = state.value.team.copy(tournamentId = tournamentId), playerIds = state.value.selectedPlayers)
 
             updateState { copy(isLoading = false) }
 
@@ -167,7 +171,7 @@ class AddOrUpdateTeamModel(
         }
 
     private fun updatePlayersState(
-        sorting: Sorting = state.value.sorting,
+        sorting: PlayerSorting = state.value.sorting,
         currentPage: Int = 1
     ) =
         onIO {
@@ -175,24 +179,23 @@ class AddOrUpdateTeamModel(
 
             val filters = state.value.tags
 
-            val (totalSize, sortedPlayers) =
-                database.players.selectFilteredAndOrdered(
-                    nameFilter = filters.name ?: "",
-                    birthYearFilter = filters.birthYear,
-                    clubFilter = filters.club ?: "",
-                    hasMedalsFilter = filters.hasMedals,
-                    sorting = sorting,
-                    fromIndex = (currentPage - 1) * pageSize,
-                    toIndex = currentPage * pageSize
-                )
+            val players = playerDatabase.selectList(
+                filter = PlayerFilter(
+                    name = filters.name ?: "",
+                    club = filters.club ?: ""
+                ),
+                sorting = sorting,
+                fromIndex = (currentPage - 1) * pageSize.toLong(),
+                toIndex = currentPage * pageSize.toLong()
+            )
 
             updateState {
                 copy(
                     playersLoading = false,
-                    players = sortedPlayers,
+                    players = players.items,
                     sorting = sorting,
                     currentPage = currentPage,
-                    lastPage = min((totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
+                    lastPage = min((players.totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
                 )
             }
         }

@@ -48,6 +48,17 @@ FROM
 WHERE
     name LIKE '%' || :name || '%';
 
+selectLast:
+SELECT
+    *,
+    (SELECT COUNT(*) FROM game WHERE game.ruleId = id) +
+    (SELECT COUNT(*) FROM schedule WHERE schedule.ruleId = id) AS used
+FROM
+    ruleTable
+ORDER BY
+    id DESC
+LIMIT :n;
+
 rule:
 SELECT
     *,

@@ -14,7 +14,7 @@ dependencies {
     implementation(compose.material3)
     implementation(compose.components.resources)
     implementation(libs.compose.navigation)
-    implementation(project(":common:database"))
+    implementation(project(":common:databaseApi"))
     implementation(project(":common:state"))
     implementation(project(":common:model:addOrUpdateCategory"))
     implementation(project(":common:model:addOrUpdatePlayer"))

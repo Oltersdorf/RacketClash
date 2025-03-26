@@ -34,11 +34,7 @@ WITH filteredAndOrdered AS (
         teamStatisticsRest ON teamStatisticsRest.id = teamTable.id
     WHERE
         tournamentId = :tournamentId AND
-        name LIKE '%' || :nameFilter || '%' AND
-        CASE
-            WHEN :rankFilter IS NULL THEN TRUE
-            ELSE rank = :rankFilter
-        END
+        name LIKE '%' || :nameFilter || '%'
 )
 SELECT
     *
@@ -72,11 +68,7 @@ FROM
     teamTable
 WHERE
     tournamentId = :tournamentId AND
-    name LIKE '%' || :nameFilter || '%' AND
-    CASE
-        WHEN :rankFilter IS NULL THEN TRUE
-        ELSE rank = :rankFilter
-    END;
+    name LIKE '%' || :nameFilter || '%';
 
 team:
 SELECT

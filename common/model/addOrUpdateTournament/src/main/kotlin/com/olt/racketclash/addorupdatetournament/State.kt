@@ -1,21 +1,11 @@
 package com.olt.racketclash.addorupdatetournament
 
-import com.olt.racketclash.database.tournament.DeletableTournament
+import com.olt.racketclash.database.api.Tournament
 
 data class State(
     val isLoading: Boolean = true,
     val isSavable: Boolean = false,
-    val tournament: DeletableTournament = DeletableTournament(
-        id = 0L,
-        name = "",
-        numberOfCourts = 1,
-        location = "",
-        startDateTime = "",
-        endDateTime = "",
-        playersCount = 0,
-        categoriesCount = 0,
-        deletable = false
-    ),
+    val tournament: Tournament = Tournament(),
     val suggestedLocations: List<String> = emptyList(),
     val suggestedTimes: List<String> = emptyList(),
     val startDateMillis: Long? = null,

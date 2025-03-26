@@ -9,9 +9,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.addorupdateteam.AddOrUpdateTeamModel
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.player.Sorting
-import com.olt.racketclash.database.table.FilteredAndOrderedPlayer
+import com.olt.racketclash.database.api.Database
+import com.olt.racketclash.database.api.Player
+import com.olt.racketclash.database.api.PlayerSorting
 import com.olt.racketclash.ui.material.SearchBar
 import com.olt.racketclash.ui.material.SearchBarMenuItem
 import com.olt.racketclash.ui.material.SearchBarTagChip
@@ -31,7 +31,9 @@ internal fun AddOrUpdateTeam(
     navigateBack: () -> Unit
 ) {
     val model = remember { AddOrUpdateTeamModel(
-        database = database,
+        teamDatabase = database.teams,
+        teamPlayerDatabase = database.teamPlayers,
+        playerDatabase = database.players,
         teamId = teamId,
         tournamentId = tournamentId
     ) }
@@ -118,11 +120,11 @@ internal fun AddOrUpdateTeam(
 }
 
 private fun columns(
-    onSort: (Sorting) -> Unit,
+    onSort: (PlayerSorting) -> Unit,
     selectedPlayers: Set<Long>,
     onAddSelect: (Long) -> Unit,
     onRemoveSelect: (Long) -> Unit
-): List<LazyTableColumn<FilteredAndOrderedPlayer>> =
+): List<LazyTableColumn<Player>> =
     listOf(
         LazyTableColumn.Checkbox(
             name = "Selected",
@@ -136,32 +138,32 @@ private fun columns(
         },
         LazyTableColumn.Text(name = "Name", weight = 0.25f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.NameAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.NameAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.NameDesc)
             }
         }),
         LazyTableColumn.Text(name = "Birth year", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.BirthYearAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.BirthYearDesc)
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.BirthYearAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.BirthYearDesc)
             }
         }) { it.birthYear.toString() },
         LazyTableColumn.Text(name = "Club", weight = 0.25f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.ClubAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.ClubDesc)
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.ClubAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.ClubDesc)
             }
         }) { it.club },
         LazyTableColumn.Text(name = "# tournaments", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.TournamentsAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.TournamentsDesc)
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.TournamentsAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.TournamentsDesc)
             }
         }) { it.numberOfTournaments.toString() },
         LazyTableColumn.Builder(name = "Medals", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.MedalsAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.MedalsDesc)
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.MedalsAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.MedalsDesc)
             }
         }) { player, weight ->
             Row(modifier = Modifier.weight(weight)) {
@@ -199,8 +201,8 @@ private fun columns(
         },
         LazyTableColumn.Builder(name = "Single", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.SinglesAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.SinglesDesc)
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.SinglesAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.SinglesDesc)
             }
         }) { player, weight ->
             /*RatioBar(
@@ -214,8 +216,8 @@ private fun columns(
         },
         LazyTableColumn.Builder(name = "Double", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.DoublesAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.DoublesDesc)
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.DoublesAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.DoublesDesc)
             }
         }) { player, weight ->
             /*RatioBar(

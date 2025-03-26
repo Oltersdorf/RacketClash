@@ -1,11 +1,11 @@
 package com.olt.racketclash.addorupdatetournament
 
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.DateTimeConverter
+import com.olt.racketclash.database.api.TournamentDatabase
 import com.olt.racketclash.state.ViewModelState
+import java.time.Instant
 
 class AddOrUpdateTournamentModel(
-    private val database: Database,
+    private val database: TournamentDatabase,
     private val tournamentId: Long?
 ) : ViewModelState<State>(initialState = State()) {
 
@@ -24,22 +24,19 @@ class AddOrUpdateTournamentModel(
             if (tournamentId == null)
                 updateState { copy(isLoading = false) }
             else {
-                val loadedTournament = database.tournaments.selectSingle(id = tournamentId)
-                val dateTimeConverter = DateTimeConverter()
-
-                val startDateSeconds = dateTimeConverter.toLong(dateTime = loadedTournament.startDateTime)
-                val endDateSeconds = dateTimeConverter.toLong(dateTime = loadedTournament.startDateTime)
+                val loadedTournament = database.selectSingle(id = tournamentId)
+                val locations = database.locations(filter = loadedTournament.location)
 
                 updateState {
                     copy(
                         isSavable = true,
                         isLoading = false,
                         tournament = loadedTournament,
-                        startDateMillis = startDateSeconds * 1000,
-                        endDateMillis = endDateSeconds * 1000,
-                        timeStart = dateTimeConverter.toTime(unixDateTimeSeconds = startDateSeconds),
-                        timeEnd = dateTimeConverter.toTime(unixDateTimeSeconds = endDateSeconds),
-                        suggestedLocations = database.tournaments.locations(filter = loadedTournament.location)
+                        startDateMillis = loadedTournament.start.epochSecond * 1000,
+                        endDateMillis = loadedTournament.end.epochSecond * 1000,
+                        timeStart = "",
+                        timeEnd = "",
+                        suggestedLocations = locations
                     )
                 }
             }
@@ -58,9 +55,8 @@ class AddOrUpdateTournamentModel(
         updateState { copy(tournament = tournament.copy(location = newLocation)) }
 
         onIO {
-            updateState {
-                copy(suggestedLocations = database.tournaments.locations(filter = newLocation))
-            }
+            val suggestedLocations = database.locations(filter = newLocation)
+            updateState { copy(suggestedLocations = suggestedLocations) }
         }
     }
 
@@ -87,23 +83,16 @@ class AddOrUpdateTournamentModel(
             updateState { copy(isLoading = true) }
 
             val state = state.value
-            val dateTimeConverter = DateTimeConverter()
 
             val newTournament = state.tournament.copy(
-                startDateTime = dateTimeConverter.addToString(
-                    unixDateSeconds = state.startDateMillis!! / 1000,
-                    time = state.timeStart
-                ),
-                endDateTime = dateTimeConverter.addToString(
-                    unixDateSeconds = state.endDateMillis!! / 1000,
-                    time = state.timeEnd
-                )
+                start = Instant.ofEpochMilli(state.startDateMillis ?: 0),
+                end = Instant.ofEpochMilli(state.endDateMillis ?: 0)
             )
 
             if (tournamentId == null)
-                database.tournaments.add(tournament = newTournament)
+                database.add(tournament = newTournament)
             else
-                database.tournaments.update(tournament = newTournament)
+                database.update(tournament = newTournament)
 
             updateState { copy(isLoading = false) }
 

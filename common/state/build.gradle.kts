@@ -8,6 +8,6 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":common:database"))
+    implementation(project(":common:databaseApi"))
     implementation(libs.compose.navigation)
 }

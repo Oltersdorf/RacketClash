@@ -5,7 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import com.olt.racketclash.addschedule.AddScheduleModel
 import com.olt.racketclash.addschedule.Player
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.ui.material.Loading
 import com.olt.racketclash.ui.material.SearchBar
 import com.olt.racketclash.ui.layout.*
@@ -18,7 +18,7 @@ internal fun AddSchedule(
     tournamentId: Long,
     navigateBack: () -> Unit
 ) {
-    val model = remember { AddScheduleModel(database = database, categoryId = categoryId, tournamentId = tournamentId) }
+    val model = remember { AddScheduleModel(database = database.schedules, categoryId = categoryId, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
 
     Form(

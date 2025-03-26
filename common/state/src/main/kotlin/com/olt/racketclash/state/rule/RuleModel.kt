@@ -1,12 +1,11 @@
 package com.olt.racketclash.state.rule
 
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.rule.toFilteredAndOrderedRule
-import com.olt.racketclash.database.table.FilteredAndOrderedRule
+import com.olt.racketclash.database.api.Rule
+import com.olt.racketclash.database.api.RuleDatabase
 import com.olt.racketclash.state.ViewModelState
 
 class RuleModel(
-    private val database: Database,
+    private val ruleDatabase: RuleDatabase,
     id: Long
 ) : ViewModelState<RuleState>(initialState = RuleState()) {
 
@@ -14,18 +13,15 @@ class RuleModel(
 
     init {
         onIO {
-            updateState {
-                copy(
-                    rule = database.rules.selectSingle(id = id).toFilteredAndOrderedRule()
-                )
-            }
+            val rule = ruleDatabase.selectSingle(id = id)
+            updateState { copy(rule = rule) }
         }
     }
 
-    fun updateRule(rule: FilteredAndOrderedRule) {
+    fun updateRule(rule: Rule) {
         onIO {
             updateState { copy(rule = rule) }
-            database.rules.update(rule = rule)
+            ruleDatabase.update(rule = rule)
         }
     }
 }

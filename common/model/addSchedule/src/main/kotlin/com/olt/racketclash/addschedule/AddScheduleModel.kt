@@ -1,10 +1,12 @@
 package com.olt.racketclash.addschedule
 
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.api.Schedule
+import com.olt.racketclash.database.api.ScheduleDatabase
 import com.olt.racketclash.state.ViewModelState
+import java.time.Instant
 
 class AddScheduleModel(
-    private val database: Database,
+    private val database: ScheduleDatabase,
     private val categoryId: Long,
     private val tournamentId: Long
 ) : ViewModelState<State>(initialState = State()) {
@@ -68,7 +70,7 @@ class AddScheduleModel(
             val scheduledGames = state.value.generatedGames
 
             scheduledGames.forEachIndexed { index, scheduledGame ->
-                database.schedule.add(
+                val schedule = Schedule(
                     categoryId = categoryId,
                     categoryOrderNumber = index,
                     tournamentId = tournamentId,
@@ -76,8 +78,9 @@ class AddScheduleModel(
                     playerIdLeftTwo = scheduledGame.player2LeftId,
                     playerIdRightOne = scheduledGame.player1RightId,
                     playerIdRightTwo = scheduledGame.player2RightId,
-                    scheduledFor = 0L
+                    scheduledFor = Instant.EPOCH
                 )
+                database.add(schedule = schedule)
             }
 
             updateState { copy(isSavable = true) }

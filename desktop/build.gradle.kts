@@ -14,6 +14,7 @@ repositories {
 
 dependencies {
     implementation(project(":common:database"))
+    implementation(project(":common:databaseApi"))
     implementation(project(":common:ui"))
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)

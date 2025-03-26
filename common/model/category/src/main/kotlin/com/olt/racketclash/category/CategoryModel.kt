@@ -1,11 +1,11 @@
 package com.olt.racketclash.category
 
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.api.GameDatabase
 import com.olt.racketclash.state.ViewModelState
 import kotlin.math.min
 
 class CategoryModel(
-    private val database: Database,
+    private val database: GameDatabase,
     private val categoryId: Long
 ) : ViewModelState<State>(initialState = State()) {
 
@@ -24,19 +24,18 @@ class CategoryModel(
         onIO {
             updateState { copy(isLoading = true) }
 
-            val (totalSize, sortedGames) =
-                database.game.selectGames(
-                    categoryId = categoryId,
-                    fromIndex = (currentPage - 1) * pageSize,
-                    toIndex = currentPage * pageSize
-                )
+            val games = database.selectList(
+                categoryId = categoryId,
+                fromIndex = (currentPage - 1) * pageSize.toLong(),
+                toIndex = currentPage * pageSize.toLong()
+            )
 
             updateState {
                 copy(
                     isLoading = false,
-                    games = sortedGames,
+                    games = games.items,
                     currentPage = currentPage,
-                    lastPage = min((totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
+                    lastPage = min((games.totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
                 )
             }
         }

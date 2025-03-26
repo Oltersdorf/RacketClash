@@ -1,4 +1,3 @@
-import java.time.ZoneId;
 import kotlin.Boolean;
 import kotlin.Int;
 
@@ -8,7 +7,6 @@ CREATE TABLE IF NOT EXISTS game (
     isRest INTEGER AS Boolean NOT NULL,
     unixTimeScheduled INTEGER NOT NULL,
     unixTimeSubmitted INTEGER NOT NULL,
-    zoneId TEXT AS ZoneId NOT NULL,
     categoryId INTEGER NOT NULL,
     categoryOrderNumber INTEGER AS Int NOT NULL,
     tournamentId INTEGER NOT NULL,
@@ -31,7 +29,6 @@ INSERT INTO
         isRest,
         unixTimeScheduled,
         unixTimeSubmitted,
-        zoneId,
         categoryId,
         categoryOrderNumber,
         tournamentId,
@@ -46,7 +43,6 @@ VALUES
         :isRest,
         :unixTimeScheduled,
         :unixTimeSubmitted,
-        :zoneId,
         :categoryId,
         :categoryOrderNumber,
         :tournamentId,

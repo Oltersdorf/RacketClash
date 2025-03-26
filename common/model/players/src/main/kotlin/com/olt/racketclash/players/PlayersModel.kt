@@ -1,13 +1,14 @@
 package com.olt.racketclash.players
 
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.player.Sorting
-import com.olt.racketclash.database.table.FilteredAndOrderedPlayer
+import com.olt.racketclash.database.api.Player
+import com.olt.racketclash.database.api.PlayerDatabase
+import com.olt.racketclash.database.api.PlayerFilter
+import com.olt.racketclash.database.api.PlayerSorting
 import com.olt.racketclash.state.ViewModelState
 import kotlin.math.min
 
 class PlayersModel(
-    private val database: Database
+    private val database: PlayerDatabase
 ) : ViewModelState<State>(initialState = State()) {
 
     private val pageSize = 50
@@ -118,21 +119,21 @@ class PlayersModel(
         updatePlayersState()
     }
 
-    fun onSort(sorting: Sorting) =
+    fun onSort(sorting: PlayerSorting) =
         updatePlayersState(sorting = sorting)
 
     fun updatePage(pageNumber: Int) =
         updatePlayersState(currentPage = pageNumber)
 
-    fun deletePlayer(player: FilteredAndOrderedPlayer) {
+    fun deletePlayer(player: Player) {
         onIO {
-            database.players.delete(id = player.id)
+            database.delete(id = player.id)
             updatePlayersState()
         }
     }
 
     private fun updatePlayersState(
-        sorting: Sorting = state.value.sorting,
+        sorting: PlayerSorting = state.value.sorting,
         currentPage: Int = 1
     ) =
         onIO {
@@ -140,24 +141,24 @@ class PlayersModel(
 
             val filters = state.value.tags
 
-            val (totalSize, sortedPlayers) =
-                database.players.selectFilteredAndOrdered(
-                    nameFilter = filters.name ?: "",
-                    birthYearFilter = filters.birthYear,
-                    clubFilter = filters.club ?: "",
-                    hasMedalsFilter = filters.hasMedals,
+            val players =
+                database.selectList(
+                    filter = PlayerFilter(
+                        name = filters.name ?: "",
+                        club = filters.club ?: ""
+                    ),
                     sorting = sorting,
-                    fromIndex = (currentPage - 1) * pageSize,
-                    toIndex = currentPage * pageSize
+                    fromIndex = (currentPage - 1) * pageSize.toLong(),
+                    toIndex = currentPage * pageSize.toLong()
                 )
 
             updateState {
                 copy(
                     isLoading = false,
-                    players = sortedPlayers,
+                    players = players.items,
                     sorting = sorting,
                     currentPage = currentPage,
-                    lastPage = min((totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
+                    lastPage = min((players.totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
                 )
             }
         }

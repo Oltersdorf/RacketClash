@@ -1,4 +1,4 @@
-import com.olt.racketclash.database.category.CategoryType;
+import com.olt.racketclash.database.api.CategoryType;
 
 CREATE TABLE IF NOT EXISTS category (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,11 +17,8 @@ WITH filteredAndOrdered AS (
     WHERE
         tournamentId = :tournamentId AND
         name LIKE '%' || :nameFilter || '%' AND
-        CASE
-            WHEN :finishedFilter IS NULL THEN TRUE
-            WHEN :finishedFilter = FALSE THEN openGames = 0
-            ELSE openGames > 0
-        END
+        openGames >= :minOpenGames AND
+        openGames <= :maxOpenGames
 )
 SELECT
     *
@@ -50,11 +47,8 @@ FROM
 WHERE
     tournamentId = :tournamentId AND
     name LIKE '%' || :nameFilter || '%' AND
-    CASE
-        WHEN :finishedFilter IS NULL THEN TRUE
-        WHEN :finishedFilter = FALSE THEN openGames = 0
-        ELSE openGames > 0
-    END;
+    openGames >= :minOpenGames AND
+    openGames <= :maxOpenGames;
 
 selectSingle:
 SELECT

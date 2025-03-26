@@ -9,9 +9,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.schedule.Schedule
-import com.olt.racketclash.database.schedule.Sorting
+import com.olt.racketclash.database.api.Database
+import com.olt.racketclash.database.api.GameSet
+import com.olt.racketclash.database.api.Schedule
+import com.olt.racketclash.database.api.ScheduleSorting
 import com.olt.racketclash.schedule.ScheduleModel
 import com.olt.racketclash.ui.material.*
 import com.olt.racketclash.ui.layout.LazyTableColumn
@@ -24,7 +25,7 @@ internal fun Schedule(
     database: Database,
     tournamentId: Long
 ) {
-    val model = remember { ScheduleModel(database = database, tournamentId = tournamentId) }
+    val model = remember { ScheduleModel(database = database.schedules, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
 
     SearchableLazyTableWithScroll(
@@ -82,34 +83,34 @@ internal fun Schedule(
 }
 
 private fun columns(
-    onConfirm: (Long, List<Pair<Int, Int>>) -> Unit,
-    onSort: (Sorting) -> Unit
+    onConfirm: (Long, List<GameSet>) -> Unit,
+    onSort: (ScheduleSorting) -> Unit
 ): List<LazyTableColumn<Schedule>> =
     listOf(
         LazyTableColumn.Builder("Active", weight = 0.05f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.ActiveAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.ActiveDesc)
+                LazyTableSortDirection.Ascending -> onSort(ScheduleSorting.ActiveAsc)
+                LazyTableSortDirection.Descending -> onSort(ScheduleSorting.ActiveDesc)
             }
         }) { scheduledGame, weight ->
             Status(modifier = Modifier.weight(weight), isOkay = scheduledGame.active)
         },
         LazyTableColumn.Text(name = "Schedule", weight = 0.15f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.ScheduleAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.ScheduleDesc)
+                LazyTableSortDirection.Ascending -> onSort(ScheduleSorting.ScheduleAsc)
+                LazyTableSortDirection.Descending -> onSort(ScheduleSorting.ScheduleDesc)
             }
-        }) { it.scheduledFor },
+        }) { it.scheduledFor.toString() },
         LazyTableColumn.Text(name = "Type", weight = 0.05f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.TypeAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.TypeDesc)
+                LazyTableSortDirection.Ascending -> onSort(ScheduleSorting.TypeAsc)
+                LazyTableSortDirection.Descending -> onSort(ScheduleSorting.TypeDesc)
             }
         }) { if (it.playerIdLeftTwo == null) "Single" else "Double" },
         LazyTableColumn.Text(name = "Category", weight = 0.15f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.CategoryAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.CategoryDesc)
+                LazyTableSortDirection.Ascending -> onSort(ScheduleSorting.CategoryAsc)
+                LazyTableSortDirection.Descending -> onSort(ScheduleSorting.CategoryDesc)
             }
         }) { it.categoryName },
         LazyTableColumn.Builder(name = "Left", weight = 0.2f) { scheduledGame, weight ->
@@ -122,22 +123,22 @@ private fun columns(
         LazyTableColumn.Builder(name = "Result", weight = 0.2f) { scheduledGame, weight ->
             Column(modifier = Modifier.weight(weight)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    var sets by remember { mutableStateOf(List(size = scheduledGame.maxSets) { 0 to 0 }) }
+                    var sets by remember { mutableStateOf(listOf<GameSet>()) }
 
                     Column {
                         sets.forEachIndexed { setIndex, set ->
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 OutlinedTextField(
                                     modifier = Modifier.width(100.dp),
-                                    value = set.first.toString(),
+                                    value = set.leftPoints.toString(),
                                     onValueChange = {
                                         val number = it.toIntOrNull()
                                         if (number != null)
-                                            sets = sets.mapIndexed { index, pair ->
+                                            sets = sets.mapIndexed { index, set ->
                                                 if (index == setIndex)
-                                                    number to pair.second
+                                                    set.copy(leftPoints = number)
                                                 else
-                                                    pair
+                                                    set
                                             }
                                     },
                                     singleLine = true
@@ -147,15 +148,15 @@ private fun columns(
 
                                 OutlinedTextField(
                                     modifier = Modifier.width(100.dp),
-                                    value = set.second.toString(),
+                                    value = set.rightPoints.toString(),
                                     onValueChange = {
                                         val number = it.toIntOrNull()
                                         if (number != null)
-                                            sets = sets.mapIndexed { index, pair ->
+                                            sets = sets.mapIndexed { index, set ->
                                                 if (index == setIndex)
-                                                    pair.first to number
+                                                    set.copy(rightPoints = number)
                                                 else
-                                                    pair
+                                                    set
                                             }
                                     },
                                     singleLine = true

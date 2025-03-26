@@ -1,8 +1,7 @@
 package com.olt.racketclash.state.rule
 
-import com.olt.racketclash.database.rule.emptyRule
-import com.olt.racketclash.database.table.FilteredAndOrderedRule
+import com.olt.racketclash.database.api.Rule
 
 data class RuleState(
-    val rule: FilteredAndOrderedRule = emptyRule()
+    val rule: Rule = Rule()
 )

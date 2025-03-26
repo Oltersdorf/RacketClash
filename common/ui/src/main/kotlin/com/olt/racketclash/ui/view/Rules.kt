@@ -10,10 +10,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.rule.Sorting
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.rule.Filter
-import com.olt.racketclash.database.table.FilteredAndOrderedRule
+import com.olt.racketclash.database.api.Database
+import com.olt.racketclash.database.api.Rule
+import com.olt.racketclash.database.api.RuleFilter
+import com.olt.racketclash.database.api.RuleSorting
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.state.rule.RuleTableModel
 import com.olt.racketclash.ui.View
@@ -26,7 +26,7 @@ internal fun Rules(
     database: Database,
     navigateTo: (View) -> Unit
 ) {
-    val model = remember { RuleTableModel(database = database) }
+    val model = remember { RuleTableModel(database = database.rules) }
     val state by model.state.collectAsState()
     var showFilterOverlay by remember { mutableStateOf(false) }
     var showAddOverlay by remember { mutableStateOf(false) }
@@ -76,10 +76,10 @@ internal fun Rules(
 
 @Composable
 private fun Body(
-    state: ListState<FilteredAndOrderedRule, Sorting, Filter>,
-    sort: (Sorting) -> Unit,
-    filter: (Filter) -> Unit,
-    delete: (FilteredAndOrderedRule) -> Unit,
+    state: ListState<Rule, RuleFilter, RuleSorting>,
+    sort: (RuleSorting) -> Unit,
+    filter: (RuleFilter) -> Unit,
+    delete: (Rule) -> Unit,
     selectPage: (Int) -> Unit,
     navigateTo: (View) -> Unit
 ) {
@@ -114,14 +114,14 @@ private fun Body(
 
 private fun columns(
     navigateTo: (View) -> Unit,
-    onSort: (Sorting) -> Unit,
-    onDelete: (FilteredAndOrderedRule) -> Unit
-): List<LazyTableColumn<FilteredAndOrderedRule>> =
+    onSort: (RuleSorting) -> Unit,
+    onDelete: (Rule) -> Unit
+): List<LazyTableColumn<Rule>> =
     listOf(
         LazyTableColumn.Link(name = "Name", text = { it.name }, weight = 0.6f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.NameAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
+                LazyTableSortDirection.Ascending -> onSort(RuleSorting.NameAsc)
+                LazyTableSortDirection.Descending -> onSort(RuleSorting.NameDesc)
             }
         }) {
             navigateTo(View.Rule(id = it.id))

@@ -1,4 +1,3 @@
-import java.time.ZoneId;
 import kotlin.Int;
 
 CREATE TABLE IF NOT EXISTS tournament(
@@ -6,9 +5,8 @@ CREATE TABLE IF NOT EXISTS tournament(
     name TEXT NOT NULL,
     numberOfCourts INTEGER AS Int NOT NULL,
     location TEXT NOT NULL,
-    unixStartDateTime INTEGER NOT NULL,
-    unixEndDateTime INTEGER NOT NULL,
-    zoneId TEXT AS ZoneId NOT NULL
+    startTime INTEGER NOT NULL,
+    endTime INTEGER NOT NULL
 );
 
 selectFilteredAndOrdered:
@@ -20,14 +18,8 @@ WITH filteredAndOrdered AS (
     WHERE
         name LIKE '%' || :nameFilter || '%' AND
         location LIKE '%' || :locationFilter || '%' AND
-    CASE
-        WHEN :yearStartFilter NOT NULL THEN unixStartDateTime >= :yearStartFilter OR unixEndDateTime >= :yearStartFilter
-        ELSE TRUE
-    END AND
-    CASE
-        WHEN :yearEndFilter NOT NULL THEN unixStartDateTime <= :yearEndFilter OR unixEndDateTime <= :yearEndFilter
-        ELSE TRUE
-    END
+        startTime >= :startFilter AND
+        endTime <= :endFilter
 )
 SELECT
     *
@@ -38,8 +30,8 @@ ORDER BY
         WHEN 'nameAsc' THEN name
         WHEN 'locationAsc' THEN location
         WHEN 'courtsAsc' THEN numberOfCourts
-        WHEN 'startDateTimeAsc' THEN unixStartDateTime
-        WHEN 'endDateTimeAsc' THEN unixEndDateTime
+        WHEN 'startDateTimeAsc' THEN startTime
+        WHEN 'endDateTimeAsc' THEN endTime
         WHEN 'playersAsc' THEN playersCount
     END ASC,
     CASE :sorting
@@ -55,14 +47,18 @@ FROM
 WHERE
     name LIKE '%' || :nameFilter || '%' AND
     location LIKE '%' || :locationFilter || '%' AND
-    CASE
-        WHEN :yearStartFilter NOT NULL THEN unixStartDateTime >= :yearStartFilter OR unixEndDateTime >= :yearStartFilter
-        ELSE TRUE
-    END AND
-    CASE
-        WHEN :yearEndFilter NOT NULL THEN unixStartDateTime <= :yearEndFilter OR unixEndDateTime <= :yearEndFilter
-        ELSE TRUE
-    END;
+    startTime >= :startFilter AND
+    endTime <= :endFilter;
+
+selectLast:
+SELECT
+    *, 0 AS playersCount, 0 AS categoriesCount, 0 AS deletable
+FROM
+    tournament
+ORDER BY
+    id DESC
+LIMIT
+    :n;
 
 selectSingle:
 SELECT
@@ -82,9 +78,9 @@ WHERE
 
 add:
 INSERT INTO
-    tournament(name, numberOfCourts, location, unixStartDateTime, unixEndDateTime, zoneId)
+    tournament(name, numberOfCourts, location, startTime, endTime)
 VALUES
-    (:name, :numberOfCourts, :location, :unixStartDateTime, :unixEndDateTime, :zoneId);
+    (:name, :numberOfCourts, :location, :startTime, :endTime);
 
 update:
 UPDATE
@@ -93,9 +89,8 @@ SET
     name = :name,
     numberOfCourts = :numberOfCourts,
     location = :location,
-    unixStartDateTime = :unixStartDateTime,
-    unixEndDateTime = :unixEndDateTime,
-    zoneId = :zoneId
+    startTime = :startTime,
+    endTime = :endTime
 WHERE
     id = :id;
 

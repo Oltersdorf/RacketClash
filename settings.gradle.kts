@@ -3,6 +3,7 @@ include(
     "common:database",
     "common:ui",
     "common:state",
+    "common:databaseApi",
     "common:model:addOrUpdateCategory",
     "common:model:addOrUpdatePlayer",
     "common:model:addOrUpdateTeam",

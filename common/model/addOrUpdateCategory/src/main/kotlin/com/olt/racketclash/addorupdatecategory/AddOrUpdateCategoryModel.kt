@@ -1,11 +1,11 @@
 package com.olt.racketclash.addorupdatecategory
 
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.category.CategoryType
+import com.olt.racketclash.database.api.CategoryDatabase
+import com.olt.racketclash.database.api.CategoryType
 import com.olt.racketclash.state.ViewModelState
 
 class AddOrUpdateCategoryModel(
-    private val database: Database,
+    private val database: CategoryDatabase,
     private val categoryId: Long?,
     private val tournamentId: Long
 ) : ViewModelState<State>(initialState = State()) {
@@ -15,11 +15,13 @@ class AddOrUpdateCategoryModel(
             if (categoryId == null)
                 updateState { copy(isLoading = false) }
             else {
+                val category = database.selectSingle(id = categoryId)
+
                 updateState {
                     copy(
                         isLoading = false,
                         isSavable = true,
-                        category = database.categories.selectSingle(id = categoryId)
+                        category = category
                     )
                 }
             }
@@ -37,9 +39,9 @@ class AddOrUpdateCategoryModel(
             updateState { copy(isLoading = true) }
 
             if (categoryId == null)
-                database.categories.add(category = state.value.category.copy(tournamentId = tournamentId))
+                database.add(category = state.value.category.copy(tournamentId = tournamentId))
             else
-                database.categories.update(category = state.value.category)
+                database.update(category = state.value.category)
 
             updateState { copy(isLoading = true) }
 

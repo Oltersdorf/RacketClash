@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.window.*
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.RacketClashDatabaseImpl
 import com.olt.racketclash.ui.RacketClashUI
 import com.olt.racketclash.ui.theme.RacketClashMaterialTheme
 import java.awt.Cursor
@@ -22,7 +22,7 @@ fun main() {
     val racketClashPath = Path(System.getProperty("user.home"), ".racketClash")
     racketClashPath.createDirectories()
 
-    val database = Database(path = racketClashPath.absolutePathString())
+    val database = RacketClashDatabaseImpl(path = racketClashPath.absolutePathString())
 
     application {
         Window(

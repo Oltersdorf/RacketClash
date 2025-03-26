@@ -1,11 +1,10 @@
 package com.olt.racketclash.addorupdateplayer
 
-import com.olt.racketclash.database.player.emptyPlayer
-import com.olt.racketclash.database.table.Player
+import com.olt.racketclash.database.api.Player
 
 data class State(
     val isLoading: Boolean = true,
     val isSavable: Boolean = false,
-    val player: Player = emptyPlayer(),
+    val player: Player = Player(),
     val clubSuggestions: List<String> = emptyList()
 )

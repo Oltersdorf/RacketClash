@@ -1,12 +1,13 @@
 package com.olt.racketclash.categories
 
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.category.Sorting
+import com.olt.racketclash.database.api.CategoryDatabase
+import com.olt.racketclash.database.api.CategoryFilter
+import com.olt.racketclash.database.api.CategorySorting
 import com.olt.racketclash.state.ViewModelState
 import kotlin.math.min
 
 class CategoriesModel(
-    private val database: Database,
+    private val database: CategoryDatabase,
     private val tournamentId: Long
 ) : ViewModelState<State>(initialState = State()) {
 
@@ -70,7 +71,7 @@ class CategoriesModel(
         updateCategoriesState()
     }
 
-    fun onSort(sorting: Sorting) =
+    fun onSort(sorting: CategorySorting) =
         updateCategoriesState(sorting = sorting)
 
     fun updatePage(pageNumber: Int) =
@@ -79,12 +80,12 @@ class CategoriesModel(
     fun deleteCategory(id: Long) {
         onIO {
             updateState { copy(categories = categories.toMutableList().apply { removeIf { it.id == id } }) }
-            database.categories.delete(id = id)
+            database.delete(id = id)
         }
     }
 
     private fun updateCategoriesState(
-        sorting: Sorting = state.value.sorting,
+        sorting: CategorySorting = state.value.sorting,
         currentPage: Int = 1
     ) =
         onIO {
@@ -92,23 +93,34 @@ class CategoriesModel(
 
             val filters = state.value.tags
 
-            val (totalSize, sortedCategories) =
-                database.categories.selectFilteredAndOrdered(
-                    tournamentId = tournamentId,
-                    nameFilter = filters.name ?: "",
-                    finishedFilter = filters.finished,
+            val categories =
+                database.selectList(
+                    filter = CategoryFilter(
+                        tournamentId = tournamentId,
+                        name = filters.name ?: "",
+                        minOpenGames = when (filters.finished) {
+                            true -> 0L
+                            false -> 1L
+                            null -> 0L
+                        },
+                        maxOpenGames = when (filters.finished) {
+                            true -> 0L
+                            false -> Long.MAX_VALUE
+                            null -> Long.MAX_VALUE
+                        }
+                    ),
                     sorting = sorting,
-                    fromIndex = (currentPage - 1) * pageSize,
-                    toIndex = currentPage * pageSize
+                    fromIndex = (currentPage - 1) * pageSize.toLong(),
+                    toIndex = currentPage * pageSize.toLong()
                 )
 
             updateState {
                 copy(
                     isLoading = false,
-                    categories = sortedCategories,
+                    categories = categories.items,
                     sorting = sorting,
                     currentPage = currentPage,
-                    lastPage = min((totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
+                    lastPage = min((categories.totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
                 )
             }
         }

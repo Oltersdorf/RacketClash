@@ -32,15 +32,10 @@ WITH filteredAndOrdered AS (
     WHERE
         name LIKE '%' || :nameFilter || '%' AND
         club LIKE '%' || :clubFilter || '%' AND
-        CASE
-            WHEN :birthYearFilter IS NULL THEN TRUE
-            ELSE birthYear = :birthYearFilter
-        END AND
-        CASE
-            WHEN :hasMedalsFilter IS NULL THEN TRUE
-            WHEN :hasMedalsFilter = FALSE THEN goldMedals = 0 AND silverMedals = 0 AND bronzeMedals = 0
-            ELSE goldMedals > 0 OR silverMedals > 0 OR bronzeMedals > 0
-        END
+        birthYear >= :birthYearMin AND
+        birthYear <= :birthYearMax AND
+        goldMedals + silverMedals + bronzeMedals >= :medalsMin AND
+        goldMedals + silverMedals + bronzeMedals <= :medalsMax
     GROUP BY
         playerTable.id
 )
@@ -99,16 +94,38 @@ FROM
     playerTable
 WHERE
     name LIKE '%' || :nameFilter || '%' AND
-    ifnull(club, '') LIKE '%' || :clubFilter || '%' AND
-    CASE
-        WHEN :birthYearFilter IS NULL THEN TRUE
-        ELSE birthYear = :birthYearFilter
-    END AND
-    CASE
-        WHEN :hasMedalsFilter IS NULL THEN TRUE
-        WHEN :hasMedalsFilter = FALSE THEN goldMedals = 0 AND silverMedals = 0 AND bronzeMedals = 0
-        ELSE goldMedals > 0 OR silverMedals > 0 OR bronzeMedals > 0
-    END;
+    club LIKE '%' || :clubFilter || '%' AND
+    birthYear >= :birthYearMin AND
+    birthYear <= :birthYearMax AND
+    goldMedals + silverMedals + bronzeMedals >= :medalsMin AND
+    goldMedals + silverMedals + bronzeMedals <= :medalsMax;
+
+selectLast:
+SELECT
+    playerTable.*,
+    COUNT(DISTINCT gameStatistics.tournamentId) AS numberOfTournaments,
+    0 AS goldMedals,
+    0 AS silverMedals,
+    0 AS bronzeMedals,
+    COUNT(gameStatistics.id) AS gamesPlayed,
+    (SELECT COUNT(DISTINCT schedule.id) FROM schedule WHERE
+        playerIdLeftOne = playerTable.id OR playerIdLeftTwo = playerTable.id OR
+        playerIdRightOne = playerTable.id OR playerIdRightTwo = playerTable.id
+    ) AS gamesScheduled
+FROM
+    playerTable
+LEFT JOIN
+    gameStatistics
+ON
+    gameStatistics.playerIdLeftOne = playerTable.id OR
+    gameStatistics.playerIdLeftTwo = playerTable.id OR
+    gameStatistics.playerIdRightOne = playerTable.id OR
+    gameStatistics.playerIdRightTwo = playerTable.id
+GROUP BY
+    playerTable.id
+ORDER BY
+    playerTable.id DESC
+LIMIT :n;
 
 player:
 SELECT
@@ -142,7 +159,7 @@ SELECT
 FROM
     playerTable
 WHERE
-    club LIKE '%' || :clubFilter || '%';
+    club LIKE '%' || :filter || '%';
 
 add:
 INSERT INTO

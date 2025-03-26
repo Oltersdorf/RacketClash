@@ -1,45 +1,23 @@
 package com.olt.racketclash.state.start
 
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.rule.Filter
-import com.olt.racketclash.database.rule.Sorting as RuleSorting
+import com.olt.racketclash.database.api.PlayerDatabase
+import com.olt.racketclash.database.api.RuleDatabase
+import com.olt.racketclash.database.api.TournamentDatabase
 import com.olt.racketclash.state.ViewModelState
-import com.olt.racketclash.database.player.Sorting as PlayerSorting
-import com.olt.racketclash.database.tournament.Sorting as TournamentSorting
 
 class StartModel(
-    private val database: Database
+    tournamentDatabase: TournamentDatabase,
+    playerDatabase: PlayerDatabase,
+    ruleDatabase: RuleDatabase
 ) : ViewModelState<StartState>(initialState = StartState()) {
 
     init {
         onIO {
+            val tournaments = tournamentDatabase.selectLast(n = 5)
+            val players = playerDatabase.selectLast(n = 5)
+            val rules = ruleDatabase.selectLast(n = 5)
+
             updateState {
-                val tournaments = database.tournaments.selectFilteredAndOrdered(
-                    nameFilter = "",
-                    locationFilter = "",
-                    yearFilter = null,
-                    sorting = TournamentSorting.NameAsc,
-                    fromIndex = 0,
-                    toIndex = 5
-                ).second
-
-                val players = database.players.selectFilteredAndOrdered(
-                    nameFilter = "",
-                    birthYearFilter = null,
-                    clubFilter = "",
-                    hasMedalsFilter = null,
-                    sorting = PlayerSorting.NameAsc,
-                    fromIndex = 0,
-                    toIndex = 5
-                ).second
-
-                val rules = database.rules.selectFilteredAndOrdered(
-                    filter = Filter(),
-                    sorting = RuleSorting.NameAsc,
-                    fromIndex = 0,
-                    toIndex = 5
-                ).second
-
                 copy(
                     isLoading = false,
                     tournaments = tournaments,

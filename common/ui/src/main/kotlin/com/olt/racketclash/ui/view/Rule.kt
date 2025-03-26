@@ -8,8 +8,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.table.FilteredAndOrderedRule
+import com.olt.racketclash.database.api.Database
+import com.olt.racketclash.database.api.Rule
 import com.olt.racketclash.state.rule.RuleModel
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.layout.AddOrUpdateRuleOverlay
@@ -28,7 +28,7 @@ internal fun Rule(
     id: Long,
     navigateTo: (View) -> Unit
 ) {
-    val model = remember { RuleModel(database = database, id = id) }
+    val model = remember { RuleModel(ruleDatabase = database.rules, id = id) }
     val state by model.state.collectAsState()
     var showFilterOverlay by remember { mutableStateOf(false) }
     var showEditOverlay by remember { mutableStateOf(false) }
@@ -75,7 +75,7 @@ internal fun Rule(
 }
 
 @Composable
-private fun Info(rule: FilteredAndOrderedRule) {
+private fun Info(rule: Rule) {
     Row(
         modifier = Modifier.padding(bottom = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(24.dp)

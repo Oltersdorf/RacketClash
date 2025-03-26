@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.team.Player
 import com.olt.racketclash.team.Tag
 import com.olt.racketclash.team.TeamModel
@@ -22,7 +22,7 @@ internal fun Team(
     tournamentId: Long,
     navigateTo: (View) -> Unit
 ) {
-    val model = remember { TeamModel(database = database, teamId = teamId, tournamentId = tournamentId) }
+    val model = remember { TeamModel(database = database.teams, teamId = teamId, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
 
     Details(

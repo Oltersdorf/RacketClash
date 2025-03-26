@@ -1,10 +1,10 @@
 package com.olt.racketclash.team
 
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.api.TeamDatabase
 import com.olt.racketclash.state.ViewModelState
 
 class TeamModel(
-    private val database: Database,
+    private val database: TeamDatabase,
     private val teamId: Long,
     private val tournamentId: Long
 ) : ViewModelState<State>(initialState = State()) {

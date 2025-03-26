@@ -1,15 +1,15 @@
 package com.olt.racketclash.tournaments
 
-import com.olt.racketclash.database.tournament.DeletableTournament
-import com.olt.racketclash.database.tournament.Sorting
+import com.olt.racketclash.database.api.Tournament
+import com.olt.racketclash.database.api.TournamentSorting
 
 data class State(
     val isLoading: Boolean = true,
-    val tournaments: List<DeletableTournament> = emptyList(),
+    val tournaments: List<Tournament> = emptyList(),
     val searchBarText: String = "",
     val availableTags: Tags = Tags(),
     val tags: Tags = Tags(),
-    val sorting: Sorting = Sorting.NameAsc,
+    val sorting: TournamentSorting = TournamentSorting.NameAsc,
     val currentPage: Int = 1,
     val lastPage: Int = 1
 )

@@ -3,7 +3,7 @@ package com.olt.racketclash.ui.view
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import com.olt.racketclash.addorupdateplayer.AddOrUpdatePlayerModel
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.ui.layout.Form
 import com.olt.racketclash.ui.layout.FormButton
 import com.olt.racketclash.ui.layout.FormDropDownTextField
@@ -16,7 +16,7 @@ internal fun AddOrUpdatePlayer(
     playerName: String?,
     navigateBack: () -> Unit
 ) {
-    val model = remember { AddOrUpdatePlayerModel(database = database, playerId = playerId) }
+    val model = remember { AddOrUpdatePlayerModel(database = database.players, playerId = playerId) }
     val state by model.state.collectAsState()
 
     Form(

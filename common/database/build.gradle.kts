@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.coroutines)
     implementation(libs.bundles.sqlite)
     testImplementation(kotlin("test"))
+    implementation(project(":common:databaseApi"))
 }
 
 sqldelight {

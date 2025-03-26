@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.tournament.DeletableTournament
-import com.olt.racketclash.database.tournament.Sorting
+import com.olt.racketclash.database.api.Database
+import com.olt.racketclash.database.api.Tournament
+import com.olt.racketclash.database.api.TournamentSorting
 import com.olt.racketclash.tournaments.TournamentsModel
 import com.olt.racketclash.ui.material.SearchBar
 import com.olt.racketclash.ui.material.SearchBarMenuItem
@@ -15,6 +15,9 @@ import com.olt.racketclash.ui.layout.LazyTableColumn
 import com.olt.racketclash.ui.layout.LazyTableSortDirection
 import com.olt.racketclash.ui.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.View
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -22,7 +25,7 @@ internal fun Tournaments(
     database: Database,
     navigateTo: (View) -> Unit
 ) {
-    val model = remember { TournamentsModel(database = database) }
+    val model = remember { TournamentsModel(database = database.tournaments) }
     val state by model.state.collectAsState()
 
     SearchableLazyTableWithScroll(
@@ -69,44 +72,52 @@ internal fun Tournaments(
 
 private fun columns(
     navigateTo: (View) -> Unit,
-    onSort: (Sorting) -> Unit,
+    onSort: (TournamentSorting) -> Unit,
     onDelete: (Long) -> Unit
-): List<LazyTableColumn<DeletableTournament>> =
+): List<LazyTableColumn<Tournament>> =
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.2f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.NameAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.NameDesc)
+                LazyTableSortDirection.Ascending -> onSort(TournamentSorting.NameAsc)
+                LazyTableSortDirection.Descending -> onSort(TournamentSorting.NameDesc)
             }
         }) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) },
         LazyTableColumn.Text(name = "Location", weight = 0.2f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.LocationAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.LocationDesc)
+                LazyTableSortDirection.Ascending -> onSort(TournamentSorting.LocationAsc)
+                LazyTableSortDirection.Descending -> onSort(TournamentSorting.LocationDesc)
             }
         }) { it.location },
         LazyTableColumn.Text(name = "Courts", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.CourtsAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.CourtsDesc)
+                LazyTableSortDirection.Ascending -> onSort(TournamentSorting.CourtsAsc)
+                LazyTableSortDirection.Descending -> onSort(TournamentSorting.CourtsDesc)
             }
         }) { it.numberOfCourts.toString() },
         LazyTableColumn.Text(name = "Start", weight = 0.15f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.StartDateTimeAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.StartDateTimeDesc)
+                LazyTableSortDirection.Ascending -> onSort(TournamentSorting.StartAsc)
+                LazyTableSortDirection.Descending -> onSort(TournamentSorting.StartDesc)
             }
-        }) { it.startDateTime },
+        }) {
+            LocalDateTime
+                .ofInstant(it.start, ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm z"))
+        },
         LazyTableColumn.Text(name = "End", weight = 0.15f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.EndDateTimeAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.EndDateTimeDesc)
+                LazyTableSortDirection.Ascending -> onSort(TournamentSorting.EndAsc)
+                LazyTableSortDirection.Descending -> onSort(TournamentSorting.EndDesc)
             }
-        }) { it.endDateTime },
+        }) {
+            LocalDateTime
+                .ofInstant(it.end, ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm z"))
+        },
         LazyTableColumn.Text(name = "Players", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(Sorting.PlayersAsc)
-                LazyTableSortDirection.Descending -> onSort(Sorting.PlayersDesc)
+                LazyTableSortDirection.Ascending -> onSort(TournamentSorting.PlayersAsc)
+                LazyTableSortDirection.Descending -> onSort(TournamentSorting.PlayersDesc)
             }
         }) { it.playersCount.toString() },
         LazyTableColumn.Text(name = "Categories", weight = 0.1f) { it.categoriesCount.toString() },
@@ -114,7 +125,6 @@ private fun columns(
             name = "Delete",
             weight = 0.1f,
             onClick = { onDelete(it.id) },
-            enabled = { it.deletable },
             imageVector = Icons.Default.Delete,
             contentDescription = "Delete"
         )

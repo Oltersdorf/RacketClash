@@ -9,16 +9,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.state.start.StartModel
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.material.Link
 import com.olt.racketclash.ui.material.Loading
 import com.olt.racketclash.ui.layout.RacketClashScrollableScaffold
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 internal fun Start(database: Database, navigateTo: (View) -> Unit) {
-    val model = remember { StartModel(database = database) }
+    val model = remember {
+        StartModel(
+            tournamentDatabase = database.tournaments,
+            playerDatabase = database.players,
+            ruleDatabase = database.rules
+        )
+    }
     val state by model.state.collectAsState()
 
     RacketClashScrollableScaffold(title = "Start") {
@@ -31,8 +40,18 @@ internal fun Start(database: Database, navigateTo: (View) -> Unit) {
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                     Link(it.name) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) }
+                    val startTime = remember {
+                        LocalDateTime
+                            .ofInstant(it.start, ZoneId.systemDefault())
+                            .format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm z"))
+                    }
+                    val endTime = remember {
+                        LocalDateTime
+                            .ofInstant(it.end, ZoneId.systemDefault())
+                            .format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm z"))
+                    }
                     Text(
-                        text = "(${it.startDateTime} to ${it.endDateTime})",
+                        text = "($startTime to $endTime)",
                         fontSize = MaterialTheme.typography.labelMedium.fontSize
                     )
                 }

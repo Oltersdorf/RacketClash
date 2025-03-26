@@ -1,12 +1,14 @@
 package com.olt.racketclash.schedule
 
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.schedule.Sorting
+import com.olt.racketclash.database.api.GameSet
+import com.olt.racketclash.database.api.ScheduleDatabase
+import com.olt.racketclash.database.api.ScheduleFilter
+import com.olt.racketclash.database.api.ScheduleSorting
 import com.olt.racketclash.state.ViewModelState
 import kotlin.math.min
 
 class ScheduleModel(
-    private val database: Database,
+    private val database: ScheduleDatabase,
     private val tournamentId: Long
 ) : ViewModelState<State>(initialState = State()) {
 
@@ -115,7 +117,7 @@ class ScheduleModel(
         updateScheduleState()
     }
 
-    fun onSort(sorting: Sorting) =
+    fun onSort(sorting: ScheduleSorting) =
         updateScheduleState(sorting = sorting)
 
     fun updatePage(pageNumber: Int) =
@@ -123,16 +125,16 @@ class ScheduleModel(
 
     fun onSaveResult(
         scheduledGameId: Long,
-        sets: List<Pair<Int, Int>>
+        sets: List<GameSet>
     ) =
         onIO {
             val scheduledGame = state.value.scheduledGames.find { it.id == scheduledGameId }
             updateState { copy(scheduledGames = scheduledGames.toMutableList().apply { remove(scheduledGame) }) }
-            scheduledGame?.let { database.schedule.setComplete(scheduledGame = it, sets = sets) }
+            scheduledGame?.let { database.setComplete(schedule = it, sets = sets) }
         }
 
     private fun updateScheduleState(
-        sorting: Sorting = state.value.sorting,
+        sorting: ScheduleSorting = state.value.sorting,
         currentPage: Int = 1
     ) =
         onIO {
@@ -140,25 +142,26 @@ class ScheduleModel(
 
             val filters = state.value.tags
 
-            val (totalSize, sortedSchedules) =
-                database.schedule.selectFilteredAndOrdered(
+            val schedules = database.selectList(
+                filter = ScheduleFilter(
                     tournamentId = tournamentId,
-                    categoryNameFilter = filters.category ?: "",
-                    isSingleFilter = filters.singles,
-                    isActiveFilter = filters.active,
-                    playerNameFilter = filters.player ?: "",
-                    sorting = sorting,
-                    fromIndex = (currentPage - 1) * pageSize,
-                    toIndex = currentPage * pageSize
-                )
+                    categoryName = filters.category ?: "",
+                    isSingle = filters.singles,
+                    isActive = filters.active,
+                    playerName = filters.player ?: ""
+                ),
+                sorting = sorting,
+                fromIndex = (currentPage - 1) * pageSize.toLong(),
+                toIndex = currentPage * pageSize.toLong()
+            )
 
             updateState {
                 copy(
                     isLoading = false,
-                    scheduledGames = sortedSchedules,
+                    scheduledGames = schedules.items,
                     sorting = sorting,
                     currentPage = currentPage,
-                    lastPage = min((totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
+                    lastPage = min((schedules.totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
                 )
             }
         }

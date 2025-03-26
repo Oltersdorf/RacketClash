@@ -6,7 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.player.Game
 import com.olt.racketclash.player.PlayerModel
 import com.olt.racketclash.player.Tag
@@ -25,7 +25,7 @@ internal fun Player(
     playerName: String,
     navigateTo: (View) -> Unit
 ) {
-    val model = remember { PlayerModel(database = database, playerId = playerId) }
+    val model = remember { PlayerModel(database = database.players, playerId = playerId) }
     val state by model.state.collectAsState()
 
     Details(

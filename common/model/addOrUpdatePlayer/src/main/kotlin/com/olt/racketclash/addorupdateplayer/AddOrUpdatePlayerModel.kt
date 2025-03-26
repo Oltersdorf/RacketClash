@@ -1,10 +1,10 @@
 package com.olt.racketclash.addorupdateplayer
 
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.api.PlayerDatabase
 import com.olt.racketclash.state.ViewModelState
 
 class AddOrUpdatePlayerModel(
-    private val database: Database,
+    private val database: PlayerDatabase,
     private val playerId: Long?
 ) : ViewModelState<State>(initialState = State()) {
 
@@ -13,18 +13,18 @@ class AddOrUpdatePlayerModel(
             if (playerId == null)
                 updateState { copy(isLoading = false) }
             else {
+                val player = database.selectSingle(id = playerId)
                 updateState {
                     copy(
                         isSavable = true,
                         isLoading = false,
-                        player = database.players.selectSingle(id = playerId)
+                        player = player
                     )
                 }
             }
 
-            updateState {
-                copy(clubSuggestions = database.players.clubs(clubFilter = player.club))
-            }
+            val clubSuggestions = database.clubs(filter = state.value.player.club)
+            updateState { copy(clubSuggestions = clubSuggestions) }
         }
     }
 
@@ -38,9 +38,8 @@ class AddOrUpdatePlayerModel(
         updateState { copy(player = player.copy(club = newClub)) }
 
         onIO {
-            updateState {
-                copy(clubSuggestions = database.players.clubs(clubFilter = newClub))
-            }
+            val clubSuggestions = database.clubs(filter = newClub)
+            updateState { copy(clubSuggestions = clubSuggestions) }
         }
     }
 
@@ -49,9 +48,9 @@ class AddOrUpdatePlayerModel(
             updateState { copy(isLoading = true) }
 
             if (playerId == null)
-                database.players.add(player = state.value.player)
+                database.add(player = state.value.player)
             else
-                database.players.update(player = state.value.player)
+                database.update(player = state.value.player)
 
             updateState { copy(isLoading = true) }
 

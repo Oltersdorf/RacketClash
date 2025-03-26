@@ -3,8 +3,8 @@ package com.olt.racketclash.ui.view
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import com.olt.racketclash.addorupdatecategory.AddOrUpdateCategoryModel
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.category.CategoryType
+import com.olt.racketclash.database.api.CategoryType
+import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.ui.layout.Form
 import com.olt.racketclash.ui.layout.FormButton
 import com.olt.racketclash.ui.layout.FormDropDownTextField
@@ -19,7 +19,7 @@ internal fun AddOrUpdateCategory(
     navigateBack: () -> Unit
 ) {
     val model = remember { AddOrUpdateCategoryModel(
-        database = database,
+        database = database.categories,
         categoryId = categoryId,
         tournamentId = tournamentId
     ) }

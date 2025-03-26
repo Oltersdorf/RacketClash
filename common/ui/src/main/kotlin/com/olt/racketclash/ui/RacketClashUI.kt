@@ -12,7 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.ui.material.SimpleIconButton
 import com.olt.racketclash.ui.view.AddOrUpdateCategory
 import com.olt.racketclash.ui.view.AddOrUpdatePlayer

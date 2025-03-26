@@ -3,7 +3,7 @@ package com.olt.racketclash.ui.view
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import com.olt.racketclash.addorupdatetournament.AddOrUpdateTournamentModel
-import com.olt.racketclash.database.Database
+import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.ui.layout.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -14,7 +14,7 @@ internal fun AddOrUpdateTournament(
     tournamentName: String?,
     navigateBack: () -> Unit
 ) {
-    val model = remember { AddOrUpdateTournamentModel(database = database, tournamentId = tournamentId) }
+    val model = remember { AddOrUpdateTournamentModel(database = database.tournaments, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
     val dateRange = rememberDateRangePickerState(
         initialDisplayMode = DisplayMode.Input,

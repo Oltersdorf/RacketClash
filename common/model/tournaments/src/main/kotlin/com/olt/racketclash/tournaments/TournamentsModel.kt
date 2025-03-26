@@ -1,12 +1,13 @@
 package com.olt.racketclash.tournaments
 
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.tournament.Sorting
+import com.olt.racketclash.database.api.TournamentDatabase
+import com.olt.racketclash.database.api.TournamentFilter
+import com.olt.racketclash.database.api.TournamentSorting
 import com.olt.racketclash.state.ViewModelState
 import kotlin.math.min
 
 class TournamentsModel(
-    private val database: Database
+    private val database: TournamentDatabase
 ) : ViewModelState<State>(initialState = State()) {
 
     private val pageSize = 50
@@ -95,7 +96,7 @@ class TournamentsModel(
         updateTournamentsState()
     }
 
-    fun onSort(sorting: Sorting) =
+    fun onSort(sorting: TournamentSorting) =
         updateTournamentsState(sorting = sorting)
 
     fun updatePage(pageNumber: Int) =
@@ -104,12 +105,12 @@ class TournamentsModel(
     fun deleteTournament(id: Long) {
         onIO {
             updateState { copy(tournaments = tournaments.toMutableList().apply { removeIf { it.id == id } }) }
-            database.tournaments.delete(id = id)
+            database.delete(id = id)
         }
     }
 
     private fun updateTournamentsState(
-        sorting: Sorting = state.value.sorting,
+        sorting: TournamentSorting = state.value.sorting,
         currentPage: Int = 1
     ) =
         onIO {
@@ -117,23 +118,24 @@ class TournamentsModel(
 
             val filters = state.value.tags
 
-            val (totalSize, sortedTournaments) =
-                database.tournaments.selectFilteredAndOrdered(
-                    nameFilter = filters.name ?: "",
-                    locationFilter = filters.location ?: "",
-                    yearFilter = filters.year,
+            val tournaments =
+                database.selectList(
+                    filter = TournamentFilter(
+                        name = filters.name ?: "",
+                        location = filters.location ?: ""
+                    ),
                     sorting = sorting,
-                    fromIndex = (currentPage - 1) * pageSize,
-                    toIndex = currentPage * pageSize
+                    fromIndex = (currentPage - 1) * pageSize.toLong(),
+                    toIndex = currentPage * pageSize.toLong()
                 )
 
             updateState {
                 copy(
                     isLoading = false,
-                    tournaments = sortedTournaments,
+                    tournaments = tournaments.items,
                     sorting = sorting,
                     currentPage = currentPage,
-                    lastPage = min((totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
+                    lastPage = min((tournaments.totalSize / (pageSize + 1)) + 1, Int.MAX_VALUE.toLong()).toInt()
                 )
             }
         }

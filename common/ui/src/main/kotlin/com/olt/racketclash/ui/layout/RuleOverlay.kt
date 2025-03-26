@@ -7,9 +7,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.rule.Filter
-import com.olt.racketclash.database.rule.emptyRule
-import com.olt.racketclash.database.table.FilteredAndOrderedRule
+import com.olt.racketclash.database.api.Rule
+import com.olt.racketclash.database.api.RuleFilter
 import com.olt.racketclash.ui.material.FilterChip
 import kotlin.math.ceil
 import kotlin.math.max
@@ -18,8 +17,8 @@ import kotlin.math.roundToInt
 
 @Composable
 fun FilterRuleTags(
-    filter: Filter,
-    applyFilter: (Filter) -> Unit
+    filter: RuleFilter,
+    applyFilter: (RuleFilter) -> Unit
 ) {
     if (filter.name.isNotBlank()) FilterChip(name = "Name", text = filter.name) {
         applyFilter(filter.copy(name = ""))
@@ -28,8 +27,8 @@ fun FilterRuleTags(
 
 @Composable
 fun FilterRuleOverlay(
-    filter: Filter,
-    applyFilter: (Filter) -> Unit,
+    filter: RuleFilter,
+    applyFilter: (RuleFilter) -> Unit,
     visible: Boolean,
     dismissOverlay: () -> Unit
 ) {
@@ -74,8 +73,8 @@ fun FilterRuleOverlay(
 @Composable
 fun AddOrUpdateRuleOverlay(
     visible: Boolean,
-    rule: FilteredAndOrderedRule = emptyRule(),
-    onConfirm: (FilteredAndOrderedRule) -> Unit,
+    rule: Rule = Rule(),
+    onConfirm: (Rule) -> Unit,
     dismissOverlay: () -> Unit
 ) {
     Overlay(

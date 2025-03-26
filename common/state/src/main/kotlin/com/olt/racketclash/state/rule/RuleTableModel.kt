@@ -1,33 +1,30 @@
 package com.olt.racketclash.state.rule
 
-import com.olt.racketclash.database.Database
-import com.olt.racketclash.database.rule.Filter
-import com.olt.racketclash.database.rule.Sorting
-import com.olt.racketclash.database.table.FilteredAndOrderedRule
+import com.olt.racketclash.database.api.*
 import com.olt.racketclash.state.list.ListModel
 
 class RuleTableModel(
-    private val database: Database
-) : ListModel<FilteredAndOrderedRule, Sorting, Filter>(
-    initialSorting = Sorting.NameAsc,
-    initialFilter = Filter()
+    private val database: RuleDatabase
+) : ListModel<Rule, RuleFilter, RuleSorting>(
+    initialFilter = RuleFilter(),
+    initialSorting = RuleSorting.NameAsc
 ) {
-    override fun databaseDelete(item: FilteredAndOrderedRule) =
-        database.rules.delete(id = item.id)
+    override suspend fun databaseDelete(item: Rule) =
+        database.delete(id = item.id)
 
-    override fun databaseSelect(
-        sorting: Sorting,
-        filter: Filter?,
-        fromIndex: Int,
-        toIndex: Int
-    ): Pair<Long, List<FilteredAndOrderedRule>> =
-        database.rules.selectFilteredAndOrdered(
-            filter = filter ?: Filter(),
+    override suspend fun databaseSelect(
+        filter: RuleFilter,
+        sorting: RuleSorting,
+        fromIndex: Long,
+        toIndex: Long
+    ): FilteredSortedList<Rule, RuleFilter, RuleSorting> =
+        database.selectList(
+            filter = filter,
             sorting = sorting,
             fromIndex = fromIndex,
             toIndex = toIndex
         )
 
-    override fun databaseAdd(item: FilteredAndOrderedRule) =
-        database.rules.add(rule = item)
+    override suspend fun databaseAdd(item: Rule) =
+        database.add(rule = item)
 }
