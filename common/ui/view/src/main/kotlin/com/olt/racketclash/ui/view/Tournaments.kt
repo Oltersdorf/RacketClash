@@ -1,25 +1,22 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.database.api.Tournament
+import com.olt.racketclash.database.api.TournamentFilter
 import com.olt.racketclash.database.api.TournamentSorting
+import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.tournaments.TournamentsModel
-import com.olt.racketclash.ui.base.material.SearchBar
-import com.olt.racketclash.ui.base.material.SearchBarMenuItem
-import com.olt.racketclash.ui.base.material.SearchBarTagChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.material.LazyTableSortDirection
-import com.olt.racketclash.ui.base.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.View
+import com.olt.racketclash.ui.layout.FilteredLazyTable
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Tournaments(
     database: Database,
@@ -28,45 +25,21 @@ internal fun Tournaments(
     val model = remember { TournamentsModel(database = database.tournaments) }
     val state by model.state.collectAsState()
 
-    SearchableLazyTableWithScroll(
-        title = "Tournaments",
-        onTitleAdd = { navigateTo(View.AddOrUpdateTournament(tournamentName = null, tournamentId = null)) },
-        items = state.tournaments,
-        isLoading = state.isLoading,
+    FilteredLazyTable(
+        state = ListState(
+            isLoading = state.isLoading,
+            items = state.tournaments,
+            filter = TournamentFilter(),
+            sorting = TournamentSorting.NameAsc
+        ),
         columns = columns(
             navigateTo = navigateTo,
             onSort = model::onSort,
             onDelete = model::deleteTournament
         ),
-        currentPage = state.currentPage,
-        lastPage = state.lastPage,
         onPageClicked = model::updatePage
     ) {
-        SearchBar(
-            text = state.searchBarText,
-            onTextChange = model::updateSearchBar,
-            dropDownItems = {
-                state.availableTags.name?.let {
-                    SearchBarMenuItem(name = "Name", text = it, onClick = model::addNameTag)
-                }
-                state.availableTags.location?.let {
-                    SearchBarMenuItem(name = "Location", text = it, onClick = model::addLocationTag)
-                }
-                state.availableTags.year?.let {
-                    SearchBarMenuItem(name = "Year", text = it.toString(), onClick = model::addYearTag)
-                }
-            }
-        ) {
-            state.availableTags.name?.let {
-                SearchBarTagChip(name = "Name", text = it, onRemove = model::removeNameTag)
-            }
-            state.availableTags.location?.let {
-                SearchBarTagChip(name = "Location", text = it, onRemove = model::removeLocationTag)
-            }
-            state.availableTags.year?.let {
-                SearchBarTagChip(name = "Year", text = it.toString(), onRemove = model::removeYearTag)
-            }
-        }
+
     }
 }
 

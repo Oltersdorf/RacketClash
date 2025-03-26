@@ -12,7 +12,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 
 @Composable
-fun Tag(
+internal fun Tag(
     name: String,
     text: String? = null
 ) {

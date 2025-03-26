@@ -9,16 +9,13 @@ import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.player.Game
 import com.olt.racketclash.player.PlayerModel
-import com.olt.racketclash.player.Tag
+import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.ui.base.material.Link
 import com.olt.racketclash.ui.material.RatioBar
-import com.olt.racketclash.ui.base.material.SearchBar
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.material.LazyTableSortDirection
-import com.olt.racketclash.ui.base.layout.SearchableLazyTableWithScroll
-import com.olt.racketclash.ui.base.material.Tag
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -99,8 +96,13 @@ internal fun Player(
         }
 
         DetailSection(title = "Games") {
-            SearchableLazyTableWithScroll(
-                items = state.games,
+            FilteredLazyTable(
+                state = ListState(
+                    isLoading = state.isLoading,
+                    items = state.games,
+                    filter = object {},
+                    sorting = object {}
+                ),
                 columns = columns(
                     navigateTo = navigateTo,
                     onDateSort = model::onDateSort,
@@ -108,19 +110,9 @@ internal fun Player(
                     onCategorySort = model::onCategorySort,
                     playerId = playerId
                 ),
-                currentPage = state.currentPage,
-                lastPage = state.lastPage,
                 onPageClicked = model::updatePage
             ) {
-                SearchBar(
-                    text = state.searchBarText,
-                    onTextChange = model::updateSearchBar,
-                    dropDownItems = state.availableTags,
-                    onDropDownItemClick = model::addTag,
-                    tags = state.tags,
-                    onTagRemove = model::removeTag,
-                    tagText = { TagText(it) }
-                )
+
             }
         }
     }
@@ -249,13 +241,3 @@ private fun columns(
             )
         }
     )
-
-@Composable
-private fun TagText(tagType: Tag) =
-    when (tagType) {
-        is Tag.Date -> Tag(name = "Date", text = tagType.text)
-        is Tag.Tournament -> Tag(name = "Tournament", text = tagType.text)
-        is Tag.Category -> Tag(name = "Category", text = tagType.text)
-        is Tag.Rule -> Tag(name = "Game rule", text = tagType.text)
-        is Tag.Player -> Tag(name = "Player", text = tagType.text)
-    }

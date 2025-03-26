@@ -86,7 +86,6 @@ sealed class LazyTableColumn<T>(
 @Composable
 fun <T> LazyTableWithScroll(
     modifier: Modifier = Modifier,
-    header: @Composable (RowScope.() -> Unit)? = null,
     items: List<T>,
     itemsSpacedBy: Dp = 0.dp,
     showHeader: Boolean = true,
@@ -95,39 +94,30 @@ fun <T> LazyTableWithScroll(
     drawDividers: Boolean = true,
     isLoading: Boolean
 ) {
-    Column(modifier = modifier) {
-        if (header != null)
-            Row(
-                modifier = Modifier.background(color = MaterialTheme.colorScheme.primaryContainer),
-                verticalAlignment = Alignment.CenterVertically,
-                content = header
-            )
+    Box(modifier = modifier, contentAlignment = Alignment.TopCenter) {
+        val scrollState = rememberLazyListState()
+        val canScroll = scrollState.canScrollBackward || scrollState.canScrollForward
 
-        Box(contentAlignment = Alignment.TopCenter) {
-            val scrollState = rememberLazyListState()
-            val canScroll = scrollState.canScrollBackward || scrollState.canScrollForward
+        LazyColumn(
+            modifier = Modifier.padding(end = if (canScroll) 14.dp else 0.dp),
+            verticalArrangement = Arrangement.spacedBy(itemsSpacedBy),
+            state = scrollState
+        ) {
+            if (showHeader)
+                header(columns = columns)
 
-            LazyColumn(
-                modifier = Modifier.padding(end = if (canScroll) 14.dp else 0.dp),
-                verticalArrangement = Arrangement.spacedBy(itemsSpacedBy),
-                state = scrollState
-            ) {
-                if (showHeader)
-                    header(columns = columns)
-
-                body(items = items, columns = columns, onClick = onClick, drawDividers = drawDividers, isLoading = isLoading)
-            }
-
-            VerticalScrollbar(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                adapter = rememberScrollbarAdapter(scrollState = scrollState),
-                style = LocalScrollbarStyle.current.copy(
-                    hoverColor = MaterialTheme.colorScheme.primary,
-                    unhoverColor = MaterialTheme.colorScheme.primary,
-                    shape = RectangleShape
-                )
-            )
+            body(items = items, columns = columns, onClick = onClick, drawDividers = drawDividers, isLoading = isLoading)
         }
+
+        VerticalScrollbar(
+            modifier = Modifier.align(Alignment.CenterEnd),
+            adapter = rememberScrollbarAdapter(scrollState = scrollState),
+            style = LocalScrollbarStyle.current.copy(
+                hoverColor = MaterialTheme.colorScheme.primary,
+                unhoverColor = MaterialTheme.colorScheme.primary,
+                shape = RectangleShape
+            )
+        )
     }
 }
 

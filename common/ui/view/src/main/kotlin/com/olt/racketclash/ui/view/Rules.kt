@@ -1,15 +1,10 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.database.api.Rule
 import com.olt.racketclash.database.api.RuleFilter
@@ -19,8 +14,6 @@ import com.olt.racketclash.state.rule.RuleTableModel
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.material.LazyTableSortDirection
-import com.olt.racketclash.ui.base.material.LazyTableWithScroll
-import com.olt.racketclash.ui.base.material.PageSelector
 import com.olt.racketclash.ui.base.material.SimpleIconButton
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.layout.RacketClashScaffold
@@ -87,33 +80,15 @@ private fun Body(
     selectPage: (Int) -> Unit,
     navigateTo: (View) -> Unit
 ) {
-    Column {
-        FilterRuleTags(filter = state.filter, applyFilter = filter)
-
-        Surface(
-            modifier = Modifier.weight(1.0f, fill = false),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            shadowElevation = 1.dp
-        ) {
-            LazyTableWithScroll(
-                items = state.items,
-                isLoading = state.isLoading,
-                columns = columns(
-                    navigateTo = navigateTo,
-                    onSort = sort,
-                    onDelete = delete
-                )
-            )
-        }
-
-        PageSelector(
-            modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
-            currentPage = state.currentPage,
-            lastPage = state.lastPage,
-            onPageClicked = selectPage
-        )
-    }
+    FilteredLazyTable(
+        state = state,
+        columns = columns(
+            navigateTo = navigateTo,
+            onSort = sort,
+            onDelete = delete
+        ),
+        onPageClicked = selectPage
+    ) { FilterRuleTags(filter = it, applyFilter = filter) }
 }
 
 private fun columns(

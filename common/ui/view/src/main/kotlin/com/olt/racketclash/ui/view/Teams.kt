@@ -1,6 +1,5 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -9,18 +8,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.database.api.Team
+import com.olt.racketclash.database.api.TeamFilter
 import com.olt.racketclash.database.api.TeamSorting
+import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.teams.TeamsModel
 import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.material.LazyTableSortDirection
-import com.olt.racketclash.ui.base.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.material.RatioBar
-import com.olt.racketclash.ui.base.material.SearchBar
-import com.olt.racketclash.ui.base.material.SearchBarMenuItem
-import com.olt.racketclash.ui.base.material.SearchBarTagChip
+import com.olt.racketclash.ui.layout.FilteredLazyTable
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Teams(
     database: Database,
@@ -30,40 +27,22 @@ internal fun Teams(
     val model = remember { TeamsModel(database = database.teams, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
 
-    SearchableLazyTableWithScroll(
-        title = "Teams",
-        onTitleAdd = { navigateTo(View.AddOrUpdateTeam(teamId = null, teamName = null, tournamentId = tournamentId)) },
-        items = state.teams,
-        isLoading = state.isLoading,
+    FilteredLazyTable(
+        state = ListState(
+            isLoading = state.isLoading,
+            items = state.teams,
+            filter = TeamFilter(),
+            sorting = TeamSorting.NameAsc
+        ),
         columns = columns(
             navigateTo = navigateTo,
             tournamentId = tournamentId,
             onSort = model::onSort,
             onDelete = model::onDelete
         ),
-        currentPage = state.currentPage,
-        lastPage = state.lastPage,
         onPageClicked = model::updatePage
     ) {
-        SearchBar(
-            text = state.searchBarText,
-            onTextChange = model::updateSearchBar,
-            dropDownItems = {
-                state.availableTags.name?.let {
-                    SearchBarMenuItem(name = "Name", text = it, onClick = model::addNameTag)
-                }
-                state.availableTags.rank?.let {
-                    SearchBarMenuItem(name = "Rank", text = it.toString(), onClick = model::addRankTag)
-                }
-            }
-        ) {
-            state.tags.name?.let {
-                SearchBarTagChip(name = "Name", text = it, onRemove = model::removeNameTag)
-            }
-            state.tags.rank?.let {
-                SearchBarTagChip(name = "Rank", text = it.toString(), onRemove = model::removeRankTag)
-            }
-        }
+
     }
 }
 

@@ -252,8 +252,6 @@ fun FormButton(
 
 @Composable
 fun <T> FormTable(
-    title: String? = null,
-    onTitleAdd: (() -> Unit)? = null,
     items: List<T>,
     isLoading: Boolean = false,
     columns: List<LazyTableColumn<T>>,
@@ -267,7 +265,6 @@ fun <T> FormTable(
 
         LazyTableWithScroll(
             modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerLowest).requiredHeightIn(max = 400.dp),
-            header = title?.let { { LazyTableWithScrollHeader(title = title, onAddClicked = onTitleAdd) } },
             items = items,
             isLoading = isLoading,
             columns = columns

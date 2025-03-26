@@ -9,21 +9,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.api.Database
-import com.olt.racketclash.database.api.GameSet
-import com.olt.racketclash.database.api.Schedule
-import com.olt.racketclash.database.api.ScheduleSorting
+import com.olt.racketclash.database.api.*
 import com.olt.racketclash.schedule.ScheduleModel
+import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.ui.material.*
 import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.material.LazyTableSortDirection
-import com.olt.racketclash.ui.base.layout.SearchableLazyTableWithScroll
-import com.olt.racketclash.ui.base.material.SearchBar
-import com.olt.racketclash.ui.base.material.SearchBarMenuItem
-import com.olt.racketclash.ui.base.material.SearchBarTagChip
 import com.olt.racketclash.ui.base.material.SimpleIconButton
+import com.olt.racketclash.ui.layout.FilteredLazyTable
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Schedule(
     database: Database,
@@ -32,57 +26,20 @@ internal fun Schedule(
     val model = remember { ScheduleModel(database = database.schedules, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
 
-    SearchableLazyTableWithScroll(
-        title = "Schedule",
-        items = state.scheduledGames,
-        isLoading = state.isLoading,
+    FilteredLazyTable(
+        state = ListState(
+            isLoading = state.isLoading,
+            items = state.scheduledGames,
+            filter = ScheduleFilter(),
+            sorting = ScheduleSorting.ScheduleAsc
+        ),
         columns = columns(
             onConfirm = model::onSaveResult,
             onSort = model::onSort
         ),
-        currentPage = state.currentPage,
-        lastPage = state.lastPage,
         onPageClicked = model::updatePage
     ) {
-        SearchBar(
-            text = state.searchBarText,
-            onTextChange = model::updateSearchBar,
-            dropDownItems = {
-                state.availableTags.active?.let {
-                    SearchBarMenuItem(name = "Active") { model.addActiveTag(true) }
-                    SearchBarMenuItem(name = "Not active") { model.addActiveTag(false) }
-                }
-                state.availableTags.singles?.let {
-                    SearchBarMenuItem(name = "Is single") { model.addSinglesTag(true) }
-                    SearchBarMenuItem(name = "is double") { model.addSinglesTag(false) }
-                }
-                state.availableTags.category?.let {
-                    SearchBarMenuItem(name = "Category", text = it, onClick = model::addCategoryTag)
-                }
-                state.availableTags.player?.let {
-                    SearchBarMenuItem(name = "Player", text = it, onClick = model::addPlayerTag)
-                }
-            }
-        ) {
-            state.tags.active?.let {
-                if (it)
-                    SearchBarTagChip(name = "Active", onRemove = model::removeActiveTag)
-                else
-                    SearchBarTagChip(name = "Not active", onRemove = model::removeActiveTag)
-            }
-            state.tags.singles?.let {
-                if (it)
-                    SearchBarTagChip(name = "Is single", onRemove = model::removeSinglesTag)
-                else
-                    SearchBarTagChip(name = "Is double", onRemove = model::removeSinglesTag)
-            }
-            state.tags.category?.let {
-                SearchBarTagChip(name = "Category", text = it, onRemove = model::removeCategoryTag)
-            }
-            state.tags.player?.let {
-                SearchBarTagChip(name = "Player", text = it, onRemove = model::removePlayerTag)
-            }
-        }
+
     }
 }
 

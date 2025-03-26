@@ -18,11 +18,12 @@ import com.olt.racketclash.category.CategoryModel
 import com.olt.racketclash.category.State
 import com.olt.racketclash.database.api.CategoryType
 import com.olt.racketclash.database.api.Database
+import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.ui.base.material.Loading
 import com.olt.racketclash.ui.material.Status
 import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.View
+import com.olt.racketclash.ui.layout.FilteredLazyTable
 
 @Composable
 internal fun Category(
@@ -93,22 +94,15 @@ private fun Custom(
     updatePage: (Int) -> Unit,
     navigateTo: (View) -> Unit
 ) {
-    SearchableLazyTableWithScroll(
-        title = "Games",
-        onTitleAdd = {
-            navigateTo(
-                View.AddSchedule(
-                categoryId = categoryId,
-                categoryName = categoryName,
-                tournamentId = tournamentId
-            ))
-        },
-        items = state.games,
-        isLoading = false,
-        searchBar = {},
-        currentPage = state.currentPage,
-        lastPage = state.currentPage,
+    FilteredLazyTable(
+        state = ListState(
+            isLoading = state.isLoading,
+            items = state.games,
+            filter = object {},
+            sorting = object {}
+        ),
         onPageClicked = updatePage,
+        filter = {},
         columns = listOf(
             LazyTableColumn.Builder(name = "Status", weight = 0.1f) { game, weight ->
                 Status(modifier = Modifier.weight(weight), isOkay = game.submitted != null)

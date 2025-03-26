@@ -4,12 +4,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import com.olt.racketclash.addschedule.AddScheduleModel
-import com.olt.racketclash.addschedule.Player
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.ui.base.layout.*
 import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.material.Loading
-import com.olt.racketclash.ui.base.material.SearchBar
 
 @Composable
 internal fun AddSchedule(
@@ -71,7 +69,6 @@ internal fun AddSchedule(
         }
         
         FormTable(
-            title = "Players",
             items = state.players,
             currentPage = state.currentPage,
             lastPage = state.lastPage,
@@ -87,17 +84,7 @@ internal fun AddSchedule(
                 LazyTableColumn.Text(name = "Team", weight = 0.45f) { it.team }
             )
         ) {
-            var searchBarText by remember { mutableStateOf("") }
 
-            SearchBar(
-                text = searchBarText,
-                onTextChange = { searchBarText = it },
-                dropDownItems = emptyList<Player>(),
-                tags = emptyList(),
-                onDropDownItemClick = {},
-                onTagRemove = {},
-                tagText = {}
-            )
         }
 
         FormButton(text = "Generate", onClick = model::generate)

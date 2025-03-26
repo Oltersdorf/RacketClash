@@ -1,6 +1,5 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -12,21 +11,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.database.api.Player
+import com.olt.racketclash.database.api.PlayerFilter
 import com.olt.racketclash.database.api.PlayerSorting
 import com.olt.racketclash.players.PlayersModel
+import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.material.LazyTableSortDirection
-import com.olt.racketclash.ui.base.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.base.material.SearchBar
-import com.olt.racketclash.ui.base.material.SearchBarMenuItem
-import com.olt.racketclash.ui.base.material.SearchBarTagChip
+import com.olt.racketclash.ui.layout.FilteredLazyTable
 import com.olt.racketclash.ui.theme.AdditionalMaterialTheme
 import org.jetbrains.compose.resources.painterResource
 import racketclash.common.ui.view.generated.resources.Res
 import racketclash.common.ui.view.generated.resources.medal
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Players(
     database: Database,
@@ -35,55 +32,21 @@ internal fun Players(
     val model = remember { PlayersModel(database = database.players) }
     val state by model.state.collectAsState()
 
-    SearchableLazyTableWithScroll(
-        title = "Players",
-        onTitleAdd = { navigateTo(View.AddOrUpdatePlayer(playerName = null, playerId = null)) },
-        items = state.players,
-        isLoading = state.isLoading,
+    FilteredLazyTable(
+        state = ListState(
+            isLoading = state.isLoading,
+            items = state.players,
+            filter = PlayerFilter(),
+            sorting = PlayerSorting.NameAsc
+        ),
         columns = columns(
             navigateTo = navigateTo,
             onSort = model::onSort,
             onDelete = model::deletePlayer
         ),
-        currentPage = state.currentPage,
-        lastPage = state.lastPage,
         onPageClicked = model::updatePage
     ) {
-        SearchBar(
-            text = state.searchBarText,
-            onTextChange = model::updateSearchBar,
-            dropDownItems = {
-                state.availableTags.name?.let {
-                    SearchBarMenuItem(name = "Name", text = it, onClick = model::addNameTag)
-                }
-                state.availableTags.birthYear?.let {
-                    SearchBarMenuItem(name = "Birth year", text = it.toString(), onClick = model::addBirthYearTag)
-                }
-                state.availableTags.club?.let {
-                    SearchBarMenuItem(name = "Club", text = it, onClick = model::addClubTag)
-                }
-                state.availableTags.hasMedals?.let {
-                    SearchBarMenuItem(name = "Has medals") { model.addHasMedalsTag(value = true) }
-                    SearchBarMenuItem(name = "Has no medals") { model.addHasMedalsTag(value = false) }
-                }
-            }
-        ) {
-            state.tags.name?.let {
-                SearchBarTagChip(name = "Name", text = it, onRemove = model::removeNameTag)
-            }
-            state.tags.birthYear?.let {
-                SearchBarTagChip(name = "Birth year", text = it.toString(), onRemove = model::removeBirthYearTag)
-            }
-            state.tags.club?.let {
-                SearchBarTagChip(name = "Club", text = it, onRemove = model::removeClubTag)
-            }
-            state.tags.hasMedals?.let {
-                if (it)
-                    SearchBarTagChip(name = "Has medals", onRemove = model::removeHasMedalsTag)
-                else
-                    SearchBarTagChip(name = "Has no medals", onRemove = model::removeHasMedalsTag)
-            }
-        }
+
     }
 }
 

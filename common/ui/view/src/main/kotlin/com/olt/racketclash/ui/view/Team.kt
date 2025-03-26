@@ -5,17 +5,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
+import com.olt.racketclash.database.api.PlayerFilter
+import com.olt.racketclash.database.api.PlayerSorting
+import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.team.Player
-import com.olt.racketclash.team.Tag
 import com.olt.racketclash.team.TeamModel
 import com.olt.racketclash.ui.material.RatioBar
-import com.olt.racketclash.ui.base.material.SearchBar
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.material.LazyTableSortDirection
-import com.olt.racketclash.ui.base.layout.SearchableLazyTableWithScroll
-import com.olt.racketclash.ui.base.material.Tag
 
 @Composable
 internal fun Team(
@@ -48,8 +47,13 @@ internal fun Team(
         }
 
         DetailSection(title = "Players") {
-            SearchableLazyTableWithScroll(
-                items = state.players,
+            FilteredLazyTable(
+                state = ListState(
+                    isLoading = state.isLoading,
+                    items = state.players,
+                    filter = PlayerFilter(),
+                    sorting = PlayerSorting.NameAsc
+                ),
                 columns = columns(
                     navigateTo = navigateTo,
                     onNameSort = model::onNameSort,
@@ -58,19 +62,9 @@ internal fun Team(
                     onSinglesSort = model::onSinglesSort,
                     onDoublesSort = model::onDoublesSort
                 ),
-                currentPage = state.currentPage,
-                lastPage = state.lastPage,
                 onPageClicked = model::updatePage
             ) {
-                SearchBar(
-                    text = state.searchBarText,
-                    onTextChange = model::updateSearchBar,
-                    dropDownItems = state.availableTags,
-                    onDropDownItemClick = model::addTag,
-                    tags = state.tags,
-                    onTagRemove = model::removeTag,
-                    tagText = { TagText(it) }
-                )
+
             }
         }
     }
@@ -134,11 +128,3 @@ private fun columns(
             )
         }
     )
-
-@Composable
-private fun TagText(tagType: Tag) =
-    when (tagType) {
-        is Tag.BirthYear -> Tag(name = "Birth year", text = tagType.text)
-        is Tag.Club -> Tag(name = "Club", text = tagType.text)
-        is Tag.Name -> Tag(name = "Name", text = tagType.text)
-    }

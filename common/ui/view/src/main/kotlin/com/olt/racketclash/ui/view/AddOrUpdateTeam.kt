@@ -65,7 +65,6 @@ internal fun AddOrUpdateTeam(
         }
 
         FormTable(
-            title = "Players",
             items = state.players,
             columns = columns(
                 onSort = model::onSort,
@@ -78,41 +77,7 @@ internal fun AddOrUpdateTeam(
             lastPage = state.lastPage,
             onPageClicked = model::changePage
         ) {
-            SearchBar(
-                text = state.searchBarText,
-                onTextChange = model::updateSearchBar,
-                dropDownItems = {
-                    state.availableTags.name?.let {
-                        SearchBarMenuItem(name = "Name", text = it, onClick = model::addNameTag)
-                    }
-                    state.availableTags.birthYear?.let {
-                        SearchBarMenuItem(name = "Birth year", text = it.toString(), onClick = model::addBirthYearTag)
-                    }
-                    state.availableTags.club?.let {
-                        SearchBarMenuItem(name = "Club", text = it, onClick = model::addClubTag)
-                    }
-                    state.availableTags.hasMedals?.let {
-                        SearchBarMenuItem(name = "Has medals") { model.addHasMedalsTag(value = true) }
-                        SearchBarMenuItem(name = "Has no medals") { model.addHasMedalsTag(value = false) }
-                    }
-                }
-            ) {
-                state.tags.name?.let {
-                    SearchBarTagChip(name = "Name", text = it, onRemove = model::removeNameTag)
-                }
-                state.tags.birthYear?.let {
-                    SearchBarTagChip(name = "Birth year", text = it.toString(), onRemove = model::removeBirthYearTag)
-                }
-                state.tags.club?.let {
-                    SearchBarTagChip(name = "Club", text = it, onRemove = model::removeClubTag)
-                }
-                state.tags.hasMedals?.let {
-                    if (it)
-                        SearchBarTagChip(name = "Has medals", onRemove = model::removeHasMedalsTag)
-                    else
-                        SearchBarTagChip(name = "Has no medals", onRemove = model::removeHasMedalsTag)
-                }
-            }
+
         }
     }
 }
