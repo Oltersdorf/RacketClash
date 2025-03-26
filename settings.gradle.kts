@@ -1,7 +1,8 @@
 rootProject.name = "RacketClash"
 include(
     "common:database",
-    "common:ui",
+    "common:ui:base",
+    "common:ui:view",
     "common:state",
     "common:databaseApi",
     "common:model:addOrUpdateCategory",
