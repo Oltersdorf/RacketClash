@@ -11,8 +11,8 @@ import com.olt.racketclash.tournaments.TournamentsModel
 import com.olt.racketclash.ui.base.material.SearchBar
 import com.olt.racketclash.ui.base.material.SearchBarMenuItem
 import com.olt.racketclash.ui.base.material.SearchBarTagChip
-import com.olt.racketclash.ui.base.layout.LazyTableColumn
-import com.olt.racketclash.ui.base.layout.LazyTableSortDirection
+import com.olt.racketclash.ui.base.material.LazyTableColumn
+import com.olt.racketclash.ui.base.material.LazyTableSortDirection
 import com.olt.racketclash.ui.base.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.View
 import java.time.LocalDateTime

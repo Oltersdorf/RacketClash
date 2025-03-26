@@ -1,4 +1,4 @@
-package com.olt.racketclash.ui.base.layout
+package com.olt.racketclash.ui.base.material
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -19,9 +19,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.ui.base.material.Link
-import com.olt.racketclash.ui.base.material.Loading
-import com.olt.racketclash.ui.base.material.SimpleIconButton
 
 private sealed class LazyTableSortState {
     data object Up : LazyTableSortState()

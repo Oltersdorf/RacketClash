@@ -17,9 +17,9 @@ import com.olt.racketclash.database.api.RuleSorting
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.state.rule.RuleTableModel
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.base.layout.LazyTableColumn
-import com.olt.racketclash.ui.base.layout.LazyTableSortDirection
-import com.olt.racketclash.ui.base.layout.LazyTableWithScroll
+import com.olt.racketclash.ui.base.material.LazyTableColumn
+import com.olt.racketclash.ui.base.material.LazyTableSortDirection
+import com.olt.racketclash.ui.base.material.LazyTableWithScroll
 import com.olt.racketclash.ui.base.material.PageSelector
 import com.olt.racketclash.ui.base.material.SimpleIconButton
 import com.olt.racketclash.ui.layout.*

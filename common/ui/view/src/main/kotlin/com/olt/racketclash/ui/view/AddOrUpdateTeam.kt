@@ -13,9 +13,7 @@ import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.database.api.Player
 import com.olt.racketclash.database.api.PlayerSorting
 import com.olt.racketclash.ui.base.layout.*
-import com.olt.racketclash.ui.base.material.SearchBar
-import com.olt.racketclash.ui.base.material.SearchBarMenuItem
-import com.olt.racketclash.ui.base.material.SearchBarTagChip
+import com.olt.racketclash.ui.base.material.*
 import com.olt.racketclash.ui.theme.AdditionalMaterialTheme
 import org.jetbrains.compose.resources.painterResource
 import racketclash.common.ui.view.generated.resources.Res

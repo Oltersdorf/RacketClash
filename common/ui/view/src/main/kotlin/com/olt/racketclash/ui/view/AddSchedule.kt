@@ -7,6 +7,7 @@ import com.olt.racketclash.addschedule.AddScheduleModel
 import com.olt.racketclash.addschedule.Player
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.ui.base.layout.*
+import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.material.Loading
 import com.olt.racketclash.ui.base.material.SearchBar
 

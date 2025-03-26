@@ -20,7 +20,7 @@ import com.olt.racketclash.database.api.CategoryType
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.ui.base.material.Loading
 import com.olt.racketclash.ui.material.Status
-import com.olt.racketclash.ui.base.layout.LazyTableColumn
+import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.layout.SearchableLazyTableWithScroll
 import com.olt.racketclash.ui.View
 

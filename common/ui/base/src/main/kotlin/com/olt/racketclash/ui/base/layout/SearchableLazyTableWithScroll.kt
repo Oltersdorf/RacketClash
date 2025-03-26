@@ -6,6 +6,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.olt.racketclash.ui.base.material.LazyTableColumn
+import com.olt.racketclash.ui.base.material.LazyTableWithScroll
 import com.olt.racketclash.ui.base.material.LazyTableWithScrollHeader
 import com.olt.racketclash.ui.base.material.PageSelector
 
