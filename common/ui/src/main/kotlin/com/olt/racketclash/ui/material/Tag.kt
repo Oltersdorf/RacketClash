@@ -35,7 +35,9 @@ fun FilterChip(
     InputChip(
         modifier = Modifier.pointerHoverIcon(icon = PointerIcon.Hand),
         colors = InputChipDefaults.inputChipColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.primary,
+            trailingIconColor = MaterialTheme.colorScheme.onPrimary,
+            labelColor = MaterialTheme.colorScheme.onPrimary
         ),
         selected = false,
         onClick = onClick,
