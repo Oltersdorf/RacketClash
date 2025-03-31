@@ -9,17 +9,7 @@ internal sealed interface View {
 
     data class Teams(val tournamentId: Long) : View
 
-    data class AddOrUpdateTeam(
-        val teamName: String?,
-        val teamId: Long?,
-        val tournamentId: Long
-    ) : View
-
-    data class Team(
-        val teamName: String,
-        val teamId: Long,
-        val tournamentId: Long
-    ) : View
+    data class Team(val teamId: Long) : View
 
     data class Categories(val tournamentId: Long) : View
 

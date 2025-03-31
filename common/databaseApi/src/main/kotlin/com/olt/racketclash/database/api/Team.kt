@@ -42,9 +42,9 @@ interface TeamDatabase {
 
     suspend fun selectSingle(id: Long): Team
 
-    suspend fun add(team: Team, playerIds: Set<Long>)
+    suspend fun add(team: Team)
 
-    suspend fun update(team: Team, playerIds: Set<Long>)
+    suspend fun update(team: Team)
 
     suspend fun delete(id: Long)
 }

@@ -341,7 +341,7 @@ private fun TournamentBody(
             ListPreviewBoxLink(
                 text = it.name,
                 subText = "(Rank: ${it.rank}, Size: ${it.size})"
-            ) { navigateTo(View.Team(teamName = it.name, teamId = it.id, tournamentId = it.tournamentId)) }
+            ) { navigateTo(View.Team(teamId = it.id)) }
         }
 
         ListPreviewBox(

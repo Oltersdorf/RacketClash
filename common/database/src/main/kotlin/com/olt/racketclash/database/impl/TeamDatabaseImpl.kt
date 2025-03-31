@@ -54,27 +54,15 @@ internal class TeamDatabaseImpl(
             .executeAsOne()
             .toTeam()
 
-    override suspend fun add(team: Team, playerIds: Set<Long>) =
-        database.transaction {
-            database.teamQueries.add(name = team.name, rank = team.rank, tournamentId = team.tournamentId)
-            val teamId = database.teamQueries.lastInsertedId().executeAsOne()
-            playerIds.forEach {
-                database.playerToTeamQueries.add(playerId = it, teamId = teamId)
-            }
-        }
+    override suspend fun add(team: Team) =
+        database
+            .teamQueries
+            .add(name = team.name, rank = team.rank, tournamentId = team.tournamentId)
 
-    override suspend fun update(team: Team, playerIds: Set<Long>) =
-        database.transaction {
-            database.teamQueries.update(
-                id = team.id,
-                name = team.name,
-                rank = team.rank
-            )
-            database.playerToTeamQueries.deleteByTeam(teamId = team.id)
-            playerIds.forEach {
-                database.playerToTeamQueries.add(playerId = it, teamId = team.id)
-            }
-        }
+    override suspend fun update(team: Team) =
+        database
+            .teamQueries
+            .update(id = team.id, name = team.name, rank = team.rank)
 
     override suspend fun delete(id: Long) =
         database.teamQueries.delete(id = id)
