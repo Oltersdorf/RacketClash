@@ -4,15 +4,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.database.api.Rule
 import com.olt.racketclash.database.api.RuleFilter
 import com.olt.racketclash.database.api.RuleSorting
+import com.olt.racketclash.state.datetime.toFormattedString
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.state.rule.RuleModel
+import com.olt.racketclash.state.rule.RuleState
 import com.olt.racketclash.state.rule.RuleTableModel
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.*
@@ -27,43 +28,32 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-private sealed class RuleTable(val index: Int, val name: String) {
-    data object Tournaments : RuleTable(index = 0, name = "Tournaments")
-    data object Categories : RuleTable(index = 1, name = "Categories")
-    data object Games : RuleTable(index = 2, name = "Games")
-}
-
 @Composable
 internal fun Rule(
     database: Database,
-    id: Long,
+    ruleId: Long,
     navigateTo: (View) -> Unit
 ) {
-    val model = remember { RuleModel(ruleDatabase = database.rules, id = id) }
+    val model = remember {
+        RuleModel(
+            ruleDatabase = database.rules,
+            tournamentDatabase = database.tournaments,
+            categoryDatabase = database.categories,
+            gameDatabase = database.games,
+            ruleId = ruleId
+        )
+    }
     val state by model.state.collectAsState()
-    var showFilterOverlay by remember { mutableStateOf(false) }
     var showEditOverlay by remember { mutableStateOf(false) }
-    var ruleTable by remember { mutableStateOf<RuleTable>(RuleTable.Tournaments) }
 
-    RacketClashScaffold(
+    RacketClashScrollableScaffold(
         title = "Rule",
-        headerContent = { Info(isLoading = state.isLoading, rule = state.rule) },
+        headerContent = { RuleInfo(isLoading = state.isLoading, rule = state.rule) },
         actions = {
-            SimpleIconButton(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Filter"
-            ) {
-                showEditOverlay = false
-                showFilterOverlay = !showFilterOverlay
-            }
-
             SimpleIconButton(
                 imageVector = Icons.Default.Edit,
                 contentDescription = "Edit"
-            ) {
-                showFilterOverlay = false
-                showEditOverlay = !showEditOverlay
-            }
+            ) { showEditOverlay = !showEditOverlay }
         },
         overlay = {
             AddOrUpdateRuleOverlay(
@@ -73,9 +63,8 @@ internal fun Rule(
             ) { showEditOverlay = false }
         }
     ) {
-        RuleTableSelection(
-            ruleTable = ruleTable,
-            onChangeSelectedTable = { ruleTable = it },
+        RuleBody(
+            state = state,
             navigateTo = navigateTo
         )
     }
@@ -400,33 +389,51 @@ private fun columns(
     )
 
 @Composable
-private fun RuleTableSelection(
-    ruleTable: RuleTable,
-    onChangeSelectedTable: (RuleTable) -> Unit,
+private fun RuleBody(
+    state: RuleState,
     navigateTo: (View) -> Unit
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(50.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        TabRow(
-            selectedTabIndex = ruleTable.index,
-            tabs = listOf(RuleTable.Tournaments, RuleTable.Categories, RuleTable.Games),
-            onTabClick = onChangeSelectedTable,
-            tabText = { it.name }
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
+        ListPreviewBox(
+            name = "Tournaments",
+            isLoading = state.isLoading,
+            items = state.tournaments,
+            onNavigateMore = { navigateTo(View.Tournaments) }
+        ) {
+            ListPreviewBoxLink(
+                text = it.name,
+                subText = "(${it.start.toFormattedString()} to ${it.end.toFormattedString()})"
+            ) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) }
+        }
 
-        when (ruleTable) {
-            RuleTable.Tournaments -> {}
-            RuleTable.Categories -> {}
-            RuleTable.Games -> {}
+        ListPreviewBox(
+            name = "Categories",
+            isLoading = state.isLoading,
+            items = state.categories,
+            onNavigateMore = { navigateTo(View.Tournaments) }
+        ) {
+            ListPreviewBoxLink(
+                text = it.name,
+                subText = "(${it.tournamentName})"
+            ) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) }
+        }
+
+        ListPreviewBox(
+            name = "Games",
+            isLoading = state.isLoading,
+            items = state.games,
+            onNavigateMore = { navigateTo(View.Tournaments) }
+        ) {
+            ListPreviewBoxLink(
+                text = it.playerNameLeftOne,
+                subText = "()"
+            ) {  }
         }
     }
 }
 
 @Composable
-private fun Info(
+private fun RuleInfo(
     isLoading: Boolean,
     rule: Rule
 ) {

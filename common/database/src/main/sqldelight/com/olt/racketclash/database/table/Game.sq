@@ -22,6 +22,15 @@ CREATE TABLE IF NOT EXISTS game (
     FOREIGN KEY (playerIdRightTwo) REFERENCES playerTable (id)
 );
 
+selectLast:
+SELECT
+    *
+FROM
+    game
+ORDER BY
+    id DESC
+LIMIT :n;
+
 add:
 INSERT INTO
     game(

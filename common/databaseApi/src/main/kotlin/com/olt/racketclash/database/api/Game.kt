@@ -46,4 +46,6 @@ interface GameDatabase {
         fromIndex: Long,
         toIndex: Long
     ): FilteredSortedList<Game, *, *>
+
+    suspend fun selectLast(n: Long): List<Game>
 }

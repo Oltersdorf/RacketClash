@@ -5,6 +5,7 @@ data class Category(
     val name: String = "",
     val type: CategoryType = CategoryType.Custom,
     val tournamentId: Long = -1,
+    val tournamentName: String = "",
     val players: Int = 0,
     val finished: Boolean = false
 )
@@ -41,6 +42,8 @@ interface CategoryDatabase {
         fromIndex: Long,
         toIndex: Long
     ): FilteredSortedList<Category, CategoryFilter, CategorySorting>
+
+    suspend fun selectLast(n: Long): List<Category>
 
     suspend fun selectSingle(id: Long): Category
 

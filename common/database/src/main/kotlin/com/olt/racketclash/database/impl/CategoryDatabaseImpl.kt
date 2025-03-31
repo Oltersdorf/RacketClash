@@ -45,6 +45,13 @@ internal class CategoryDatabaseImpl(
             )
         }
 
+    override suspend fun selectLast(n: Long): List<Category> =
+        database
+            .categoryQueries
+            .selectLast(n = n)
+            .executeAsList()
+            .map { it.toCategory() }
+
     override suspend fun selectSingle(id: Long): Category =
         database
             .categoryQueries

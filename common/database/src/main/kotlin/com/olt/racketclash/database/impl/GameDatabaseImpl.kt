@@ -48,4 +48,11 @@ internal class GameDatabaseImpl(
                 sorting = object {}
             )
         }
+
+    override suspend fun selectLast(n: Long): List<Game> =
+        database
+            .gameQueries
+            .selectLast(n = n)
+            .executeAsList()
+            .map { it.toGame() }
 }

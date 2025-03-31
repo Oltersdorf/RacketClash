@@ -46,6 +46,32 @@ internal fun com.olt.racketclash.database.table.GameSet.toGameSet(): GameSet =
         rightPoints = rightPoints
     )
 
+internal fun com.olt.racketclash.database.table.Game.toGame(): Game =
+    Game(
+        id = id,
+        scheduleId = unixTimeScheduled,
+        scheduled = Instant.ofEpochSecond(unixTimeScheduled),
+        submitted = Instant.ofEpochSecond(unixTimeSubmitted),
+        playerIdLeftOne = playerIdLeftOne,
+        playerNameLeftOne = "",
+        playerTeamIdLeftOne = null,
+        playerTeamNameLeftOne = null,
+        playerIdLeftTwo = playerIdLeftTwo,
+        playerNameLeftTwo = null,
+        playerTeamIdLeftTwo = null,
+        playerTeamNameLeftTwo = null,
+        playerIdRightOne = playerIdRightOne,
+        playerNameRightOne = null,
+        playerTeamIdRightOne = null,
+        playerTeamNameRightOne = null,
+        playerIdRightTwo = playerIdRightTwo,
+        playerNameRightTwo = null,
+        playerTeamIdRightTwo = null,
+        playerTeamNameRightTwo = null,
+        sets = emptyList(),
+        leftWon = null,
+    )
+
 internal fun SelectFilteredAndOrdered.toCategory(): Category =
     Category(
         id = id,
@@ -53,6 +79,16 @@ internal fun SelectFilteredAndOrdered.toCategory(): Category =
         type = type,
         tournamentId = tournamentId,
         players = players.toInt(),
+        finished = false
+    )
+
+internal fun com.olt.racketclash.database.table.category.SelectLast.toCategory(): Category =
+    Category(
+        id = id,
+        name = name,
+        type = type,
+        tournamentId = tournamentId,
+        players = 0,
         finished = false
     )
 

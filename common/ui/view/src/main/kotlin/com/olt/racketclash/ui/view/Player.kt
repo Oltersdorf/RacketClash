@@ -9,13 +9,13 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.*
 import com.olt.racketclash.state.datetime.toFormattedString
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.state.player.PlayerModel
+import com.olt.racketclash.state.player.PlayerState
 import com.olt.racketclash.state.player.PlayerTableModel
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.*
@@ -28,43 +28,32 @@ import racketclash.common.ui.view.generated.resources.medal
 import kotlin.math.max
 import kotlin.math.min
 
-private sealed class PlayerTable(val index: Int, val name: String) {
-    data object Tournaments : PlayerTable(index = 0, name = "Tournaments")
-    data object Categories : PlayerTable(index = 1, name = "Categories")
-    data object Games : PlayerTable(index = 2, name = "Games")
-}
-
 @Composable
 internal fun Player(
     database: Database,
     playerId: Long,
     navigateTo: (View) -> Unit
 ) {
-    val model = remember { PlayerModel(playerDatabase = database.players, id = playerId) }
+    val model = remember {
+        PlayerModel(
+            playerDatabase = database.players,
+            tournamentDatabase = database.tournaments,
+            categoryDatabase = database.categories,
+            gameDatabase = database.games,
+            id = playerId
+        )
+    }
     val state by model.state.collectAsState()
-    var showFilterOverlay by remember { mutableStateOf(false) }
     var showEditOverlay by remember { mutableStateOf(false) }
-    var playerTable by remember { mutableStateOf<PlayerTable>(PlayerTable.Tournaments) }
 
-    RacketClashScaffold(
+    RacketClashScrollableScaffold(
         title = "Player",
-        headerContent = { Info(isLoading = state.isLoading, player = state.player) },
+        headerContent = { PlayerInfo(isLoading = state.isLoading, player = state.player) },
         actions = {
-            SimpleIconButton(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Filter"
-            ) {
-                showEditOverlay = false
-                showFilterOverlay = !showFilterOverlay
-            }
-
             SimpleIconButton(
                 imageVector = Icons.Default.Edit,
                 contentDescription = "Edit"
-            ) {
-                showFilterOverlay = false
-                showEditOverlay = !showEditOverlay
-            }
+            ) { showEditOverlay = !showEditOverlay }
         },
         overlay = {
             AddOrUpdatePlayerOverlay(
@@ -76,9 +65,8 @@ internal fun Player(
             ) { showEditOverlay = false }
         }
     ) {
-        PlayerTableSelection(
-            playerTable = playerTable,
-            onChangeSelectedTable = { playerTable = it },
+        PlayerBody(
+            state = state,
             navigateTo = navigateTo
         )
     }
@@ -370,27 +358,45 @@ private fun columns(
     )
 
 @Composable
-private fun PlayerTableSelection(
-    playerTable: PlayerTable,
-    onChangeSelectedTable: (PlayerTable) -> Unit,
+private fun PlayerBody(
+    state: PlayerState,
     navigateTo: (View) -> Unit
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(50.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        TabRow(
-            selectedTabIndex = playerTable.index,
-            tabs = listOf(PlayerTable.Tournaments, PlayerTable.Categories, PlayerTable.Games),
-            onTabClick = onChangeSelectedTable,
-            tabText = { it.name }
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
+        ListPreviewBox(
+            name = "Tournaments",
+            isLoading = state.isLoading,
+            items = state.tournaments,
+            onNavigateMore = { navigateTo(View.Tournaments) }
+        ) {
+            ListPreviewBoxLink(
+                text = it.name,
+                subText = "(${it.start.toFormattedString()} to ${it.end.toFormattedString()})"
+            ) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) }
+        }
 
-        when (playerTable) {
-            PlayerTable.Tournaments -> {}
-            PlayerTable.Categories -> {}
-            PlayerTable.Games -> {}
+        ListPreviewBox(
+            name = "Categories",
+            isLoading = state.isLoading,
+            items = state.categories,
+            onNavigateMore = { navigateTo(View.Tournaments) }
+        ) {
+            ListPreviewBoxLink(
+                text = it.name,
+                subText = "(${it.tournamentName})"
+            ) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) }
+        }
+
+        ListPreviewBox(
+            name = "Games",
+            isLoading = state.isLoading,
+            items = state.games,
+            onNavigateMore = { navigateTo(View.Tournaments) }
+        ) {
+            ListPreviewBoxLink(
+                text = it.playerNameLeftOne,
+                subText = "()"
+            ) {  }
         }
     }
 }
@@ -520,7 +526,7 @@ private fun PlayerTableSelection(
     )*/
 
 @Composable
-private fun Info(
+private fun PlayerInfo(
     isLoading: Boolean,
     player: Player
 ) {

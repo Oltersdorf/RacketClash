@@ -50,6 +50,15 @@ WHERE
     openGames >= :minOpenGames AND
     openGames <= :maxOpenGames;
 
+selectLast:
+SELECT
+    *, 1 AS deletable, 0 AS players, 0 AS openGames
+FROM
+    category
+ORDER BY
+    id DESC
+LIMIT :n;
+
 selectSingle:
 SELECT
     *, 1 AS deletable

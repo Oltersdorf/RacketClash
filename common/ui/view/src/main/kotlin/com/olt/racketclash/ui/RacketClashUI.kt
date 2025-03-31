@@ -107,7 +107,7 @@ fun RacketClashUI(
                     is View.AddOrUpdateTournament -> AddOrUpdateTournament(database = database, tournamentId = cv.tournamentId, tournamentName = cv.tournamentName) { viewHistory += View.Tournaments }
                     is View.Categories -> Categories(database = database, tournamentId = cv.tournamentId) { viewHistory += it }
                     is View.Category -> Category(database = database, categoryId = cv.categoryId, categoryName = cv.categoryName, tournamentId = cv.tournamentId) { viewHistory += it }
-                    is View.Rule -> Rule(database = database, id = cv.id) { viewHistory += it }
+                    is View.Rule -> Rule(database = database, ruleId = cv.id) { viewHistory += it }
                     View.Rules -> Rules(database = database) { viewHistory += it }
                     is View.Player -> Player(database = database, playerId = cv.playerId) { viewHistory += it }
                     View.Players -> Players(database = database) { viewHistory += it }
