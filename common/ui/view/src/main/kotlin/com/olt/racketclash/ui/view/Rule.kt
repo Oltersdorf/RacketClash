@@ -124,7 +124,7 @@ internal fun Rules(
 }
 
 @Composable
-internal fun BoxScope.FilterRuleOverlay(
+private fun BoxScope.FilterRuleOverlay(
     filter: RuleFilter,
     applyFilter: (RuleFilter) -> Unit,
     visible: Boolean,
@@ -141,7 +141,7 @@ internal fun BoxScope.FilterRuleOverlay(
 }
 
 @Composable
-internal fun BoxScope.AddOrUpdateRuleOverlay(
+private fun BoxScope.AddOrUpdateRuleOverlay(
     visible: Boolean,
     rule: Rule? = null,
     onConfirm: (Rule) -> Unit,
@@ -330,7 +330,7 @@ internal fun BoxScope.AddOrUpdateRuleOverlay(
 }
 
 @Composable
-internal fun RuleTable(
+private fun RuleTable(
     state: ListState<Rule, RuleFilter, RuleSorting>,
     onSort: (RuleSorting) -> Unit,
     onDelete: (Rule) -> Unit,
@@ -389,50 +389,6 @@ private fun columns(
     )
 
 @Composable
-private fun RuleBody(
-    state: RuleState,
-    navigateTo: (View) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-        ListPreviewBox(
-            name = "Tournaments",
-            isLoading = state.isLoading,
-            items = state.tournaments,
-            onNavigateMore = { navigateTo(View.Tournaments) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.name,
-                subText = "(${it.start.toFormattedString()} to ${it.end.toFormattedString()})"
-            ) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) }
-        }
-
-        ListPreviewBox(
-            name = "Categories",
-            isLoading = state.isLoading,
-            items = state.categories,
-            onNavigateMore = { navigateTo(View.Tournaments) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.name,
-                subText = "(${it.tournamentName})"
-            ) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) }
-        }
-
-        ListPreviewBox(
-            name = "Games",
-            isLoading = state.isLoading,
-            items = state.games,
-            onNavigateMore = { navigateTo(View.Tournaments) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.playerNameLeftOne,
-                subText = "()"
-            ) {  }
-        }
-    }
-}
-
-@Composable
 private fun RuleInfo(
     isLoading: Boolean,
     rule: Rule
@@ -452,6 +408,50 @@ private fun RuleInfo(
                 DetailText(title = "Points", text = "${rule.winPoints}/${rule.maxPoints} +/- ${rule.pointsDifference}")
                 DetailText(title = "Rest", text = "G:${rule.gamePointsForRest} / S:${rule.setPointsForRest} / P:${rule.pointPointsForRest}")
             }
+        }
+    }
+}
+
+@Composable
+private fun RuleBody(
+    state: RuleState,
+    navigateTo: (View) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
+        ListPreviewBox(
+            name = "Tournaments",
+            isLoading = state.isLoading,
+            items = state.tournaments,
+            onNavigateMore = { navigateTo(View.Tournaments) }
+        ) {
+            ListPreviewBoxLink(
+                text = it.name,
+                subText = "(${it.start.toFormattedString()} to ${it.end.toFormattedString()})"
+            ) { navigateTo(View.Tournament(tournamentId = it.id)) }
+        }
+
+        ListPreviewBox(
+            name = "Categories",
+            isLoading = state.isLoading,
+            items = state.categories,
+            onNavigateMore = { navigateTo(View.Tournaments) }
+        ) {
+            ListPreviewBoxLink(
+                text = it.name,
+                subText = "(${it.tournamentName})"
+            ) { navigateTo(View.Tournament(tournamentId = it.id)) }
+        }
+
+        ListPreviewBox(
+            name = "Games",
+            isLoading = state.isLoading,
+            items = state.games,
+            onNavigateMore = { navigateTo(View.Tournaments) }
+        ) {
+            ListPreviewBoxLink(
+                text = it.playerNameLeftOne,
+                subText = "()"
+            ) {  }
         }
     }
 }

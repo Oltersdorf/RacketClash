@@ -38,6 +38,8 @@ interface TeamDatabase {
         toIndex: Long
     ): FilteredSortedList<Team, TeamFilter, TeamSorting>
 
+    suspend fun selectLast(n: Long): List<Team>
+
     suspend fun selectSingle(id: Long): Team
 
     suspend fun add(team: Team, playerIds: Set<Long>)

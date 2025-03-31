@@ -256,6 +256,28 @@ internal fun com.olt.racketclash.database.table.schedule.SelectFilteredAndOrdere
         playerNameRightTwo = playerNameRightTwo
     )
 
+internal fun com.olt.racketclash.database.table.Schedule.toSchedule(): Schedule =
+    Schedule(
+        id = id,
+        ruleId = ruleId,
+        ruleName = "",
+        maxSets = 1,
+        scheduledFor = Instant.ofEpochSecond(unixTimeScheduled),
+        active = active,
+        categoryId = categoryId,
+        categoryName = "",
+        categoryOrderNumber = categoryOrderNumber,
+        tournamentId = tournamentId,
+        playerIdLeftOne = playerIdLeftOne,
+        playerNameLeftOne = "",
+        playerIdLeftTwo = playerIdLeftTwo,
+        playerNameLeftTwo = null,
+        playerIdRightOne = playerIdRightOne,
+        playerNameRightOne = "",
+        playerIdRightTwo = playerIdRightTwo,
+        playerNameRightTwo = null
+    )
+
 internal fun ScheduleSorting.toName(): String =
     when (this) {
         ScheduleSorting.ActiveAsc -> "activeAsc"
@@ -283,6 +305,20 @@ internal fun com.olt.racketclash.database.table.Team.toTeam(): Team =
     )
 
 internal fun FilteredAndOrderedTeam.toTeam(): Team =
+    Team(
+        id = id,
+        name = name,
+        rank = rank,
+        tournamentId = tournamentId,
+        size = size,
+        gamesWon = gamesWon,
+        gamesDraw = gamesDraw,
+        gamesLost = gamesLost,
+        gamePointsWon = gamePointsWon,
+        gamePointsLost = gamePointsLost
+    )
+
+internal fun com.olt.racketclash.database.table.team.SelectLast.toTeam(): Team =
     Team(
         id = id,
         name = name,

@@ -5,19 +5,9 @@ internal sealed interface View {
 
     data object Tournaments : View
 
-    data class AddOrUpdateTournament(
-        val tournamentName: String?,
-        val tournamentId: Long?
-    ) : View
+    data class Tournament(val tournamentId: Long) : View
 
-    data class Tournament(
-        val tournamentName: String,
-        val tournamentId: Long
-    ) : View
-
-    data class Teams(
-        val tournamentId: Long
-    ) : View
+    data class Teams(val tournamentId: Long) : View
 
     data class AddOrUpdateTeam(
         val teamName: String?,
@@ -31,9 +21,7 @@ internal sealed interface View {
         val tournamentId: Long
     ) : View
 
-    data class Categories(
-        val tournamentId: Long
-    ) : View
+    data class Categories(val tournamentId: Long) : View
 
     data class AddOrUpdateCategory(
         val categoryName: String?,

@@ -47,6 +47,13 @@ internal class ScheduleDatabaseImpl(
             )
         }
 
+    override suspend fun selectFirst(n: Long): List<Schedule> =
+        database
+            .scheduleQueries
+            .selectFirst(n = 5)
+            .executeAsList()
+            .map { it.toSchedule() }
+
     override suspend fun setComplete(
         schedule: Schedule,
         sets: List<GameSet>

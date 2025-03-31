@@ -51,6 +51,8 @@ interface ScheduleDatabase {
         toIndex: Long
     ): FilteredSortedList<Schedule, ScheduleFilter, ScheduleSorting>
 
+    suspend fun selectFirst(n: Long): List<Schedule>
+
     suspend fun setComplete(schedule: Schedule, sets: List<GameSet>)
 
     suspend fun add(schedule: Schedule)

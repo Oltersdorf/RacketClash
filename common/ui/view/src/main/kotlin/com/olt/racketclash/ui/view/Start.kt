@@ -53,7 +53,7 @@ private fun StartBody(
             ListPreviewBoxLink(
                 text = it.name,
                 subText = "(${it.start.toFormattedString()} to ${it.end.toFormattedString()})"
-            ) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) }
+            ) { navigateTo(View.Tournament(tournamentId = it.id)) }
         }
 
         ListPreviewBox(

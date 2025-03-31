@@ -129,7 +129,7 @@ internal fun Players(
 }
 
 @Composable
-internal fun BoxScope.FilterPlayerOverlay(
+private fun BoxScope.FilterPlayerOverlay(
     filter: PlayerFilter,
     applyFilter: (PlayerFilter) -> Unit,
     visible: Boolean,
@@ -179,7 +179,7 @@ internal fun BoxScope.FilterPlayerOverlay(
 }
 
 @Composable
-internal fun BoxScope.AddOrUpdatePlayerOverlay(
+private fun BoxScope.AddOrUpdatePlayerOverlay(
     visible: Boolean,
     player: Player? = null,
     clubSuggestions: List<String>,
@@ -226,7 +226,7 @@ internal fun BoxScope.AddOrUpdatePlayerOverlay(
 }
 
 @Composable
-internal fun PlayerTable(
+private fun PlayerTable(
     state: ListState<Player, PlayerFilter, PlayerSorting>,
     onSort: (PlayerSorting) -> Unit,
     onDelete: (Player) -> Unit,
@@ -356,50 +356,6 @@ private fun columns(
             contentDescription = "Delete"
         )
     )
-
-@Composable
-private fun PlayerBody(
-    state: PlayerState,
-    navigateTo: (View) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-        ListPreviewBox(
-            name = "Tournaments",
-            isLoading = state.isLoading,
-            items = state.tournaments,
-            onNavigateMore = { navigateTo(View.Tournaments) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.name,
-                subText = "(${it.start.toFormattedString()} to ${it.end.toFormattedString()})"
-            ) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) }
-        }
-
-        ListPreviewBox(
-            name = "Categories",
-            isLoading = state.isLoading,
-            items = state.categories,
-            onNavigateMore = { navigateTo(View.Tournaments) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.name,
-                subText = "(${it.tournamentName})"
-            ) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) }
-        }
-
-        ListPreviewBox(
-            name = "Games",
-            isLoading = state.isLoading,
-            items = state.games,
-            onNavigateMore = { navigateTo(View.Tournaments) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.playerNameLeftOne,
-                subText = "()"
-            ) {  }
-        }
-    }
-}
 
 /*private fun columns(
     navigateTo: (View) -> Unit,
@@ -544,6 +500,50 @@ private fun PlayerInfo(
                 DetailText(title = "First game", text = player.firstGameDate?.toFormattedString() ?: "N/A")
                 DetailText(title = "Last game", text = player.lastGameDate?.toFormattedString() ?: "N/A")
             }
+        }
+    }
+}
+
+@Composable
+private fun PlayerBody(
+    state: PlayerState,
+    navigateTo: (View) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
+        ListPreviewBox(
+            name = "Tournaments",
+            isLoading = state.isLoading,
+            items = state.tournaments,
+            onNavigateMore = { navigateTo(View.Tournaments) }
+        ) {
+            ListPreviewBoxLink(
+                text = it.name,
+                subText = "(${it.start.toFormattedString()} to ${it.end.toFormattedString()})"
+            ) { navigateTo(View.Tournament(tournamentId = it.id)) }
+        }
+
+        ListPreviewBox(
+            name = "Categories",
+            isLoading = state.isLoading,
+            items = state.categories,
+            onNavigateMore = { navigateTo(View.Tournaments) }
+        ) {
+            ListPreviewBoxLink(
+                text = it.name,
+                subText = "(${it.tournamentName})"
+            ) { navigateTo(View.Tournament(tournamentId = it.id)) }
+        }
+
+        ListPreviewBox(
+            name = "Games",
+            isLoading = state.isLoading,
+            items = state.games,
+            onNavigateMore = { navigateTo(View.Tournaments) }
+        ) {
+            ListPreviewBoxLink(
+                text = it.playerNameLeftOne,
+                subText = "()"
+            ) {  }
         }
     }
 }

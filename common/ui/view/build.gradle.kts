@@ -19,12 +19,10 @@ dependencies {
     implementation(project(":common:state"))
     implementation(project(":common:model:addOrUpdateCategory"))
     implementation(project(":common:model:addOrUpdateTeam"))
-    implementation(project(":common:model:addOrUpdateTournament"))
     implementation(project(":common:model:addSchedule"))
     implementation(project(":common:model:categories"))
     implementation(project(":common:model:category"))
     implementation(project(":common:model:schedule"))
     implementation(project(":common:model:team"))
     implementation(project(":common:model:teams"))
-    implementation(project(":common:model:tournaments"))
 }

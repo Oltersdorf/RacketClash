@@ -119,6 +119,15 @@ WHERE
         p2R.name LIKE '%' || :playerNameFilter || '%'
     );
 
+selectFirst:
+SELECT
+    *
+FROM
+    schedule
+ORDER BY
+    id ASC
+LIMIT :n;
+
 active:
 SELECT
     COUNT(*)

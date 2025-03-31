@@ -40,8 +40,16 @@ internal class TeamDatabaseImpl(
             )
         }
 
+    override suspend fun selectLast(n: Long): List<Team> =
+        database
+            .teamQueries
+            .selectLast(n = n)
+            .executeAsList()
+            .map { it.toTeam() }
+
     override suspend fun selectSingle(id: Long): Team =
-        database.teamQueries
+        database
+            .teamQueries
             .team(id = id)
             .executeAsOne()
             .toTeam()
