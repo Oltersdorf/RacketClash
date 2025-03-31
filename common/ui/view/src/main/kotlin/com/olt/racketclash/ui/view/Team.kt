@@ -28,14 +28,13 @@ internal fun Team(
     val state by model.state.collectAsState()
 
     Details(
-        isLoading = state.isLoading,
-        onEdit = { navigateTo(View.AddOrUpdateTeam(teamId = teamId, teamName = teamName, tournamentId = tournamentId)) }
+        isLoading = state.isLoading
     ) {
-        DetailSection(title = "Description") {
+        DetailSectionColumn(title = "Description") {
             DetailText(title = "Name", text = "$teamName (${state.numberOfPlayers} Players)")
         }
 
-        DetailSection(title = "Statistics") {
+        DetailSectionColumn(title = "Statistics") {
             StatisticsDetail(
                 doubleGamePoints = state.doubleGamePoints,
                 doubleSetPoints = state.doubleSetPoints,
@@ -46,7 +45,7 @@ internal fun Team(
             )
         }
 
-        DetailSection(title = "Players") {
+        DetailSectionColumn(title = "Players") {
             FilteredLazyTable(
                 state = ListState(
                     isLoading = state.isLoading,
@@ -84,7 +83,7 @@ private fun columns(
                 LazyTableSortDirection.Ascending -> onNameSort()
                 LazyTableSortDirection.Descending -> onNameSort()
             }
-        }) { navigateTo(View.Player(playerName = it.name, playerId = it.id)) },
+        }) { navigateTo(View.Player(playerId = it.id)) },
         LazyTableColumn.Text(name = "Birth year", weight = 0.1f, onSort = {
             when (it) {
                 LazyTableSortDirection.Ascending -> onBirthYearSort()

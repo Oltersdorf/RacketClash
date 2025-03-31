@@ -8,14 +8,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
+import com.olt.racketclash.state.datetime.toFormattedString
 import com.olt.racketclash.state.start.StartModel
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.ListPreviewBox
 import com.olt.racketclash.ui.base.layout.ListPreviewBoxLink
 import com.olt.racketclash.ui.layout.RacketClashScrollableScaffold
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Composable
 internal fun Start(database: Database, navigateTo: (View) -> Unit) {
@@ -36,20 +34,9 @@ internal fun Start(database: Database, navigateTo: (View) -> Unit) {
                 items = state.tournaments,
                 onNavigateMore = { navigateTo(View.Tournaments) }
             ) {
-                val startTime = remember {
-                    LocalDateTime
-                        .ofInstant(it.start, ZoneId.systemDefault())
-                        .format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm z"))
-                }
-                val endTime = remember {
-                    LocalDateTime
-                        .ofInstant(it.end, ZoneId.systemDefault())
-                        .format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm z"))
-                }
-
                 ListPreviewBoxLink(
                     text = it.name,
-                    subText = "($startTime to $endTime)"
+                    subText = "(${it.start.toFormattedString()} to ${it.end.toFormattedString()})"
                 ) { navigateTo(View.Tournament(tournamentName = it.name, tournamentId = it.id)) }
             }
 
@@ -62,7 +49,7 @@ internal fun Start(database: Database, navigateTo: (View) -> Unit) {
                 ListPreviewBoxLink(
                     text = it.name,
                     subText = "(${it.club})"
-                ) { navigateTo(View.Player(playerName = it.name, playerId = it.id)) }
+                ) { navigateTo(View.Player(playerId = it.id)) }
             }
 
             ListPreviewBox(

@@ -1,7 +1,5 @@
 package com.olt.racketclash.ui.layout
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -68,58 +66,6 @@ internal fun RacketClashScaffold(
             contentAlignment = contentAlignment,
             content = content
         )
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun Overlay(
-    visible: Boolean,
-    durationMillis: Int = 500,
-    onDismiss: () -> Unit,
-    contentAlignment: Alignment = Alignment.TopStart,
-    content: @Composable BoxScope.() -> Unit
-) {
-    AnimatedVisibility(
-        label = "overlayBackground",
-        visible = visible,
-        enter = fadeIn(
-            initialAlpha = 0.0f,
-            animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing)
-        ),
-        exit = fadeOut(
-            targetAlpha = 0.0f,
-            animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing)
-        )
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxSize().onClick(onClick = onDismiss),
-            color = MaterialTheme.colorScheme.scrim.copy(0.3f)
-        ) {}
-    }
-
-    AnimatedVisibility(
-        label = "overlay",
-        visible = visible,
-        enter = slideInVertically(
-            initialOffsetY = { -it },
-            animationSpec = tween(durationMillis = durationMillis, easing = LinearOutSlowInEasing)
-        ),
-        exit = slideOutVertically(
-            targetOffsetY = { -it },
-            animationSpec = tween(durationMillis = durationMillis, easing = LinearOutSlowInEasing)
-        )
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-        ) {
-            Box(
-                modifier = Modifier.padding(50.dp),
-                contentAlignment = contentAlignment,
-                content = content
-            )
-        }
     }
 }
 

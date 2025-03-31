@@ -1,75 +1,65 @@
 package com.olt.racketclash.ui
 
-internal sealed class View(val name: String) {
-    data object Start : View(name = "Racket Clash")
+internal sealed interface View {
+    data object Start : View
 
-    data object Tournaments : View(name = "Tournaments")
+    data object Tournaments : View
 
     data class AddOrUpdateTournament(
         val tournamentName: String?,
         val tournamentId: Long?
-    ) : View(name = tournamentName ?: "New tournament")
+    ) : View
 
     data class Tournament(
         val tournamentName: String,
         val tournamentId: Long
-    ) : View(name = tournamentName)
+    ) : View
 
     data class Teams(
         val tournamentId: Long
-    ) : View(name = "Teams")
+    ) : View
 
     data class AddOrUpdateTeam(
         val teamName: String?,
         val teamId: Long?,
         val tournamentId: Long
-    ) : View(name = teamName ?: "New team")
+    ) : View
 
     data class Team(
         val teamName: String,
         val teamId: Long,
         val tournamentId: Long
-    ) : View(name = teamName)
+    ) : View
 
     data class Categories(
         val tournamentId: Long
-    ) : View(name = "Categories")
+    ) : View
 
     data class AddOrUpdateCategory(
         val categoryName: String?,
         val categoryId: Long?,
         val tournamentId: Long
-    ) : View(name = categoryName ?: "New category")
+    ) : View
 
     data class Category(
         val categoryName: String,
         val categoryId: Long,
         val tournamentId: Long
-    ) : View(name = categoryName)
+    ) : View
 
     data class AddSchedule(
         val categoryId: Long,
         val categoryName: String,
         val tournamentId: Long
-    ) : View(name = "Games")
+    ) : View
 
-    data class Schedule(
-        val tournamentId: Long
-    ) : View(name = "Schedule")
+    data class Schedule(val tournamentId: Long) : View
 
-    data object Players: View(name = "Players")
+    data object Players: View
 
-    data class Player(
-        val playerName: String,
-        val playerId: Long
-    ) : View(name = playerName)
+    data class Player(val playerId: Long) : View
 
-    data class AddOrUpdatePlayer(
-        val playerName: String?,
-        val playerId: Long?
-    ) : View(name = playerName ?: "New player")
+    data object Rules : View
 
-    data object Rules : View(name = "Rules")
-
-    data class Rule(val id: Long) : View("Rule")
+    data class Rule(val id: Long) : View
 }

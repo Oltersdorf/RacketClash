@@ -20,7 +20,7 @@ fun Form(
     confirmButton: @Composable RowScope.() -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = title,
             modifier = Modifier.fillMaxWidth(),
@@ -30,7 +30,7 @@ fun Form(
 
         HorizontalDivider(modifier = Modifier.fillMaxWidth())
 
-        Box(modifier = Modifier.fillMaxWidth().padding(top = 50.dp)) {
+        Box(modifier = Modifier.fillMaxWidth().padding(top = 25.dp)) {
             val verticalScrollState = rememberScrollState()
             val canScroll = verticalScrollState.canScrollBackward || verticalScrollState.canScrollForward
 
@@ -38,7 +38,7 @@ fun Form(
                 modifier = Modifier
                     .verticalScroll(verticalScrollState)
                     .padding(end = if (canScroll) 14.dp else 0.dp),
-                verticalArrangement = Arrangement.spacedBy(50.dp)
+                verticalArrangement = Arrangement.spacedBy(25.dp)
             ) {
                 if (isLoading)
                     Loading()
@@ -103,6 +103,7 @@ fun FormRow(
 @Composable
 fun FormTextField(
     value: String,
+    enabled: Boolean = true,
     isError: Boolean = false,
     label: String = "",
     onValueChange: (String) -> Unit
@@ -110,6 +111,7 @@ fun FormTextField(
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
         value = value,
+        enabled = enabled,
         onValueChange = onValueChange,
         singleLine = true,
         isError = isError,
@@ -120,6 +122,7 @@ fun FormTextField(
 @Composable
 fun RowScope.FormTextField(
     value: String,
+    enabled: Boolean = true,
     isError: Boolean = false,
     label: String = "",
     onValueChange: (String) -> Unit
@@ -127,6 +130,7 @@ fun RowScope.FormTextField(
     OutlinedTextField(
         modifier = Modifier.weight(0.5f),
         value = value,
+        enabled = enabled,
         onValueChange = onValueChange,
         singleLine = true,
         isError = isError,
@@ -138,6 +142,7 @@ fun RowScope.FormTextField(
 fun FormNumberSelector(
     value: Int,
     label: String = "",
+    enabled: Boolean = true,
     range: IntRange = Int.MIN_VALUE..Int.MAX_VALUE,
     steps: Int = 1,
     onUp: (Int) -> Unit,
@@ -147,6 +152,7 @@ fun FormNumberSelector(
         modifier = Modifier.fillMaxWidth(),
         value = value,
         label = label,
+        enabled = enabled,
         range = range,
         steps = steps,
         onUp = onUp,
@@ -158,6 +164,7 @@ fun FormNumberSelector(
 fun RowScope.FormNumberSelector(
     value: Int,
     label: String = "",
+    enabled: Boolean = true,
     range: IntRange = Int.MIN_VALUE..Int.MAX_VALUE,
     steps: Int = 1,
     onUp: (Int) -> Unit,
@@ -167,6 +174,29 @@ fun RowScope.FormNumberSelector(
         modifier = Modifier.weight(0.5f),
         value = value,
         label = label,
+        enabled = enabled,
+        range = range,
+        steps = steps,
+        onUp = onUp,
+        onDown = onDown
+    )
+}
+
+@Composable
+fun RowScope.FormNumberSelector(
+    value: Long,
+    label: String = "",
+    enabled: Boolean = true,
+    range: LongRange = Long.MIN_VALUE..Long.MAX_VALUE,
+    steps: Int = 1,
+    onUp: (Long) -> Unit,
+    onDown: (Long) -> Unit
+) {
+    NumberSelector(
+        modifier = Modifier.weight(0.5f),
+        value = value,
+        label = label,
+        enabled = enabled,
         range = range,
         steps = steps,
         onUp = onUp,
@@ -178,6 +208,7 @@ fun RowScope.FormNumberSelector(
 fun <T> FormDropDownTextField(
     text: String,
     label: String = "",
+    enabled: Boolean = true,
     readOnly: Boolean = false,
     onTextChange: (String) -> Unit = {},
     dropDownItems: List<T>,
@@ -188,6 +219,7 @@ fun <T> FormDropDownTextField(
         modifier = Modifier.fillMaxWidth(),
         text = text,
         label = label,
+        enabled = enabled,
         readOnly = readOnly,
         onTextChange = onTextChange,
         dropDownItems = dropDownItems,
@@ -200,6 +232,7 @@ fun <T> FormDropDownTextField(
 fun <T> RowScope.FormDropDownTextField(
     text: String,
     label: String = "",
+    enabled: Boolean = true,
     readOnly: Boolean = false,
     onTextChange: (String) -> Unit = {},
     dropDownItems: List<T>,
@@ -210,6 +243,7 @@ fun <T> RowScope.FormDropDownTextField(
         modifier = Modifier.weight(0.5f),
         text = text,
         label = label,
+        enabled = enabled,
         readOnly = readOnly,
         onTextChange = onTextChange,
         dropDownItems = dropDownItems,
@@ -222,6 +256,7 @@ fun <T> RowScope.FormDropDownTextField(
 fun RowScope.FormCheckBox(
     text: String,
     checked: Boolean,
+    enabled: Boolean = true,
     onCheckChanged: (Boolean) -> Unit
 ) {
     Row(
@@ -230,6 +265,7 @@ fun RowScope.FormCheckBox(
     ) {
         Checkbox(
             checked = checked,
+            enabled = enabled,
             onCheckedChange = onCheckChanged
         )
         Text(text = text)
@@ -239,10 +275,12 @@ fun RowScope.FormCheckBox(
 @Composable
 fun FormButton(
     text: String,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Button(
         modifier = Modifier.fillMaxWidth(),
+        enabled = enabled,
         onClick = onClick,
         shape = RectangleShape
     ) {

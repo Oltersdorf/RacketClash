@@ -9,12 +9,10 @@ class RuleModel(
     id: Long
 ) : ViewModelState<RuleState>(initialState = RuleState()) {
 
-    val tournaments = lazy {  }
-
     init {
         onIO {
             val rule = ruleDatabase.selectSingle(id = id)
-            updateState { copy(rule = rule) }
+            updateState { copy(isLoading = false, rule = rule) }
         }
     }
 

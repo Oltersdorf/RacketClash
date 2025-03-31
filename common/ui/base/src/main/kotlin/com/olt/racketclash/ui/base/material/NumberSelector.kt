@@ -18,6 +18,7 @@ fun NumberSelector(
     modifier: Modifier,
     value: Int,
     label: String = "",
+    enabled: Boolean = true,
     range: IntRange = Int.MIN_VALUE..Int.MAX_VALUE,
     steps: Int = 1,
     onUp: (Int) -> Unit,
@@ -26,6 +27,7 @@ fun NumberSelector(
     OutlinedTextField(
         modifier = modifier,
         value = value.toString(),
+        enabled = enabled,
         onValueChange = {},
         singleLine = true,
         readOnly = true,
@@ -37,7 +39,7 @@ fun NumberSelector(
                     contentDescription = "+$steps",
                     modifier = Modifier
                         .pointerHoverIcon(PointerIcon.Hand)
-                        .clickable {
+                        .clickable(enabled = enabled) {
                             val newValue = value + steps
                             if (newValue > value && range.contains(newValue)) //Check for overflow and range
                                 onUp(newValue)
@@ -48,7 +50,55 @@ fun NumberSelector(
                     contentDescription = "-$steps",
                     modifier = Modifier
                         .pointerHoverIcon(PointerIcon.Hand)
-                        .clickable {
+                        .clickable(enabled = enabled) {
+                            val newValue = value - steps
+                            if (newValue < value && range.contains(newValue)) //Check for underflow and range
+                                onDown(newValue)
+                        }
+                )
+            }
+        }
+    )
+}
+
+@Composable
+fun NumberSelector(
+    modifier: Modifier,
+    value: Long,
+    label: String = "",
+    enabled: Boolean = true,
+    range: LongRange = Long.MIN_VALUE..Long.MAX_VALUE,
+    steps: Int = 1,
+    onUp: (Long) -> Unit,
+    onDown: (Long) -> Unit
+) {
+    OutlinedTextField(
+        modifier = modifier,
+        value = value.toString(),
+        enabled = enabled,
+        onValueChange = {},
+        singleLine = true,
+        readOnly = true,
+        label = { Text(label) },
+        trailingIcon = {
+            Column {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowUp,
+                    contentDescription = "+$steps",
+                    modifier = Modifier
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .clickable(enabled = enabled) {
+                            val newValue = value + steps
+                            if (newValue > value && range.contains(newValue)) //Check for overflow and range
+                                onUp(newValue)
+                        }
+                )
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = "-$steps",
+                    modifier = Modifier
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .clickable(enabled = enabled) {
                             val newValue = value - steps
                             if (newValue < value && range.contains(newValue)) //Check for underflow and range
                                 onDown(newValue)

@@ -1,5 +1,7 @@
 package com.olt.racketclash.database.api
 
+import java.time.Instant
+
 data class PlayerFilter(
     val name: String = "",
     val birthYear: IntRange = Int.MIN_VALUE..Int.MAX_VALUE,
@@ -35,6 +37,8 @@ data class Player(
     val bronzeMedals: Long = 0,
     val gamesPlayed: Long = 0,
     val gamesScheduled: Long = 0,
+    val firstGameDate: Instant? = null,
+    val lastGameDate: Instant? = null
 )
 
 interface PlayerDatabase {

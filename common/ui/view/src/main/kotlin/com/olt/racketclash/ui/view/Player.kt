@@ -1,124 +1,401 @@
 package com.olt.racketclash.ui.view
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.api.Database
-import com.olt.racketclash.player.Game
-import com.olt.racketclash.player.PlayerModel
+import com.olt.racketclash.database.api.*
+import com.olt.racketclash.state.datetime.toFormattedString
 import com.olt.racketclash.state.list.ListState
-import com.olt.racketclash.ui.base.material.Link
-import com.olt.racketclash.ui.material.RatioBar
-import com.olt.racketclash.ui.layout.*
+import com.olt.racketclash.state.player.PlayerModel
+import com.olt.racketclash.state.player.PlayerTableModel
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.material.LazyTableSortDirection
+import com.olt.racketclash.ui.base.layout.*
+import com.olt.racketclash.ui.base.material.*
+import com.olt.racketclash.ui.layout.*
+import com.olt.racketclash.ui.theme.AdditionalMaterialTheme
+import org.jetbrains.compose.resources.painterResource
+import racketclash.common.ui.view.generated.resources.Res
+import racketclash.common.ui.view.generated.resources.medal
+import kotlin.math.max
+import kotlin.math.min
 
-@OptIn(ExperimentalLayoutApi::class)
+private sealed class PlayerTable(val index: Int, val name: String) {
+    data object Tournaments : PlayerTable(index = 0, name = "Tournaments")
+    data object Categories : PlayerTable(index = 1, name = "Categories")
+    data object Games : PlayerTable(index = 2, name = "Games")
+}
+
 @Composable
 internal fun Player(
     database: Database,
     playerId: Long,
-    playerName: String,
     navigateTo: (View) -> Unit
 ) {
-    val model = remember { PlayerModel(database = database.players, playerId = playerId) }
+    val model = remember { PlayerModel(playerDatabase = database.players, id = playerId) }
     val state by model.state.collectAsState()
+    var showFilterOverlay by remember { mutableStateOf(false) }
+    var showEditOverlay by remember { mutableStateOf(false) }
+    var playerTable by remember { mutableStateOf<PlayerTable>(PlayerTable.Tournaments) }
 
-    Details(
-        isLoading = state.isLoading,
-        onEdit = { navigateTo(View.AddOrUpdatePlayer(playerName = playerName, playerId = playerId)) }
-    ) {
-        DetailSection(title = "Description") {
-            DetailText(title = "Name", text = "$playerName (Year: ${state.birthYear})")
-            DetailText(title = "Club", text = state.club)
-        }
-
-        DetailSection(title = "Statistics") {
-            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                DetailText(title = "First game", text = state.firstGame)
-                DetailText(title = "Last game", text = state.lastGame)
+    RacketClashScaffold(
+        title = "Player",
+        headerContent = { Info(isLoading = state.isLoading, player = state.player) },
+        actions = {
+            SimpleIconButton(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Filter"
+            ) {
+                showEditOverlay = false
+                showFilterOverlay = !showFilterOverlay
             }
 
-            StatisticsDetail(
-                doubleGamePoints = state.doubleGamePoints,
-                doubleSetPoints = state.doubleSetPoints,
-                doublePointPoints = state.doublePointPoints,
-                singleGamePoints = state.singleGamePoints,
-                singleSetPoints = state.singleSetPoints,
-                singlePointPoints = state.singlePointPoints
+            SimpleIconButton(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "Edit"
+            ) {
+                showFilterOverlay = false
+                showEditOverlay = !showEditOverlay
+            }
+        },
+        overlay = {
+            AddOrUpdatePlayerOverlay(
+                visible = showEditOverlay,
+                player = state.player,
+                clubSuggestions = state.clubSuggestions,
+                onGetClubSuggestions = model::clubSuggestions,
+                onConfirm = model::updatePlayer
+            ) { showEditOverlay = false }
+        }
+    ) {
+        PlayerTableSelection(
+            playerTable = playerTable,
+            onChangeSelectedTable = { playerTable = it },
+            navigateTo = navigateTo
+        )
+    }
+}
+
+@Composable
+internal fun Players(
+    database: Database,
+    navigateTo: (View) -> Unit
+) {
+    val model = remember { PlayerTableModel(database = database.players) }
+    val state by model.state.collectAsState()
+    val clubSuggestions by model.clubSuggestionsState.collectAsState()
+    var showFilterOverlay by remember { mutableStateOf(false) }
+    var showAddOverlay by remember { mutableStateOf(false) }
+
+    RacketClashScaffold(
+        title = "Players",
+        actions = {
+            SimpleIconButton(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Filter"
+            ) {
+                showAddOverlay = false
+                showFilterOverlay = !showFilterOverlay
+            }
+
+            SimpleIconButton(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add"
+            ) {
+                showFilterOverlay = false
+                showAddOverlay = !showAddOverlay
+            }
+        },
+        overlay = {
+            FilterPlayerOverlay(
+                visible = showFilterOverlay,
+                filter = state.filter,
+                applyFilter = model::filter
+            ) { showFilterOverlay = false }
+
+            AddOrUpdatePlayerOverlay(
+                visible = showAddOverlay,
+                clubSuggestions = clubSuggestions,
+                onGetClubSuggestions = model::clubSuggestions,
+                onConfirm = model::add
+            ) { showAddOverlay = false }
+        }
+    ) {
+        PlayerTable(
+            state = state,
+            onSort = model::sort,
+            onDelete = model::delete,
+            onSelectPage = model::selectPage,
+            onNavigateTo = navigateTo,
+            onApplyFilter = model::filter
+        )
+    }
+}
+
+@Composable
+internal fun BoxScope.FilterPlayerOverlay(
+    filter: PlayerFilter,
+    applyFilter: (PlayerFilter) -> Unit,
+    visible: Boolean,
+    dismissOverlay: () -> Unit
+) {
+    FilterFormOverlay(
+        filterState = filter,
+        visible = visible,
+        dismissOverlay = dismissOverlay,
+        onFilter = applyFilter
+    ) { state, update ->
+        FormTextField(value = state.name, label = "Name") { update { copy(name = it) } }
+        FormRow {
+            FormNumberSelector(
+                value = state.birthYear.first,
+                label = "Min birth year",
+                range = filter.birthYear,
+                onUp = { update { copy(birthYear = it..max(it, birthYear.last)) } },
+                onDown = { update { copy(birthYear = it..birthYear.last) } }
+            )
+            FormNumberSelector(
+                value = state.birthYear.last,
+                label = "Max birth year",
+                range = filter.birthYear,
+                onUp = { update { copy(birthYear = birthYear.first..it) } },
+                onDown = { update { copy(birthYear = min(it, birthYear.first)..it) } }
             )
         }
-
-        DetailSection("Tournaments") {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                state.tournaments.forEach { tournament ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Text(tournament.name)
-
-                        val teamId = tournament.teamId
-                        val teamName = tournament.teamName
-                        if (teamId != null && teamName != null)
-                            Link(teamName) {
-                                navigateTo(
-                                    View.Team(
-                                    tournamentId = tournament.id,
-                                    teamId = teamId,
-                                    teamName = teamName
-                                ))
-                            }
-
-                        if (tournament.categories.isNotEmpty()) {
-                            Text("(")
-
-                            FlowRow {
-                                tournament.categories.forEachIndexed { index, category ->
-                                    Link(category.name) {
-                                        navigateTo(
-                                            View.Category(
-                                            categoryId = category.id,
-                                            categoryName = category.name,
-                                            tournamentId = tournament.id
-                                        ))
-                                    }
-                                    Text(": ${category.rank}${ if (index + 1 < tournament.categories.size) ", " else "" }")
-                                }
-                            }
-
-                            Text(")")
-                        }
-                    }
-                }
-            }
-        }
-
-        DetailSection(title = "Games") {
-            FilteredLazyTable(
-                state = ListState(
-                    isLoading = state.isLoading,
-                    items = state.games,
-                    filter = object {},
-                    sorting = object {}
-                ),
-                columns = columns(
-                    navigateTo = navigateTo,
-                    onDateSort = model::onDateSort,
-                    onTournamentSort = model::onTournamentSort,
-                    onCategorySort = model::onCategorySort,
-                    playerId = playerId
-                ),
-                onPageClicked = model::updatePage
-            ) {
-
-            }
+        FormTextField(value = state.club, label = "Club") { update { copy(club = it) } }
+        FormRow {
+            FormNumberSelector(
+                value = state.medals.first,
+                label = "Min medals",
+                range = filter.medals,
+                onUp = { update { copy(medals = it..max(it, medals.last)) } },
+                onDown = { update { copy(medals = it..medals.last) } }
+            )
+            FormNumberSelector(
+                value = state.medals.last,
+                label = "Max medals",
+                range = filter.medals,
+                onUp = { update { copy(medals = medals.first..it) } },
+                onDown = { update { copy(medals = min(it, medals.first)..it) } }
+            )
         }
     }
 }
 
+@Composable
+internal fun BoxScope.AddOrUpdatePlayerOverlay(
+    visible: Boolean,
+    player: Player? = null,
+    clubSuggestions: List<String>,
+    onGetClubSuggestions: (String) -> Unit,
+    onConfirm: (Player) -> Unit,
+    dismissOverlay: () -> Unit
+) {
+    AddOrUpdateFormOverlay(
+       defaultItemState = Player(),
+       itemState = player,
+       visible = visible,
+       dismissOverlay = dismissOverlay,
+       canConfirm = { it.name.isNotBlank() },
+       onConfirm = onConfirm
+    ) { state, update ->
+        FormTextField(
+            value = state.name,
+            label = "Name",
+            isError = state.name.isBlank(),
+            onValueChange = { update { copy(name = it) } }
+        )
+
+        FormDropDownTextField(
+            text = state.birthYear.toString(),
+            label = "Birth year",
+            readOnly = true,
+            dropDownItems = (1900..2050).toList(),
+            dropDownItemText = { Text(it.toString()) },
+            onItemClicked = { update { copy(birthYear = it) } }
+        )
+
+        FormDropDownTextField(
+            text = state.club,
+            label = "Club",
+            onTextChange = {
+                update { copy(club = it) }
+                onGetClubSuggestions(it)
+            },
+            dropDownItems = clubSuggestions,
+            dropDownItemText = { Text(it) },
+            onItemClicked = { update { copy(club = it) } }
+        )
+    }
+}
+
+@Composable
+internal fun PlayerTable(
+    state: ListState<Player, PlayerFilter, PlayerSorting>,
+    onSort: (PlayerSorting) -> Unit,
+    onDelete: (Player) -> Unit,
+    onSelectPage: (Int) -> Unit,
+    onNavigateTo: (View) -> Unit,
+    onApplyFilter: (PlayerFilter) -> Unit
+) {
+    FilteredLazyTable(
+        state = state,
+        columns = columns(
+            navigateTo = onNavigateTo,
+            onSort = onSort,
+            onDelete = onDelete
+        ),
+        onPageClicked = onSelectPage
+    ) {
+        if (it.name.isNotBlank())
+            FilterChip(name = "Name", text = it.name) { onApplyFilter(it.copy(name = "")) }
+    }
+}
+
 private fun columns(
+    navigateTo: (View) -> Unit,
+    onSort: (PlayerSorting) -> Unit,
+    onDelete: (Player) -> Unit
+): List<LazyTableColumn<Player>> =
+    listOf(
+        LazyTableColumn.Link(name = "Name", weight = 0.25f, text = { it.name }, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.NameAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.NameDesc)
+            }
+        }) { navigateTo(View.Player(playerId = it.id)) },
+        LazyTableColumn.Text(name = "Birth year", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.BirthYearAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.BirthYearDesc)
+            }
+        }) { it.birthYear.toString() },
+        LazyTableColumn.Text(name = "Club", weight = 0.25f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.ClubAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.ClubDesc)
+            }
+        }) { it.club },
+        LazyTableColumn.Text(name = "# tournaments", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.TournamentsAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.TournamentsDesc)
+            }
+        }) { it.numberOfTournaments.toString() },
+        LazyTableColumn.Builder(name = "Medals", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.MedalsAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.MedalsDesc)
+            }
+        }) { player, weight ->
+            Row(modifier = Modifier.weight(weight)) {
+                if (player.goldMedals > 0) {
+                    Text(text = player.goldMedals.toString())
+                    Icon(
+                        painter = painterResource(Res.drawable.medal),
+                        contentDescription = "Gold",
+                        tint = AdditionalMaterialTheme.current.gold
+                    )
+                }
+                if (player.silverMedals > 0) {
+                    Text(
+                        text = player.silverMedals.toString(),
+                        modifier = Modifier.padding(start = if (player.goldMedals > 0) 10.dp else 0.dp)
+                    )
+                    Icon(
+                        painter = painterResource(Res.drawable.medal),
+                        contentDescription = "Silver",
+                        tint = AdditionalMaterialTheme.current.silver
+                    )
+                }
+                if (player.bronzeMedals > 0) {
+                    Text(
+                        text = player.bronzeMedals.toString(),
+                        modifier = Modifier.padding(start = if (player.goldMedals > 0 || player.silverMedals > 0) 10.dp else 0.dp)
+                    )
+                    Icon(
+                        painter = painterResource(Res.drawable.medal),
+                        contentDescription = "Bronze",
+                        tint = AdditionalMaterialTheme.current.bronze
+                    )
+                }
+            }
+        },
+        LazyTableColumn.Builder(name = "Single", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.SinglesAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.SinglesDesc)
+            }
+        }) { player, weight ->
+            /*RatioBar(
+                modifier = Modifier
+                    .weight(weight)
+                    .padding(horizontal = 5.dp),
+                left = player.winRatioSingle.first,
+                middle = player.winRatioSingle.second,
+                right = player.winRatioSingle.third
+            )*/
+        },
+        LazyTableColumn.Builder(name = "Double", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(PlayerSorting.DoublesAsc)
+                LazyTableSortDirection.Descending -> onSort(PlayerSorting.DoublesDesc)
+            }
+        }) { player, weight ->
+            /*RatioBar(
+                modifier = Modifier
+                    .weight(weight)
+                    .padding(horizontal = 5.dp),
+                left = player.winRatioDouble.first,
+                middle = player.winRatioDouble.second,
+                right = player.winRatioDouble.third
+            )*/
+        },
+        LazyTableColumn.IconButton(
+            name = "Delete",
+            weight = 0.1f,
+            enabled = { it.gamesPlayed + it.gamesScheduled == 0L },
+            onClick = onDelete,
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete"
+        )
+    )
+
+@Composable
+private fun PlayerTableSelection(
+    playerTable: PlayerTable,
+    onChangeSelectedTable: (PlayerTable) -> Unit,
+    navigateTo: (View) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(50.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        TabRow(
+            selectedTabIndex = playerTable.index,
+            tabs = listOf(PlayerTable.Tournaments, PlayerTable.Categories, PlayerTable.Games),
+            onTabClick = onChangeSelectedTable,
+            tabText = { it.name }
+        )
+
+        when (playerTable) {
+            PlayerTable.Tournaments -> {}
+            PlayerTable.Categories -> {}
+            PlayerTable.Games -> {}
+        }
+    }
+}
+
+/*private fun columns(
     navigateTo: (View) -> Unit,
     onDateSort: () -> Unit,
     onTournamentSort: () -> Unit,
@@ -131,7 +408,7 @@ private fun columns(
                 LazyTableSortDirection.Ascending -> onDateSort()
                 LazyTableSortDirection.Descending -> onDateSort()
             }
-        }) { it.date },
+        }) { it.submitted?.toFormattedString() ?: "N/A" },
         LazyTableColumn.Builder(name = "Tournament", weight = 0.1f, onSort = {
             when (it) {
                 LazyTableSortDirection.Ascending -> onTournamentSort()
@@ -240,4 +517,27 @@ private fun columns(
                 right = game.totalPointPoints.second
             )
         }
-    )
+    )*/
+
+@Composable
+private fun Info(
+    isLoading: Boolean,
+    player: Player
+) {
+    Details(
+        isLoading = isLoading,
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
+    ) {
+        DetailSectionRow(title = player.name) {
+            DetailText(title = "Birth year", text = player.birthYear.toString())
+            DetailText(title = "Club", text = player.club)
+        }
+
+        DetailSectionColumn(title = "Statistics") {
+            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                DetailText(title = "First game", text = player.firstGameDate?.toFormattedString() ?: "N/A")
+                DetailText(title = "Last game", text = player.lastGameDate?.toFormattedString() ?: "N/A")
+            }
+        }
+    }
+}

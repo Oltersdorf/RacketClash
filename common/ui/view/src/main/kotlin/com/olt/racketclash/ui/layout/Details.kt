@@ -1,9 +1,6 @@
 package com.olt.racketclash.ui.layout
 
-import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,47 +10,50 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.ui.base.material.Loading
 import com.olt.racketclash.ui.material.RatioBar
-import com.olt.racketclash.ui.base.material.SimpleIconButton
 
 @Composable
 fun Details(
+    modifier: Modifier = Modifier,
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(10.dp),
     isLoading: Boolean = false,
-    onEdit: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(color = MaterialTheme.colorScheme.surfaceContainer),
-        contentAlignment = Alignment.TopCenter
+    Column(
+        modifier = modifier,
+        verticalArrangement = verticalArrangement
     ) {
         if (isLoading)
             Loading()
-        else {
-            SimpleIconButton(
-                modifier = Modifier.align(Alignment.TopEnd).padding(20.dp),
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit",
-                onClick = onEdit
-            )
-
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(50.dp),
-                content = content
-            )
-        }
+        else
+            content()
     }
 }
 
 @Composable
-fun DetailSection(
+fun DetailSectionColumn(
     title: String,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column {
-        Text(title, fontSize = MaterialTheme.typography.titleLarge.fontSize)
+        Text(text = title, fontWeight = FontWeight.Bold)
 
         content()
+    }
+}
+
+@Composable
+fun DetailSectionRow(
+    title: String,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.spacedBy(24.dp),
+    content: @Composable RowScope.() -> Unit
+) {
+    Column {
+        Text(text = title, fontWeight = FontWeight.Bold)
+
+        Row(
+            horizontalArrangement = horizontalArrangement,
+            content = content
+        )
     }
 }
 
@@ -62,14 +62,14 @@ fun DetailText(
     title: String,
     text: String
 ) {
-    Row {
+    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         Text(
-            modifier = Modifier.padding(end = 5.dp),
             text = "$title:",
+            fontSize = MaterialTheme.typography.labelMedium.fontSize,
             fontWeight = FontWeight.Bold
         )
 
-        Text(text)
+        Text(text = text, fontSize = MaterialTheme.typography.labelMedium.fontSize,)
     }
 }
 
