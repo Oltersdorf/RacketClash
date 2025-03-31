@@ -17,6 +17,4 @@ dependencies {
     implementation(project(":common:ui:base"))
     implementation(project(":common:databaseApi"))
     implementation(project(":common:state"))
-    implementation(project(":common:model:addSchedule"))
-    implementation(project(":common:model:schedule"))
 }

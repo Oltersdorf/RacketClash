@@ -14,14 +14,12 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.ui.base.material.SimpleIconButton
-import com.olt.racketclash.ui.view.AddSchedule
 import com.olt.racketclash.ui.view.Categories
 import com.olt.racketclash.ui.view.Category
 import com.olt.racketclash.ui.view.Player
 import com.olt.racketclash.ui.view.Players
 import com.olt.racketclash.ui.view.Rule
 import com.olt.racketclash.ui.view.Rules
-import com.olt.racketclash.ui.view.Schedule
 import com.olt.racketclash.ui.view.Start
 import com.olt.racketclash.ui.view.Team
 import com.olt.racketclash.ui.view.Teams
@@ -98,14 +96,13 @@ fun RacketClashUI(
             ) {
                 when (val cv = viewHistory.last()) {
                     View.Start -> Start(database = database) { viewHistory += it }
-                    is View.AddSchedule -> AddSchedule(database = database, categoryId = cv.categoryId, categoryName = cv.categoryName, tournamentId = cv.tournamentId) { viewHistory += View.Schedule(tournamentId = cv.tournamentId) }
                     is View.Categories -> Categories(database = database, tournamentId = cv.tournamentId) { viewHistory += it }
                     is View.Category -> Category(database = database, categoryId = cv.categoryId) { viewHistory += it }
                     is View.Rule -> Rule(database = database, ruleId = cv.id) { viewHistory += it }
                     View.Rules -> Rules(database = database) { viewHistory += it }
                     is View.Player -> Player(database = database, playerId = cv.playerId) { viewHistory += it }
                     View.Players -> Players(database = database) { viewHistory += it }
-                    is View.Schedule -> Schedule(database = database, tournamentId = cv.tournamentId)
+                    is View.Schedule -> {}
                     is View.Team -> Team(database = database, teamId = cv.teamId) { viewHistory += it }
                     is View.Teams -> Teams(database = database, tournamentId = cv.tournamentId) { viewHistory += it }
                     is View.Tournament -> Tournament(database = database, tournamentId = cv.tournamentId) { viewHistory += it }

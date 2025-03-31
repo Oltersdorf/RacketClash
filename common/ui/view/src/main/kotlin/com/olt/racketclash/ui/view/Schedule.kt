@@ -1,23 +1,6 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.api.*
-import com.olt.racketclash.schedule.ScheduleModel
-import com.olt.racketclash.state.list.ListState
-import com.olt.racketclash.ui.material.*
-import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.material.LazyTableSortDirection
-import com.olt.racketclash.ui.base.material.SimpleIconButton
-import com.olt.racketclash.ui.layout.FilteredLazyTable
-
+/*
 @Composable
 internal fun Schedule(
     database: Database,
@@ -140,4 +123,4 @@ private fun columns(
                 if (rightTwo != null) Text(rightTwo)
             }
         }
-    )
+    )*/
