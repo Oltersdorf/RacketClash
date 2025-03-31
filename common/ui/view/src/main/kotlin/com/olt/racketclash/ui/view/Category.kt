@@ -1,170 +1,266 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.category.CategoryModel
-import com.olt.racketclash.category.State
-import com.olt.racketclash.database.api.CategoryType
-import com.olt.racketclash.database.api.Database
+import com.olt.racketclash.database.api.*
+import com.olt.racketclash.state.category.CategoryModel
+import com.olt.racketclash.state.category.CategoryState
+import com.olt.racketclash.state.category.CategoryTableModel
 import com.olt.racketclash.state.list.ListState
-import com.olt.racketclash.ui.base.material.Loading
-import com.olt.racketclash.ui.material.Status
-import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.layout.FilteredLazyTable
+import com.olt.racketclash.ui.base.layout.*
+import com.olt.racketclash.ui.base.material.FilterChip
+import com.olt.racketclash.ui.base.material.LazyTableColumn
+import com.olt.racketclash.ui.base.material.LazyTableSortDirection
+import com.olt.racketclash.ui.base.material.SimpleIconButton
+import com.olt.racketclash.ui.layout.*
+import com.olt.racketclash.ui.layout.RacketClashScrollableScaffold
+import com.olt.racketclash.ui.material.Status
 
 @Composable
 internal fun Category(
     database: Database,
     categoryId: Long,
-    categoryName: String,
+    navigateTo: (View) -> Unit
+) {
+    val model = remember {
+        CategoryModel(
+            categoryDatabase = database.categories,
+            categoryId = categoryId
+        )
+    }
+    val state by model.state.collectAsState()
+    var showEditOverlay by remember { mutableStateOf(false) }
+
+    RacketClashScrollableScaffold(
+        title = "Categories",
+        headerContent = { CategoryInfo(isLoading = state.isLoading, category = state.category) },
+        actions = {
+            SimpleIconButton(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "Edit"
+            ) { showEditOverlay = !showEditOverlay }
+        },
+        overlay = {
+            AddOrUpdateCategoryOverlay(
+                visible = showEditOverlay,
+                category = state.category,
+                onConfirm = model::updatePlayer
+            ) { showEditOverlay = false }
+        }
+    ) {
+        CategoryBody(
+            state = state,
+            navigateTo = navigateTo
+        )
+    }
+}
+
+@Composable
+internal fun Categories(
+    database: Database,
     tournamentId: Long,
     navigateTo: (View) -> Unit
 ) {
-    val model = remember { CategoryModel(database = database.games, categoryId = categoryId) }
+    val model = remember { CategoryTableModel(database = database.categories, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
+    var showFilterOverlay by remember { mutableStateOf(false) }
+    var showAddOverlay by remember { mutableStateOf(false) }
 
-    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        var selectedTab by remember { mutableIntStateOf(0) }
+    RacketClashScaffold(
+        title = "Categories",
+        actions = {
+            SimpleIconButton(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Filter"
+            ) {
+                showAddOverlay = false
+                showFilterOverlay = !showFilterOverlay
+            }
 
-        TabRow(selectedTabIndex = selectedTab) {
-            Tab(
-                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
-                selected = selectedTab == 0,
-                onClick = { selectedTab = 0 }
+            SimpleIconButton(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add"
             ) {
-                Text(
-                    modifier = Modifier.padding(vertical = 10.dp),
-                    text = "Games",
-                    fontSize = MaterialTheme.typography.titleLarge.fontSize
-                )
+                showFilterOverlay = false
+                showAddOverlay = !showAddOverlay
             }
-            Tab(
-                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
-                selected = selectedTab == 1,
-                onClick = { selectedTab = 1 }
-            ) {
-                Text(
-                    modifier = Modifier.padding(vertical = 10.dp),
-                    text = "Ranking",
-                    fontSize = MaterialTheme.typography.titleLarge.fontSize
-                )
-            }
+        },
+        overlay = {
+            FilterCategoryOverlay(
+                visible = showFilterOverlay,
+                filter = state.filter,
+                applyFilter = model::filter
+            ) { showFilterOverlay = false }
+
+            AddOrUpdateCategoryOverlay(
+                visible = showAddOverlay,
+                onConfirm = model::add
+            ) { showAddOverlay = false }
         }
+    ) {
+        CategoryTable(
+            state = state,
+            onSort = model::sort,
+            onDelete = model::delete,
+            onSelectPage = model::selectPage,
+            onNavigateTo = navigateTo,
+            onApplyFilter = model::filter
+        )
+    }
+}
 
-        if (state.isLoading)
-            Loading()
-        else {
-            when (selectedTab) {
-                0 -> when (state.type) {
-                    CategoryType.Custom -> Custom(
-                        categoryId = categoryId,
-                        categoryName = categoryName,
-                        tournamentId = tournamentId,
-                        state = state,
-                        updatePage = model::updatePage,
-                        navigateTo = navigateTo
-                    )
-                    CategoryType.Table -> Table()
-                    CategoryType.Tree -> Tree()
-                }
+@Composable
+private fun BoxScope.FilterCategoryOverlay(
+    filter: CategoryFilter,
+    applyFilter: (CategoryFilter) -> Unit,
+    visible: Boolean,
+    dismissOverlay: () -> Unit
+) {
+    FilterFormOverlay(
+        filterState = filter,
+        visible = visible,
+        dismissOverlay = dismissOverlay,
+        onFilter = applyFilter
+    ) { state, update ->
+        FormTextField(value = state.name, label = "Name") { update { copy(name = it) } }
+    }
+}
+
+@Composable
+private fun BoxScope.AddOrUpdateCategoryOverlay(
+    visible: Boolean,
+    category: Category? = null,
+    onConfirm: (Category) -> Unit,
+    dismissOverlay: () -> Unit
+) {
+    AddOrUpdateFormOverlay(
+        defaultItemState = Category(),
+        itemState = category,
+        visible = visible,
+        dismissOverlay = dismissOverlay,
+        canConfirm = { it.name.isNotBlank() },
+        onConfirm = onConfirm
+    ) { state, update ->
+        FormTextField(
+            value = state.name,
+            label = "Name",
+            isError = state.name.isBlank(),
+            onValueChange = { update { copy(name = it) } }
+        )
+
+        FormDropDownTextField(
+            text = state.type.text(),
+            label = "Type",
+            readOnly = true,
+            dropDownItems = listOf(CategoryType.Custom, CategoryType.Table, CategoryType.Tree),
+            dropDownItemText = { Text(it.text()) },
+            onItemClicked = { update { copy(type = it) } }
+        )
+    }
+}
+
+@Composable
+private fun CategoryTable(
+    state: ListState<Category, CategoryFilter, CategorySorting>,
+    onSort: (CategorySorting) -> Unit,
+    onDelete: (Category) -> Unit,
+    onSelectPage: (Int) -> Unit,
+    onNavigateTo: (View) -> Unit,
+    onApplyFilter: (CategoryFilter) -> Unit
+) {
+    FilteredLazyTable(
+        state = state,
+        columns = columns(
+            navigateTo = onNavigateTo,
+            onSort = onSort,
+            onDelete = onDelete
+        ),
+        onPageClicked = onSelectPage
+    ) {
+        if (it.name.isNotBlank())
+            FilterChip(name = "Name", text = it.name) { onApplyFilter(it.copy(name = "")) }
+    }
+}
+
+private fun columns(
+    navigateTo: (View) -> Unit,
+    onSort: (CategorySorting) -> Unit,
+    onDelete: (Category) -> Unit
+): List<LazyTableColumn<Category>> =
+    listOf(
+        LazyTableColumn.Builder(name = "Status", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(CategorySorting.StatusAsc)
+                LazyTableSortDirection.Descending -> onSort(CategorySorting.StatusDesc)
             }
+        }) { category, weight ->
+            Status(modifier = Modifier.weight(weight), isOkay = category.finished)
+        },
+        LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(CategorySorting.NameAsc)
+                LazyTableSortDirection.Descending -> onSort(CategorySorting.NameDesc)
+            }
+        }) { navigateTo(View.Category(categoryId = it.id)) },
+        LazyTableColumn.Text(name = "Type", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(CategorySorting.TypeAsc)
+                LazyTableSortDirection.Descending -> onSort(CategorySorting.TypeDesc)
+            }
+        }) { it.type.text() },
+        LazyTableColumn.Text(name = "Players", weight = 0.1f, onSort = {
+            when (it) {
+                LazyTableSortDirection.Ascending -> onSort(CategorySorting.PlayersAsc)
+                LazyTableSortDirection.Descending -> onSort(CategorySorting.PlayersDesc)
+            }
+        }) { it.players.toString() },
+
+        LazyTableColumn.IconButton(
+            name = "Delete",
+            weight = 0.1f,
+            onClick = { onDelete(it) },
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete"
+        )
+    )
+
+@Composable
+private fun CategoryInfo(
+    isLoading: Boolean,
+    category: Category
+) {
+    Details(
+        isLoading = isLoading,
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
+    ) {
+        DetailSectionRow(title = category.name) {
+            DetailText(title = "id", text = category.id.toString())
         }
     }
 }
 
 @Composable
-private fun Custom(
-    categoryId: Long,
-    categoryName: String,
-    tournamentId: Long,
-    state: State,
-    updatePage: (Int) -> Unit,
+private fun CategoryBody(
+    state: CategoryState,
     navigateTo: (View) -> Unit
 ) {
-    FilteredLazyTable(
-        state = ListState(
-            isLoading = state.isLoading,
-            items = state.games,
-            filter = object {},
-            sorting = object {}
-        ),
-        onPageClicked = updatePage,
-        filter = {},
-        columns = listOf(
-            LazyTableColumn.Builder(name = "Status", weight = 0.1f) { game, weight ->
-                Status(modifier = Modifier.weight(weight), isOkay = game.submitted != null)
-            },
-            LazyTableColumn.Text(name = "Scheduled", weight = 0.1f) { it.scheduled.toString() },
-            LazyTableColumn.Text(name = "Finished", weight = 0.1f) { it.submitted?.toString() ?: "Pending" },
-            LazyTableColumn.Builder(name = "Left", weight = 0.3f) { game, weight ->
-                Column(modifier = Modifier.weight(weight)) {
-                    Text(
-                        text = "${game.playerNameLeftOne} (${game.playerTeamNameLeftOne})",
-                        fontWeight = if (game.leftWon == true) FontWeight.Bold else null
-                    )
-                    if (game.playerNameLeftTwo != null && game.playerTeamNameLeftTwo != null)
-                        Text(
-                            text = "${game.playerNameLeftTwo} (${game.playerTeamNameLeftOne})",
-                            fontWeight = if (game.leftWon == true) FontWeight.Bold else null
-                        )
-                }
-            },
-            LazyTableColumn.Builder(name = "Results", weight = 0.1f) { game, weight ->
-                Column(modifier = Modifier.weight(weight)) {
-                    if (game.sets.isEmpty())
-                        Text("Pending")
-                    else
-                        game.sets.forEach {
-                            Row {
-                                Text(
-                                    text = it.leftPoints.toString(),
-                                    fontWeight = if (it.leftPoints > it.rightPoints) FontWeight.Bold else null
-                                )
-                                Text(" : ")
-                                Text(
-                                    text = it.rightPoints.toString(),
-                                    fontWeight = if (it.rightPoints > it.leftPoints) FontWeight.Bold else null
-                                )
-                            }
-                        }
-                }
-            },
-            LazyTableColumn.Builder(name = "Right", weight = 0.3f) { game, weight ->
-                Column(modifier = Modifier.weight(weight)) {
-                    Text(
-                        text = "${game.playerNameRightOne} (${game.playerTeamNameRightOne})",
-                        fontWeight = if (game.leftWon == false) FontWeight.Bold else null
-                    )
-                    if (game.playerNameRightTwo != null && game.playerTeamNameRightTwo != null)
-                        Text(
-                            text = "${game.playerNameRightTwo} (${game.playerTeamNameRightTwo})",
-                            fontWeight = if (game.leftWon == false) FontWeight.Bold else null
-                        )
-                }
-            },
-        )
-    )
+    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
+
+    }
 }
 
-@Composable
-private fun Table() {
-
-}
-
-@Composable
-private fun Tree() {
-
-}
+private fun CategoryType.text(): String =
+    when (this) {
+        CategoryType.Custom -> "Custom"
+        CategoryType.Table -> "List"
+        CategoryType.Tree -> "Tree"
+    }

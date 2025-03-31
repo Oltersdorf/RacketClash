@@ -8,12 +8,12 @@ class PlayerModel(
     tournamentDatabase: TournamentDatabase,
     categoryDatabase: CategoryDatabase,
     gameDatabase: GameDatabase,
-    id: Long
+    playerId: Long
 ) : ViewModelState<PlayerState>(initialState = PlayerState()) {
 
     init {
         onIO {
-            val player = playerDatabase.selectSingle(id = id)
+            val player = playerDatabase.selectSingle(id = playerId)
             val tournaments = tournamentDatabase.selectLast(n = 5)
             val categories = categoryDatabase.selectLast(n = 5)
             val games = gameDatabase.selectLast(n = 5)

@@ -40,7 +40,7 @@ internal fun Player(
             tournamentDatabase = database.tournaments,
             categoryDatabase = database.categories,
             gameDatabase = database.games,
-            id = playerId
+            playerId = playerId
         )
     }
     val state by model.state.collectAsState()
@@ -356,130 +356,6 @@ private fun columns(
             contentDescription = "Delete"
         )
     )
-
-/*private fun columns(
-    navigateTo: (View) -> Unit,
-    onDateSort: () -> Unit,
-    onTournamentSort: () -> Unit,
-    onCategorySort: () -> Unit,
-    playerId: Long
-): List<LazyTableColumn<Game>> =
-    listOf(
-        LazyTableColumn.Text(name = "Date", weight = 0.08f, onSort = {
-            when (it) {
-                LazyTableSortDirection.Ascending -> onDateSort()
-                LazyTableSortDirection.Descending -> onDateSort()
-            }
-        }) { it.submitted?.toFormattedString() ?: "N/A" },
-        LazyTableColumn.Builder(name = "Tournament", weight = 0.1f, onSort = {
-            when (it) {
-                LazyTableSortDirection.Ascending -> onTournamentSort()
-                LazyTableSortDirection.Descending -> onTournamentSort()
-            }
-        }) { game, weight ->
-            Row(
-                modifier = Modifier.weight(weight),
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                Text(game.tournamentName)
-                Link("(${game.categoryName})") {
-                    View.Category(
-                        categoryId = game.categoryId,
-                        categoryName = game.categoryName,
-                        tournamentId = game.tournamentId
-                    )
-                }
-            }
-        },
-        LazyTableColumn.Text(name = "Game Rule", weight = 0.08f, onSort = {
-            when (it) {
-                LazyTableSortDirection.Ascending -> onCategorySort()
-                LazyTableSortDirection.Descending -> onCategorySort()
-            }
-        }) { it.ruleName },
-        LazyTableColumn.Builder(name = "Left", weight = 0.1f) { game, weight ->
-            Column(modifier = Modifier.weight(weight)) {
-                if (game.playerLeftOneId == playerId)
-                    Text(game.playerLeftOneName)
-                else
-                    Link(game.playerLeftOneName) {
-                        navigateTo(View.Player(playerId = game.playerLeftOneId, playerName = game.playerLeftOneName))
-                    }
-
-                val playerLeftTwoId = game.playerLeftTwoId
-                val playerLeftTwoName = game.playerLeftTwoName
-                if (playerLeftTwoId != null && playerLeftTwoName != null) {
-                    if (playerLeftTwoId == playerId)
-                        Text(playerLeftTwoName)
-                    else
-                        Link(playerLeftTwoName) {
-                            navigateTo(View.Player(playerId = playerLeftTwoId, playerName = playerLeftTwoName))
-                        }
-                }
-            }
-        },
-        LazyTableColumn.Builder(name = "Results", weight = 0.05f) { game, weight ->
-            val playerIsLeft = game.playerLeftOneId == playerId || game.playerLeftTwoId == playerId
-
-            Column(modifier = Modifier.weight(weight)) {
-                game.results.forEach {
-                    Row {
-                        Text(it.first.toString(), fontWeight = if (playerIsLeft) FontWeight.Bold else null)
-                        Text(":")
-                        Text(it.second.toString(), fontWeight = if (!playerIsLeft) FontWeight.Bold else null)
-                    }
-                }
-            }
-        },
-        LazyTableColumn.Builder(name = "Right", weight = 0.1f) { game, weight ->
-            Column(modifier = Modifier.weight(weight)) {
-                if (game.playerRightOneId == playerId)
-                    Text(game.playerRightOneName)
-                else
-                    Link(game.playerRightOneName) {
-                        navigateTo(View.Player(playerId = game.playerRightOneId, playerName = game.playerRightOneName))
-                    }
-
-                val playerRightTwoId = game.playerRightTwoId
-                val playerRightTwoName = game.playerRightTwoName
-                if (playerRightTwoId != null && playerRightTwoName != null) {
-                    if (playerRightTwoId == playerId)
-                        Text(playerRightTwoName)
-                    else
-                        Link(playerRightTwoName) {
-                            navigateTo(View.Player(playerId = playerRightTwoId, playerName = playerRightTwoName))
-                        }
-                }
-            }
-        },
-        LazyTableColumn.Builder(name = "Game", weight = 0.05f) { game, weight ->
-            RatioBar(
-                modifier = Modifier
-                    .weight(weight)
-                    .padding(horizontal = 5.dp),
-                left = game.totalGamePoints.first,
-                right = game.totalGamePoints.second
-            )
-        },
-        LazyTableColumn.Builder(name = "Sets", weight = 0.05f) { game, weight ->
-            RatioBar(
-                modifier = Modifier
-                    .weight(weight)
-                    .padding(horizontal = 5.dp),
-                left = game.totalSetPoints.first,
-                right = game.totalSetPoints.second
-            )
-        },
-        LazyTableColumn.Builder(name = "Points", weight = 0.05f) { game, weight ->
-            RatioBar(
-                modifier = Modifier
-                    .weight(weight)
-                    .padding(horizontal = 5.dp),
-                left = game.totalPointPoints.first,
-                right = game.totalPointPoints.second
-            )
-        }
-    )*/
 
 @Composable
 private fun PlayerInfo(

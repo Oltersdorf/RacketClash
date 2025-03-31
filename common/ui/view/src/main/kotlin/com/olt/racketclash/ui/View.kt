@@ -13,17 +13,7 @@ internal sealed interface View {
 
     data class Categories(val tournamentId: Long) : View
 
-    data class AddOrUpdateCategory(
-        val categoryName: String?,
-        val categoryId: Long?,
-        val tournamentId: Long
-    ) : View
-
-    data class Category(
-        val categoryName: String,
-        val categoryId: Long,
-        val tournamentId: Long
-    ) : View
+    data class Category(val categoryId: Long) : View
 
     data class AddSchedule(
         val categoryId: Long,

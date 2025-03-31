@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.ui.base.material.SimpleIconButton
-import com.olt.racketclash.ui.view.AddOrUpdateCategory
 import com.olt.racketclash.ui.view.AddSchedule
 import com.olt.racketclash.ui.view.Categories
 import com.olt.racketclash.ui.view.Category
@@ -99,10 +98,9 @@ fun RacketClashUI(
             ) {
                 when (val cv = viewHistory.last()) {
                     View.Start -> Start(database = database) { viewHistory += it }
-                    is View.AddOrUpdateCategory -> AddOrUpdateCategory(database = database, categoryId = cv.categoryId, categoryName = cv.categoryName, tournamentId = cv.tournamentId) { viewHistory += View.Categories(tournamentId = cv.tournamentId) }
                     is View.AddSchedule -> AddSchedule(database = database, categoryId = cv.categoryId, categoryName = cv.categoryName, tournamentId = cv.tournamentId) { viewHistory += View.Schedule(tournamentId = cv.tournamentId) }
                     is View.Categories -> Categories(database = database, tournamentId = cv.tournamentId) { viewHistory += it }
-                    is View.Category -> Category(database = database, categoryId = cv.categoryId, categoryName = cv.categoryName, tournamentId = cv.tournamentId) { viewHistory += it }
+                    is View.Category -> Category(database = database, categoryId = cv.categoryId) { viewHistory += it }
                     is View.Rule -> Rule(database = database, ruleId = cv.id) { viewHistory += it }
                     View.Rules -> Rules(database = database) { viewHistory += it }
                     is View.Player -> Player(database = database, playerId = cv.playerId) { viewHistory += it }

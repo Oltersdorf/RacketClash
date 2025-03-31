@@ -1,10 +1,8 @@
-package com.olt.racketclash.addorupdatecategory
+package com.olt.racketclash.state.category
 
 import com.olt.racketclash.database.api.Category
 
-
-data class State(
+data class CategoryState(
     val isLoading: Boolean = true,
-    val isSavable: Boolean = false,
     val category: Category = Category()
 )
