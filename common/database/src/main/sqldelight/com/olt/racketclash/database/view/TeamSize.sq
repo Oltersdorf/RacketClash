@@ -1,7 +1,0 @@
-CREATE VIEW IF NOT EXISTS teamSize AS
-SELECT
-    teamId, COUNT(playerId) AS size
-FROM
-    playerToTeam
-GROUP BY
-    teamId;

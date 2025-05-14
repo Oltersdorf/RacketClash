@@ -1,13 +1,14 @@
 package com.olt.racketclash.database.impl
 
-import com.olt.racketclash.database.RacketClashDatabase
-import com.olt.racketclash.database.api.*
-import com.olt.racketclash.database.toName
-import com.olt.racketclash.database.toTeam
+import com.olt.racketclash.database.api.FilteredSortedList
+import com.olt.racketclash.database.api.Team
+import com.olt.racketclash.database.api.TeamDatabase
+import com.olt.racketclash.database.api.TeamFilter
+import com.olt.racketclash.database.api.TeamSorting
+import kotlin.math.min
 
-internal class TeamDatabaseImpl(
-    private val database: RacketClashDatabase
-) : TeamDatabase {
+internal class TeamDatabaseImpl : TeamDatabase {
+    private val teams = mutableListOf<Team>()
 
     override suspend fun selectList(
         filter: TeamFilter,
@@ -15,55 +16,35 @@ internal class TeamDatabaseImpl(
         fromIndex: Long,
         toIndex: Long
     ): FilteredSortedList<Team, TeamFilter, TeamSorting> =
-        database.transactionWithResult {
-            FilteredSortedList(
-                totalSize = database
-                    .teamQueries
-                    .selectFilteredAndOrderedSize(
-                        tournamentId = filter.tournamentId,
-                        nameFilter = filter.name
-                    ).executeAsOne(),
-                fromIndex = fromIndex,
-                toIndex = toIndex,
-                items = database
-                    .teamQueries
-                    .filteredAndOrderedTeam(
-                        tournamentId = filter.tournamentId,
-                        nameFilter = filter.name,
-                        sorting = sorting.toName(),
-                        limit = toIndex,
-                        offset = fromIndex
-                    ).executeAsList()
-                    .map { it.toTeam() },
-                filter = filter,
-                sorting = sorting
-            )
-        }
+        FilteredSortedList(
+            totalSize = teams.size.toLong(),
+            fromIndex = fromIndex,
+            toIndex = toIndex,
+            items = teams.toList().subList(fromIndex.toInt(), min(toIndex.toInt(), teams.size)),
+            filter = filter,
+            sorting = sorting
+        )
 
     override suspend fun selectLast(n: Long): List<Team> =
-        database
-            .teamQueries
-            .selectLast(n = n)
-            .executeAsList()
-            .map { it.toTeam() }
+        teams.takeLast(n.toInt())
 
     override suspend fun selectSingle(id: Long): Team =
-        database
-            .teamQueries
-            .team(id = id)
-            .executeAsOne()
-            .toTeam()
+        teams.first { it.id == id }
 
-    override suspend fun add(team: Team) =
-        database
-            .teamQueries
-            .add(name = team.name, rank = team.rank, tournamentId = team.tournamentId)
+    override suspend fun add(team: Team) {
+        teams.add(team)
+    }
 
-    override suspend fun update(team: Team) =
-        database
-            .teamQueries
-            .update(id = team.id, name = team.name, rank = team.rank)
+    override suspend fun update(team: Team) {
+        teams.replaceAll {
+            if (it.id == team.id)
+                team
+            else
+                it
+        }
+    }
 
-    override suspend fun delete(id: Long) =
-        database.teamQueries.delete(id = id)
+    override suspend fun delete(id: Long) {
+        teams.removeIf { it.id == id }
+    }
 }

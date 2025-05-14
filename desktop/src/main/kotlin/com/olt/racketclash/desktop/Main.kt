@@ -15,14 +15,13 @@ import java.awt.Dimension
 import java.awt.Point
 import java.awt.Toolkit
 import kotlin.io.path.Path
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
 
 fun main() {
     val racketClashPath = Path(System.getProperty("user.home"), ".racketClash")
     racketClashPath.createDirectories()
 
-    val database = RacketClashDatabaseImpl(path = racketClashPath.absolutePathString())
+    val database = RacketClashDatabaseImpl()
 
     application {
         Window(

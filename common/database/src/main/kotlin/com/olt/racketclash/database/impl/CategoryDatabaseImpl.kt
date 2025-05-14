@@ -1,13 +1,14 @@
 package com.olt.racketclash.database.impl
 
-import com.olt.racketclash.database.RacketClashDatabase
-import com.olt.racketclash.database.api.*
-import com.olt.racketclash.database.toCategory
-import com.olt.racketclash.database.toName
+import com.olt.racketclash.database.api.Category
+import com.olt.racketclash.database.api.CategoryDatabase
+import com.olt.racketclash.database.api.CategoryFilter
+import com.olt.racketclash.database.api.CategorySorting
+import com.olt.racketclash.database.api.FilteredSortedList
+import kotlin.math.min
 
-internal class CategoryDatabaseImpl(
-    private val database: RacketClashDatabase
-) : CategoryDatabase {
+internal class CategoryDatabaseImpl : CategoryDatabase {
+    private val categories = mutableListOf<Category>()
 
     override suspend fun selectList(
         filter: CategoryFilter,
@@ -15,60 +16,35 @@ internal class CategoryDatabaseImpl(
         fromIndex: Long,
         toIndex: Long
     ): FilteredSortedList<Category, CategoryFilter, CategorySorting> =
-        database.transactionWithResult {
-            FilteredSortedList(
-                totalSize = database
-                    .categoryQueries
-                    .selectFilteredAndOrderedSize(
-                        tournamentId = filter.tournamentId,
-                        nameFilter = filter.name,
-                        minOpenGames = filter.minOpenGames,
-                        maxOpenGames = filter.maxOpenGames
-                    ).executeAsOne()
-                    .size,
-                fromIndex = fromIndex,
-                toIndex = toIndex,
-                items = database
-                    .categoryQueries
-                    .selectFilteredAndOrdered(
-                        tournamentId = filter.tournamentId,
-                        nameFilter = filter.name,
-                        minOpenGames = filter.minOpenGames,
-                        maxOpenGames = filter.maxOpenGames,
-                        sorting = sorting.toName(),
-                        offset = fromIndex,
-                        limit = toIndex
-                    ).executeAsList()
-                    .map { it.toCategory() },
-                filter = filter,
-                sorting = sorting
-            )
-        }
+        FilteredSortedList(
+            totalSize = categories.size.toLong(),
+            fromIndex = fromIndex,
+            toIndex = toIndex,
+            items = categories.toList().subList(fromIndex.toInt(), min(toIndex.toInt(), categories.size)),
+            filter = filter,
+            sorting = sorting
+        )
 
     override suspend fun selectLast(n: Long): List<Category> =
-        database
-            .categoryQueries
-            .selectLast(n = n)
-            .executeAsList()
-            .map { it.toCategory() }
+        categories.takeLast(n.toInt())
 
     override suspend fun selectSingle(id: Long): Category =
-        database
-            .categoryQueries
-            .selectSingle(id = id)
-            .executeAsOne()
-            .toCategory()
+        categories.first { it.id == id }
 
-    override suspend fun add(category: Category) =
-        database
-            .categoryQueries
-            .add(name = category.name, type = category.type, category.tournamentId)
+    override suspend fun add(category: Category) {
+        categories.add(category)
+    }
 
-    override suspend fun update(category: Category) =
-        database
-            .categoryQueries
-            .update(id = category.id, name = category.name)
+    override suspend fun update(category: Category) {
+        categories.replaceAll {
+            if (it.id == category.id)
+                category
+            else
+                it
+        }
+    }
 
-    override suspend fun delete(id: Long) =
-        database.categoryQueries.delete(id = id)
+    override suspend fun delete(id: Long) {
+        categories.removeIf { it.id == id }
+    }
 }

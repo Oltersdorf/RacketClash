@@ -1,13 +1,14 @@
 package com.olt.racketclash.database.impl
 
-import com.olt.racketclash.database.RacketClashDatabase
-import com.olt.racketclash.database.api.*
-import com.olt.racketclash.database.toName
-import com.olt.racketclash.database.toPlayer
+import com.olt.racketclash.database.api.FilteredSortedList
+import com.olt.racketclash.database.api.Player
+import com.olt.racketclash.database.api.PlayerDatabase
+import com.olt.racketclash.database.api.PlayerFilter
+import com.olt.racketclash.database.api.PlayerSorting
+import kotlin.math.min
 
-internal class PlayerDatabaseImpl(
-    private val database: RacketClashDatabase
-): PlayerDatabase {
+internal class PlayerDatabaseImpl: PlayerDatabase {
+    private val players = mutableListOf<Player>()
 
     override suspend fun selectList(
         filter: PlayerFilter,
@@ -15,74 +16,38 @@ internal class PlayerDatabaseImpl(
         fromIndex: Long,
         toIndex: Long
     ): FilteredSortedList<Player, PlayerFilter, PlayerSorting> =
-        database.transactionWithResult {
-            FilteredSortedList(
-                totalSize = database
-                    .playerQueries
-                    .selectFilteredAndOrderedSize(
-                        nameFilter = filter.name,
-                        clubFilter = filter.club,
-                        birthYearMin = filter.birthYear.first,
-                        birthYearMax = filter.birthYear.last,
-                        medalsMin = filter.medals.first,
-                        medalsMax = filter.medals.last
-                    ).executeAsOne().size,
-                fromIndex = fromIndex,
-                toIndex = toIndex,
-                items = database
-                    .playerQueries
-                    .filteredAndOrderedPlayer(
-                        nameFilter = filter.name,
-                        clubFilter = filter.club,
-                        birthYearMin = filter.birthYear.first,
-                        birthYearMax = filter.birthYear.last,
-                        medalsMin = filter.medals.first,
-                        medalsMax = filter.medals.last,
-                        sorting = sorting.toName(),
-                        offset = fromIndex,
-                        limit = toIndex
-                    ).executeAsList()
-                    .map { it.toPlayer() },
-                filter = filter,
-                sorting = sorting
-            )
-        }
+        FilteredSortedList(
+            totalSize = players.size.toLong(),
+            fromIndex = fromIndex,
+            toIndex = toIndex,
+            items = players.toList().subList(fromIndex.toInt(), min(toIndex.toInt(), players.size)),
+            filter = filter,
+            sorting = sorting
+        )
 
     override suspend fun selectLast(n: Long): List<Player> =
-        database
-            .playerQueries
-            .selectLast(n = n)
-            .executeAsList()
-            .map { it.toPlayer() }
+        players.takeLast(n.toInt())
 
     override suspend fun selectSingle(id: Long): Player =
-        database
-            .playerQueries
-            .player(id = id)
-            .executeAsOne()
-            .toPlayer()
+        players.first { it.id == id }
 
-    override suspend fun clubs(filter: String) =
-        database
-            .playerQueries
-            .clubs(filter = filter)
-            .executeAsList()
+    override suspend fun clubs(filter: String): List<String> =
+        players.map { it.club }.toSet().toList()
 
-    override suspend fun add(player: Player) =
-        database.playerQueries.add(
-            name = player.name,
-            birthYear = player.birthYear,
-            club = player.club
-        )
+    override suspend fun add(player: Player) {
+        players.add(player)
+    }
 
-    override suspend fun update(player: Player) =
-        database.playerQueries.update(
-            id = player.id,
-            name = player.name,
-            birthYear = player.birthYear,
-            club = player.club
-        )
+    override suspend fun update(player: Player) {
+        players.replaceAll {
+            if (it.id == player.id)
+                player
+            else
+                it
+        }
+    }
 
-    override suspend fun delete(id: Long) =
-        database.playerQueries.delete(id = id)
+    override suspend fun delete(id: Long) {
+        players.removeIf { it.id == id }
+    }
 }
