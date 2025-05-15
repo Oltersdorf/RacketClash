@@ -87,7 +87,6 @@ fun <T> Table(
     items: List<T>,
     itemsSpacedBy: Dp = 0.dp,
     showHeader: Boolean = true,
-    onClick: ((T) -> Unit)? = null,
     columns: List<LazyTableColumn<T>>,
     drawDividers: Boolean = true,
     isLoading: Boolean
@@ -99,7 +98,7 @@ fun <T> Table(
         if (showHeader)
             Header(columns = columns)
 
-        Body(items = items, columns = columns, onClick = onClick, drawDividers = drawDividers, isLoading = isLoading)
+        Body(items = items, columns = columns, drawDividers = drawDividers, isLoading = isLoading)
     }
 }
 
@@ -184,7 +183,6 @@ private fun <T> Header(columns: List<LazyTableColumn<T>>) {
 private fun <T> Body(
     items: List<T>,
     columns: List<LazyTableColumn<T>>,
-    onClick: ((T) -> Unit)?,
     drawDividers: Boolean,
     isLoading: Boolean
 ) {
@@ -194,7 +192,6 @@ private fun <T> Body(
         items.forEachIndexed { index, item ->
             Row(
                 modifier = Modifier
-                    .run { if (onClick != null) clickable { onClick(item) } else this }
                     .padding(vertical = 5.dp, horizontal = 10.dp)
                     .run { if (drawDividers && index != 0) bottomBorder(color = MaterialTheme.colorScheme.primary) else this },
                 verticalAlignment = Alignment.CenterVertically
