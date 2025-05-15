@@ -14,7 +14,7 @@ import com.olt.racketclash.state.start.StartState
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.ListPreviewBox
 import com.olt.racketclash.ui.base.layout.ListPreviewBoxLink
-import com.olt.racketclash.ui.layout.RacketClashScrollableScaffold
+import com.olt.racketclash.ui.layout.RacketClashScaffold
 
 @Composable
 internal fun Start(
@@ -30,7 +30,7 @@ internal fun Start(
     }
     val state by model.state.collectAsState()
 
-    RacketClashScrollableScaffold(title = "Start") {
+    RacketClashScaffold(title = "Start") {
         StartBody(
             state = state,
             navigateTo = navigateTo

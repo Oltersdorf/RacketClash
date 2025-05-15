@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 
 @Composable
-internal fun RacketClashScrollableScaffold(
+internal fun RacketClashScaffold(
     title: String,
     actions: @Composable RowScope.() -> Unit = {},
     headerContent: @Composable BoxScope.() -> Unit = {},
@@ -43,29 +43,6 @@ internal fun RacketClashScrollableScaffold(
                 )
             )
         }
-    }
-}
-
-@Composable
-internal fun RacketClashScaffold(
-    title: String,
-    actions: @Composable RowScope.() -> Unit = {},
-    headerContent: @Composable BoxScope.() -> Unit = {},
-    overlay: @Composable BoxScope.() -> Unit = {},
-    contentAlignment: Alignment = Alignment.TopStart,
-    content: @Composable BoxScope.() -> Unit
-) {
-    RacketClashScaffoldBase(
-        title = title,
-        actions = actions,
-        headerContent = headerContent
-    ) {
-        Body(
-            modifier = Modifier.padding(it),
-            overlay = overlay,
-            contentAlignment = contentAlignment,
-            content = content
-        )
     }
 }
 

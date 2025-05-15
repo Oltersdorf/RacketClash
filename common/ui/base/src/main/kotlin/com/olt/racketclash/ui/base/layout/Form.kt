@@ -1,6 +1,6 @@
 package com.olt.racketclash.ui.base.layout
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -30,38 +30,19 @@ fun Form(
 
         HorizontalDivider(modifier = Modifier.fillMaxWidth())
 
-        Box(modifier = Modifier.fillMaxWidth().padding(top = 25.dp)) {
-            val verticalScrollState = rememberScrollState()
-            val canScroll = verticalScrollState.canScrollBackward || verticalScrollState.canScrollForward
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(top = 25.dp),
+            verticalArrangement = Arrangement.spacedBy(25.dp)
+        ) {
+            if (isLoading)
+                Loading()
+            else {
+                content()
 
-            Column(
-                modifier = Modifier
-                    .verticalScroll(verticalScrollState)
-                    .padding(end = if (canScroll) 14.dp else 0.dp),
-                verticalArrangement = Arrangement.spacedBy(25.dp)
-            ) {
-                if (isLoading)
-                    Loading()
-                else {
-                    content()
-
-                    Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
-                        abortButton()
-                        confirmButton()
-                    }
+                Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
+                    abortButton()
+                    confirmButton()
                 }
-            }
-
-            if (canScroll) {
-                VerticalScrollbar(
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                    adapter = rememberScrollbarAdapter(verticalScrollState),
-                    style = LocalScrollbarStyle.current.copy(
-                        hoverColor = MaterialTheme.colorScheme.primary,
-                        unhoverColor = MaterialTheme.colorScheme.primary,
-                        shape = RectangleShape
-                    )
-                )
             }
         }
     }
@@ -301,7 +282,7 @@ fun <T> FormTable(
     Column {
         searchBar()
 
-        LazyTableWithScroll(
+        Table(
             modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerLowest).requiredHeightIn(max = 400.dp),
             items = items,
             isLoading = isLoading,

@@ -12,7 +12,10 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.api.*
+import com.olt.racketclash.database.api.Database
+import com.olt.racketclash.database.api.Team
+import com.olt.racketclash.database.api.TeamFilter
+import com.olt.racketclash.database.api.TeamSorting
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.state.team.TeamModel
 import com.olt.racketclash.state.team.TeamState
@@ -21,10 +24,9 @@ import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.*
 import com.olt.racketclash.ui.base.material.FilterChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.material.LazyTableSortDirection
 import com.olt.racketclash.ui.base.material.SimpleIconButton
+import com.olt.racketclash.ui.base.material.TableSortDirection
 import com.olt.racketclash.ui.layout.*
-import com.olt.racketclash.ui.layout.RacketClashScrollableScaffold
 import com.olt.racketclash.ui.material.RatioBar
 
 @Composable
@@ -43,7 +45,7 @@ internal fun Team(
     val state by model.state.collectAsState()
     var showEditOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScrollableScaffold(
+    RacketClashScaffold(
         title = "Team",
         headerContent = { TeamInfo(isLoading = state.isLoading, team = state.team) },
         actions = {
@@ -181,7 +183,7 @@ private fun TeamTable(
     onNavigateTo: (View) -> Unit,
     onApplyFilter: (TeamFilter) -> Unit
 ) {
-    FilteredLazyTable(
+    FilteredTable(
         state = state,
         columns = columns(
             navigateTo = onNavigateTo,
@@ -203,22 +205,22 @@ private fun columns(
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(TeamSorting.NameAsc)
-                LazyTableSortDirection.Descending -> onSort(TeamSorting.NameDesc)
+                TableSortDirection.Ascending -> onSort(TeamSorting.NameAsc)
+                TableSortDirection.Descending -> onSort(TeamSorting.NameDesc)
             }
         }) {
             navigateTo(View.Team(teamId = it.id))
         },
         LazyTableColumn.Text(name = "Rank", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(TeamSorting.RankAsc)
-                LazyTableSortDirection.Descending -> onSort(TeamSorting.RankDesc)
+                TableSortDirection.Ascending -> onSort(TeamSorting.RankAsc)
+                TableSortDirection.Descending -> onSort(TeamSorting.RankDesc)
             }
         }) { it.rank.toString() },
         LazyTableColumn.Text(name = "Size", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(TeamSorting.SizeAsc)
-                LazyTableSortDirection.Descending -> onSort(TeamSorting.SizeDesc)
+                TableSortDirection.Ascending -> onSort(TeamSorting.SizeAsc)
+                TableSortDirection.Descending -> onSort(TeamSorting.SizeDesc)
             }
         }) { it.size.toString() },
         LazyTableColumn.Builder(name = "Games", weight = 0.1f) { team, weight ->
@@ -233,8 +235,8 @@ private fun columns(
         },
         LazyTableColumn.Builder(name = "Points", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(TeamSorting.PointsAsc)
-                LazyTableSortDirection.Descending -> onSort(TeamSorting.PointsDesc)
+                TableSortDirection.Ascending -> onSort(TeamSorting.PointsAsc)
+                TableSortDirection.Descending -> onSort(TeamSorting.PointsDesc)
             }
         }) { team, weight ->
             RatioBar(

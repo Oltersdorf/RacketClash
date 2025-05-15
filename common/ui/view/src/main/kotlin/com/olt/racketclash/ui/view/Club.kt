@@ -9,12 +9,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Club
@@ -27,21 +22,12 @@ import com.olt.racketclash.state.club.ClubTableModel
 import com.olt.racketclash.state.datetime.toFormattedString
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.base.layout.AddOrUpdateFormOverlay
-import com.olt.racketclash.ui.base.layout.FilterFormOverlay
-import com.olt.racketclash.ui.base.layout.FormTextField
-import com.olt.racketclash.ui.base.layout.ListPreviewBox
-import com.olt.racketclash.ui.base.layout.ListPreviewBoxLink
+import com.olt.racketclash.ui.base.layout.*
 import com.olt.racketclash.ui.base.material.FilterChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.material.LazyTableSortDirection
 import com.olt.racketclash.ui.base.material.SimpleIconButton
-import com.olt.racketclash.ui.layout.DetailSectionRow
-import com.olt.racketclash.ui.layout.DetailText
-import com.olt.racketclash.ui.layout.Details
-import com.olt.racketclash.ui.layout.FilteredLazyTable
-import com.olt.racketclash.ui.layout.RacketClashScaffold
-import com.olt.racketclash.ui.layout.RacketClashScrollableScaffold
+import com.olt.racketclash.ui.base.material.TableSortDirection
+import com.olt.racketclash.ui.layout.*
 
 @Composable
 internal fun Club(
@@ -60,7 +46,7 @@ internal fun Club(
     val state by model.state.collectAsState()
     var showEditOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScrollableScaffold(
+    RacketClashScaffold(
         title = "Club",
         headerContent = { ClubInfo(isLoading = state.isLoading, club = state.club) },
         actions = {
@@ -187,7 +173,7 @@ private fun ClubTable(
     onNavigateTo: (View) -> Unit,
     onApplyFilter: (ClubFilter) -> Unit
 ) {
-    FilteredLazyTable(
+    FilteredTable(
         state = state,
         columns = columns(
             navigateTo = onNavigateTo,
@@ -209,8 +195,8 @@ private fun columns(
     listOf(
         LazyTableColumn.Link(name = "Name", text = { it.name }, weight = 0.9f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(ClubSorting.NameAsc)
-                LazyTableSortDirection.Descending -> onSort(ClubSorting.NameDesc)
+                TableSortDirection.Ascending -> onSort(ClubSorting.NameAsc)
+                TableSortDirection.Descending -> onSort(ClubSorting.NameDesc)
             }
         }) {
             navigateTo(View.Club(clubId = it.id))

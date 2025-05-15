@@ -1,6 +1,9 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -16,13 +19,15 @@ import com.olt.racketclash.state.category.CategoryState
 import com.olt.racketclash.state.category.CategoryTableModel
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.base.layout.*
+import com.olt.racketclash.ui.base.layout.AddOrUpdateFormOverlay
+import com.olt.racketclash.ui.base.layout.FilterFormOverlay
+import com.olt.racketclash.ui.base.layout.FormDropDownTextField
+import com.olt.racketclash.ui.base.layout.FormTextField
 import com.olt.racketclash.ui.base.material.FilterChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.material.LazyTableSortDirection
 import com.olt.racketclash.ui.base.material.SimpleIconButton
+import com.olt.racketclash.ui.base.material.TableSortDirection
 import com.olt.racketclash.ui.layout.*
-import com.olt.racketclash.ui.layout.RacketClashScrollableScaffold
 import com.olt.racketclash.ui.material.Status
 
 @Composable
@@ -40,7 +45,7 @@ internal fun Category(
     val state by model.state.collectAsState()
     var showEditOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScrollableScaffold(
+    RacketClashScaffold(
         title = "Categories",
         headerContent = { CategoryInfo(isLoading = state.isLoading, category = state.category) },
         actions = {
@@ -177,7 +182,7 @@ private fun CategoryTable(
     onNavigateTo: (View) -> Unit,
     onApplyFilter: (CategoryFilter) -> Unit
 ) {
-    FilteredLazyTable(
+    FilteredTable(
         state = state,
         columns = columns(
             navigateTo = onNavigateTo,
@@ -199,28 +204,28 @@ private fun columns(
     listOf(
         LazyTableColumn.Builder(name = "Status", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(CategorySorting.StatusAsc)
-                LazyTableSortDirection.Descending -> onSort(CategorySorting.StatusDesc)
+                TableSortDirection.Ascending -> onSort(CategorySorting.StatusAsc)
+                TableSortDirection.Descending -> onSort(CategorySorting.StatusDesc)
             }
         }) { category, weight ->
             Status(modifier = Modifier.weight(weight), isOkay = category.finished)
         },
         LazyTableColumn.Link(name = "Name", weight = 0.8f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(CategorySorting.NameAsc)
-                LazyTableSortDirection.Descending -> onSort(CategorySorting.NameDesc)
+                TableSortDirection.Ascending -> onSort(CategorySorting.NameAsc)
+                TableSortDirection.Descending -> onSort(CategorySorting.NameDesc)
             }
         }) { navigateTo(View.Category(categoryId = it.id)) },
         LazyTableColumn.Text(name = "Type", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(CategorySorting.TypeAsc)
-                LazyTableSortDirection.Descending -> onSort(CategorySorting.TypeDesc)
+                TableSortDirection.Ascending -> onSort(CategorySorting.TypeAsc)
+                TableSortDirection.Descending -> onSort(CategorySorting.TypeDesc)
             }
         }) { it.type.text() },
         LazyTableColumn.Text(name = "Players", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(CategorySorting.PlayersAsc)
-                LazyTableSortDirection.Descending -> onSort(CategorySorting.PlayersDesc)
+                TableSortDirection.Ascending -> onSort(CategorySorting.PlayersAsc)
+                TableSortDirection.Descending -> onSort(CategorySorting.PlayersDesc)
             }
         }) { it.players.toString() },
 

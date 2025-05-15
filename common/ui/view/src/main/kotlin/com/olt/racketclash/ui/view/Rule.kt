@@ -1,8 +1,14 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,10 +25,9 @@ import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.*
 import com.olt.racketclash.ui.base.material.FilterChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.material.LazyTableSortDirection
 import com.olt.racketclash.ui.base.material.SimpleIconButton
+import com.olt.racketclash.ui.base.material.TableSortDirection
 import com.olt.racketclash.ui.layout.*
-import com.olt.racketclash.ui.layout.RacketClashScaffold
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -46,7 +51,7 @@ internal fun Rule(
     val state by model.state.collectAsState()
     var showEditOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScrollableScaffold(
+    RacketClashScaffold(
         title = "Rule",
         headerContent = { RuleInfo(isLoading = state.isLoading, rule = state.rule) },
         actions = {
@@ -338,7 +343,7 @@ private fun RuleTable(
     onNavigateTo: (View) -> Unit,
     onApplyFilter: (RuleFilter) -> Unit
 ) {
-    FilteredLazyTable(
+    FilteredTable(
         state = state,
         columns = columns(
             navigateTo = onNavigateTo,
@@ -360,8 +365,8 @@ private fun columns(
     listOf(
         LazyTableColumn.Link(name = "Name", text = { it.name }, weight = 0.6f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(RuleSorting.NameAsc)
-                LazyTableSortDirection.Descending -> onSort(RuleSorting.NameDesc)
+                TableSortDirection.Ascending -> onSort(RuleSorting.NameAsc)
+                TableSortDirection.Descending -> onSort(RuleSorting.NameDesc)
             }
         }) {
             navigateTo(View.Rule(id = it.id))

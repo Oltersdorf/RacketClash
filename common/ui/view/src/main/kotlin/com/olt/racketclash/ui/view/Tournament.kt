@@ -16,7 +16,10 @@ import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.olt.racketclash.database.api.*
+import com.olt.racketclash.database.api.Database
+import com.olt.racketclash.database.api.Tournament
+import com.olt.racketclash.database.api.TournamentFilter
+import com.olt.racketclash.database.api.TournamentSorting
 import com.olt.racketclash.state.datetime.toFormattedString
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.state.tournament.TournamentModel
@@ -26,11 +29,12 @@ import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.*
 import com.olt.racketclash.ui.base.material.FilterChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.material.LazyTableSortDirection
 import com.olt.racketclash.ui.base.material.SimpleIconButton
-import com.olt.racketclash.ui.layout.*
+import com.olt.racketclash.ui.base.material.TableSortDirection
+import com.olt.racketclash.ui.layout.DetailSectionRow
+import com.olt.racketclash.ui.layout.Details
+import com.olt.racketclash.ui.layout.FilteredTable
 import com.olt.racketclash.ui.layout.RacketClashScaffold
-import com.olt.racketclash.ui.layout.RacketClashScrollableScaffold
 import java.time.Instant
 
 @Composable
@@ -53,7 +57,7 @@ internal fun Tournament(
     val state by model.state.collectAsState()
     var showEditOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScrollableScaffold(
+    RacketClashScaffold(
         title = "Tournament",
         headerContent = { TournamentInfo(isLoading = state.isLoading, tournament = state.tournament) },
         actions = {
@@ -245,7 +249,7 @@ private fun TournamentTable(
     onNavigateTo: (View) -> Unit,
     onApplyFilter: (TournamentFilter) -> Unit
 ) {
-    FilteredLazyTable(
+    FilteredTable(
         state = state,
         columns = columns(
             navigateTo = onNavigateTo,
@@ -267,38 +271,38 @@ private fun columns(
     listOf(
         LazyTableColumn.Link(name = "Name", weight = 0.2f, text = { it.name }, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(TournamentSorting.NameAsc)
-                LazyTableSortDirection.Descending -> onSort(TournamentSorting.NameDesc)
+                TableSortDirection.Ascending -> onSort(TournamentSorting.NameAsc)
+                TableSortDirection.Descending -> onSort(TournamentSorting.NameDesc)
             }
         }) { navigateTo(View.Tournament(tournamentId = it.id)) },
         LazyTableColumn.Text(name = "Location", weight = 0.2f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(TournamentSorting.LocationAsc)
-                LazyTableSortDirection.Descending -> onSort(TournamentSorting.LocationDesc)
+                TableSortDirection.Ascending -> onSort(TournamentSorting.LocationAsc)
+                TableSortDirection.Descending -> onSort(TournamentSorting.LocationDesc)
             }
         }) { it.location },
         LazyTableColumn.Text(name = "Courts", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(TournamentSorting.CourtsAsc)
-                LazyTableSortDirection.Descending -> onSort(TournamentSorting.CourtsDesc)
+                TableSortDirection.Ascending -> onSort(TournamentSorting.CourtsAsc)
+                TableSortDirection.Descending -> onSort(TournamentSorting.CourtsDesc)
             }
         }) { it.numberOfCourts.toString() },
         LazyTableColumn.Text(name = "Start", weight = 0.15f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(TournamentSorting.StartAsc)
-                LazyTableSortDirection.Descending -> onSort(TournamentSorting.StartDesc)
+                TableSortDirection.Ascending -> onSort(TournamentSorting.StartAsc)
+                TableSortDirection.Descending -> onSort(TournamentSorting.StartDesc)
             }
         }) { it.start.toFormattedString() },
         LazyTableColumn.Text(name = "End", weight = 0.15f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(TournamentSorting.EndAsc)
-                LazyTableSortDirection.Descending -> onSort(TournamentSorting.EndDesc)
+                TableSortDirection.Ascending -> onSort(TournamentSorting.EndAsc)
+                TableSortDirection.Descending -> onSort(TournamentSorting.EndDesc)
             }
         }) { it.end.toFormattedString() },
         LazyTableColumn.Text(name = "Players", weight = 0.1f, onSort = {
             when (it) {
-                LazyTableSortDirection.Ascending -> onSort(TournamentSorting.PlayersAsc)
-                LazyTableSortDirection.Descending -> onSort(TournamentSorting.PlayersDesc)
+                TableSortDirection.Ascending -> onSort(TournamentSorting.PlayersAsc)
+                TableSortDirection.Descending -> onSort(TournamentSorting.PlayersDesc)
             }
         }) { it.playersCount.toString() },
         LazyTableColumn.Text(name = "Categories", weight = 0.1f) { it.categoriesCount.toString() },
