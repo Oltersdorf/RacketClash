@@ -17,12 +17,12 @@ import com.olt.racketclash.database.api.ClubFilter
 import com.olt.racketclash.database.api.ClubSorting
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.state.club.ClubModel
-import com.olt.racketclash.state.club.ClubState
 import com.olt.racketclash.state.club.ClubTableModel
-import com.olt.racketclash.state.datetime.toFormattedString
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.base.layout.*
+import com.olt.racketclash.ui.base.layout.AddOrUpdateFormOverlay
+import com.olt.racketclash.ui.base.layout.FilterFormOverlay
+import com.olt.racketclash.ui.base.layout.FormTextField
 import com.olt.racketclash.ui.base.material.FilterChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.material.SimpleIconButton
@@ -63,10 +63,19 @@ internal fun Club(
             ) { showEditOverlay = false }
         }
     ) {
-        ClubBody(
-            state = state,
-            navigateTo = navigateTo
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
+            PlayerPreview(
+                isLoading = state.isLoading,
+                players = state.players,
+                navigateTo = navigateTo
+            )
+
+            TournamentPreview(
+                isLoading = state.isLoading,
+                tournaments = state.tournaments,
+                navigateTo = navigateTo
+            )
+        }
     }
 }
 
@@ -226,38 +235,6 @@ private fun ClubInfo(
                 DetailText(title = "id", text = club.id.toString())
                 DetailText(title = "players", text = club.players.toString())
             }
-        }
-    }
-}
-
-@Composable
-private fun ClubBody(
-    state: ClubState,
-    navigateTo: (View) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-        ListPreviewBox(
-            name = "Players",
-            isLoading = state.isLoading,
-            items = state.players,
-            onNavigateMore = { navigateTo(View.Players) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.name,
-                subText = "(${it.birthYear})"
-            ) { navigateTo(View.Player(playerId = it.id)) }
-        }
-
-        ListPreviewBox(
-            name = "Tournaments",
-            isLoading = state.isLoading,
-            items = state.tournaments,
-            onNavigateMore = { navigateTo(View.Tournaments) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.name,
-                subText = "(${it.start.toFormattedString()} to ${it.end.toFormattedString()})"
-            ) { navigateTo(View.Tournament(tournamentId = it.id)) }
         }
     }
 }

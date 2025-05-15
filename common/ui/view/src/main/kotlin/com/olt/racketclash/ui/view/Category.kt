@@ -15,14 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.*
 import com.olt.racketclash.state.category.CategoryModel
-import com.olt.racketclash.state.category.CategoryState
 import com.olt.racketclash.state.category.CategoryTableModel
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.base.layout.AddOrUpdateFormOverlay
-import com.olt.racketclash.ui.base.layout.FilterFormOverlay
-import com.olt.racketclash.ui.base.layout.FormDropDownTextField
-import com.olt.racketclash.ui.base.layout.FormTextField
+import com.olt.racketclash.ui.base.layout.*
 import com.olt.racketclash.ui.base.material.FilterChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.material.SimpleIconButton
@@ -62,10 +58,9 @@ internal fun Category(
             ) { showEditOverlay = false }
         }
     ) {
-        CategoryBody(
-            state = state,
-            navigateTo = navigateTo
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
+
+        }
     }
 }
 
@@ -254,12 +249,21 @@ private fun CategoryInfo(
 }
 
 @Composable
-private fun CategoryBody(
-    state: CategoryState,
+internal fun CategoryPreview(
+    isLoading: Boolean,
+    categories: List<Category>,
     navigateTo: (View) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-
+    ListPreviewBox(
+        name = "Categories",
+        isLoading = isLoading,
+        items = categories,
+        onNavigateMore = { navigateTo(View.Tournaments) }
+    ) {
+        ListPreviewBoxLink(
+            text = it.name,
+            subText = "(${it.tournamentName})"
+        ) { navigateTo(View.Tournament(tournamentId = it.id)) }
     }
 }
 

@@ -18,7 +18,6 @@ import com.olt.racketclash.database.api.TeamFilter
 import com.olt.racketclash.database.api.TeamSorting
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.state.team.TeamModel
-import com.olt.racketclash.state.team.TeamState
 import com.olt.racketclash.state.team.TeamTableModel
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.*
@@ -62,10 +61,13 @@ internal fun Team(
             ) { showEditOverlay = false }
         }
     ) {
-        TeamBody(
-            state = state,
-            navigateTo = navigateTo
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
+            PlayerPreview(
+                isLoading = state.isLoading,
+                players = state.players,
+                navigateTo = navigateTo
+            )
+        }
     }
 }
 
@@ -274,21 +276,20 @@ private fun TeamInfo(
 }
 
 @Composable
-private fun TeamBody(
-    state: TeamState,
+internal fun TeamPreview(
+    isLoading: Boolean,
+    teams: List<Team>,
     navigateTo: (View) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-        ListPreviewBox(
-            name = "Players",
-            isLoading = state.isLoading,
-            items = state.players,
-            onNavigateMore = { navigateTo(View.Players) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.name,
-                subText = "(${it.club})"
-            ) { navigateTo(View.Player(playerId = it.id)) }
-        }
+    ListPreviewBox(
+        name = "Teams",
+        isLoading = isLoading,
+        items = teams,
+        onNavigateMore = { navigateTo(View.Teams(tournamentId = 0L)) }
+    ) {
+        ListPreviewBoxLink(
+            text = it.name,
+            subText = "(Rank: ${it.rank}, Size: ${it.size})"
+        ) { navigateTo(View.Team(teamId = it.id)) }
     }
 }

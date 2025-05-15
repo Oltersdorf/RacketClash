@@ -23,7 +23,6 @@ import com.olt.racketclash.database.api.TournamentSorting
 import com.olt.racketclash.state.datetime.toFormattedString
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.state.tournament.TournamentModel
-import com.olt.racketclash.state.tournament.TournamentState
 import com.olt.racketclash.state.tournament.TournamentTableModel
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.*
@@ -76,10 +75,19 @@ internal fun Tournament(
             ) { showEditOverlay = false }
         }
     ) {
-        TournamentBody(
-            state = state,
-            navigateTo = navigateTo
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
+            TeamPreview(
+                isLoading = state.isLoading,
+                teams = state.teams,
+                navigateTo = navigateTo
+            )
+
+            CategoryPreview(
+                isLoading = state.isLoading,
+                categories = state.categories,
+                navigateTo = navigateTo
+            )
+        }
     }
 }
 
@@ -331,45 +339,20 @@ private fun TournamentInfo(
 }
 
 @Composable
-private fun TournamentBody(
-    state: TournamentState,
+internal fun TournamentPreview(
+    isLoading: Boolean,
+    tournaments: List<Tournament>,
     navigateTo: (View) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-        ListPreviewBox(
-            name = "Teams",
-            isLoading = false,
-            items = state.teams,
-            onNavigateMore = { navigateTo(View.Teams(tournamentId = state.tournament.id)) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.name,
-                subText = "(Rank: ${it.rank}, Size: ${it.size})"
-            ) { navigateTo(View.Team(teamId = it.id)) }
-        }
-
-        ListPreviewBox(
-            name = "Categories",
-            isLoading = false,
-            items = state.categories,
-            onNavigateMore = { navigateTo(View.Categories(tournamentId = state.tournament.id)) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.name,
-                subText = "(Type: ${it.type})"
-            ) { navigateTo(View.Category(categoryId = it.id)) }
-        }
-
-        ListPreviewBox(
-            name = "Schedule",
-            isLoading = false,
-            items = state.scheduledGames,
-            onNavigateMore = { navigateTo(View.Schedule(tournamentId = state.tournament.id)) }
-        ) {
-            ListPreviewBoxLink(
-                text = "Schedule",
-                subText = ""
-            ) { navigateTo(View.Schedule(tournamentId = it.tournamentId)) }
-        }
+    ListPreviewBox(
+        name = "Tournaments",
+        isLoading = isLoading,
+        items = tournaments,
+        onNavigateMore = { navigateTo(View.Tournaments) }
+    ) {
+        ListPreviewBoxLink(
+            text = it.name,
+            subText = "(${it.start.toFormattedString()} to ${it.end.toFormattedString()})"
+        ) { navigateTo(View.Tournament(tournamentId = it.id)) }
     }
 }

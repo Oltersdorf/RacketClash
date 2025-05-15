@@ -16,10 +16,8 @@ import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.database.api.Rule
 import com.olt.racketclash.database.api.RuleFilter
 import com.olt.racketclash.database.api.RuleSorting
-import com.olt.racketclash.state.datetime.toFormattedString
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.state.rule.RuleModel
-import com.olt.racketclash.state.rule.RuleState
 import com.olt.racketclash.state.rule.RuleTableModel
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.*
@@ -68,10 +66,19 @@ internal fun Rule(
             ) { showEditOverlay = false }
         }
     ) {
-        RuleBody(
-            state = state,
-            navigateTo = navigateTo
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
+            TournamentPreview(
+                isLoading = state.isLoading,
+                tournaments = state.tournaments,
+                navigateTo = navigateTo
+            )
+
+            CategoryPreview(
+                isLoading = state.isLoading,
+                categories = state.categories,
+                navigateTo = navigateTo
+            )
+        }
     }
 }
 
@@ -413,50 +420,6 @@ private fun RuleInfo(
                 DetailText(title = "Points", text = "${rule.winPoints}/${rule.maxPoints} +/- ${rule.pointsDifference}")
                 DetailText(title = "Rest", text = "G:${rule.gamePointsForRest} / S:${rule.setPointsForRest} / P:${rule.pointPointsForRest}")
             }
-        }
-    }
-}
-
-@Composable
-private fun RuleBody(
-    state: RuleState,
-    navigateTo: (View) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-        ListPreviewBox(
-            name = "Tournaments",
-            isLoading = state.isLoading,
-            items = state.tournaments,
-            onNavigateMore = { navigateTo(View.Tournaments) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.name,
-                subText = "(${it.start.toFormattedString()} to ${it.end.toFormattedString()})"
-            ) { navigateTo(View.Tournament(tournamentId = it.id)) }
-        }
-
-        ListPreviewBox(
-            name = "Categories",
-            isLoading = state.isLoading,
-            items = state.categories,
-            onNavigateMore = { navigateTo(View.Tournaments) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.name,
-                subText = "(${it.tournamentName})"
-            ) { navigateTo(View.Tournament(tournamentId = it.id)) }
-        }
-
-        ListPreviewBox(
-            name = "Games",
-            isLoading = state.isLoading,
-            items = state.games,
-            onNavigateMore = { navigateTo(View.Tournaments) }
-        ) {
-            ListPreviewBoxLink(
-                text = it.playerNameLeftOne,
-                subText = "()"
-            ) {  }
         }
     }
 }
