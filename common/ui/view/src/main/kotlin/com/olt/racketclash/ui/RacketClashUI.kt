@@ -16,6 +16,8 @@ import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.ui.base.material.SimpleIconButton
 import com.olt.racketclash.ui.view.Categories
 import com.olt.racketclash.ui.view.Category
+import com.olt.racketclash.ui.view.Club
+import com.olt.racketclash.ui.view.Clubs
 import com.olt.racketclash.ui.view.Player
 import com.olt.racketclash.ui.view.Players
 import com.olt.racketclash.ui.view.Rule
@@ -107,6 +109,8 @@ fun RacketClashUI(
                     is View.Teams -> Teams(database = database, tournamentId = cv.tournamentId) { viewHistory += it }
                     is View.Tournament -> Tournament(database = database, tournamentId = cv.tournamentId) { viewHistory += it }
                     View.Tournaments -> Tournaments(database = database) { viewHistory += it }
+                    View.Clubs -> Clubs(database = database) { viewHistory += it }
+                    is View.Club -> Club(database = database, clubId = cv.clubId) { viewHistory += it }
                 }
             }
         }

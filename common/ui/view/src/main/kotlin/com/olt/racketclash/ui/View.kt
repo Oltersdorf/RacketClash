@@ -24,4 +24,8 @@ internal sealed interface View {
     data object Rules : View
 
     data class Rule(val id: Long) : View
+
+    data object Clubs : View
+
+    data class Club(val clubId: Long) : View
 }

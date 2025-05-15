@@ -2,6 +2,7 @@ package com.olt.racketclash.database
 
 import com.olt.racketclash.database.api.*
 import com.olt.racketclash.database.impl.CategoryDatabaseImpl
+import com.olt.racketclash.database.impl.ClubDatabaseImpl
 import com.olt.racketclash.database.impl.GameDatabaseImpl
 import com.olt.racketclash.database.impl.PlayerDatabaseImpl
 import com.olt.racketclash.database.impl.TeamPlayerDatabaseImpl
@@ -19,4 +20,5 @@ class RacketClashDatabaseImpl : Database {
     override val schedules: ScheduleDatabase = ScheduleDatabaseImpl()
     override val games: GameDatabase = GameDatabaseImpl()
     override val teamPlayers: TeamPlayerDatabase = TeamPlayerDatabaseImpl()
+    override val clubs: ClubDatabase = ClubDatabaseImpl()
 }
