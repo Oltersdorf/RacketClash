@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 class PlayerTableModel(
     private val database: PlayerDatabase
 ) : ListModel<Player, PlayerFilter, PlayerSorting>(
+    emptyItem = Player(),
     initialFilter = PlayerFilter(),
     initialSorting = PlayerSorting.NameAsc
 ) {

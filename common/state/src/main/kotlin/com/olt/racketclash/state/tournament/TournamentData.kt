@@ -2,9 +2,7 @@ package com.olt.racketclash.state.tournament
 
 import com.olt.racketclash.database.api.*
 
-data class TournamentState(
-    val isLoading: Boolean = true,
-    val tournament: Tournament = Tournament(),
+data class TournamentData(
     val players: List<Player> = emptyList(),
     val teams: List<Team> = emptyList(),
     val categories: List<Category> = emptyList(),

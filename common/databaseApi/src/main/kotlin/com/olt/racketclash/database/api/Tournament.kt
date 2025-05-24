@@ -33,7 +33,12 @@ data class Tournament(
     val end: Instant = Instant.EPOCH,
     val playersCount: Long = 0,
     val categoriesCount: Long = 0
-)
+): Validateable {
+
+    override fun validate(): Boolean {
+        return name.isNotBlank()
+    }
+}
 
 interface TournamentDatabase {
     suspend fun selectList(

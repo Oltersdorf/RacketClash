@@ -3,33 +3,25 @@ package com.olt.racketclash.state.team
 import com.olt.racketclash.database.api.PlayerDatabase
 import com.olt.racketclash.database.api.Team
 import com.olt.racketclash.database.api.TeamDatabase
-import com.olt.racketclash.state.ViewModelState
+import com.olt.racketclash.state.detail.DetailModel
 
 class TeamModel(
     private val teamDatabase: TeamDatabase,
-    playerDatabase: PlayerDatabase,
-    teamId: Long
-) : ViewModelState<TeamState>(initialState = TeamState()) {
+    private val playerDatabase: PlayerDatabase,
+    private val teamId: Long
+) : DetailModel<Team, TeamData>(
+    initialItem = Team(),
+    initialData = TeamData()
+) {
 
-    init {
-        onIO {
-            val team = teamDatabase.selectSingle(id = teamId)
-            val players = playerDatabase.selectLast(n = 5)
+    override suspend fun databaseUpdate(item: Team) =
+        teamDatabase.update(team = item)
 
-            updateState {
-                copy(
-                    isLoading = false,
-                    team = team,
-                    players = players
-                )
-            }
-        }
-    }
+    override suspend fun databaseSelectItem(): Team =
+        teamDatabase.selectSingle(id = teamId)
 
-    fun updateTeam(team: Team) {
-        onIO {
-            updateState { copy(team = team) }
-            teamDatabase.update(team = team)
-        }
-    }
+    override suspend fun databaseSelectData(item: Team): TeamData =
+        TeamData(
+            players = playerDatabase.selectLast(n = 5)
+        )
 }

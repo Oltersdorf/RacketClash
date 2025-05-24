@@ -1,14 +1,17 @@
 package com.olt.racketclash.state.list
 
 import com.olt.racketclash.database.api.FilteredSortedList
+import com.olt.racketclash.database.api.Validateable
 import com.olt.racketclash.state.ViewModelState
 import java.lang.Long.min
 
-abstract class ListModel<Item, Filter, Sorting>(
+abstract class ListModel<Item: Validateable, Filter, Sorting>(
+    private val emptyItem: Item,
     initialFilter: Filter,
     initialSorting: Sorting,
 ) : ViewModelState<ListState<Item, Filter, Sorting>>(
         initialState = ListState(
+            addItem = emptyItem,
             filter = initialFilter,
             sorting = initialSorting
         )
@@ -16,9 +19,13 @@ abstract class ListModel<Item, Filter, Sorting>(
 
     init { updateList() }
 
-    fun add(item: Item) {
+    fun setNewItem(item: Item) =
+        updateState { copy(addItem = item, canAdd = item.validate()) }
+
+    fun addNewItem() {
         onIO {
-            databaseAdd(item = item)
+            databaseAdd(item = state.value.addItem)
+            updateState { copy(addItem = emptyItem) }
             updateList(updatedPage = state.value.currentPage)
         }
     }
@@ -41,7 +48,13 @@ abstract class ListModel<Item, Filter, Sorting>(
     fun sort(sorting: Sorting) =
         updateList(updatedState = state.value.copy(sorting = sorting))
 
-    fun filter(filter: Filter) =
+    fun setFilter(filter: Filter) =
+        updateState { copy(filterUpdate = filter) }
+
+    fun applyFilter() =
+        updateList()
+
+    fun setAndApplyFilter(filter: Filter) =
         updateList(updatedState = state.value.copy(filter = filter))
 
     fun selectPage(pageNumber: Int) =

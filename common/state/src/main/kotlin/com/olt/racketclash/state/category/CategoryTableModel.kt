@@ -7,6 +7,7 @@ class CategoryTableModel(
     private val database: CategoryDatabase,
     private val tournamentId: Long
 ) : ListModel<Category, CategoryFilter, CategorySorting>(
+    emptyItem = Category(),
     initialFilter = CategoryFilter(tournamentId = tournamentId),
     initialSorting = CategorySorting.NameAsc
 ) {

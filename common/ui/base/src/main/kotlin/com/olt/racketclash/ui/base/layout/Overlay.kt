@@ -12,24 +12,20 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun <State> BoxScope.Overlay(
-    defaultState: State,
-    state: State? = defaultState,
+fun Overlay(
     visible: Boolean,
     durationMillis: Int = 500,
     onDismiss: () -> Unit,
     contentAlignment: Alignment = Alignment.TopStart,
-    content: @Composable BoxScope.(State, (State.() -> State) -> Unit) -> Unit
+    content: @Composable BoxScope.() -> Unit
 ) {
-    var stateHolder by remember(key1 = visible) { mutableStateOf(state ?: defaultState) }
-
     AnimatedVisibility(
         label = "overlayBackground",
         visible = visible,
@@ -68,29 +64,27 @@ fun <State> BoxScope.Overlay(
                 modifier = Modifier.padding(50.dp),
                 contentAlignment = contentAlignment
             ) {
-                content(stateHolder) { stateHolder = it(stateHolder) }
+                content()
             }
         }
     }
 }
 
 @Composable
-fun <State> BoxScope.FilterFormOverlay(
-    filterState: State,
+fun FilterFormOverlay(
     visible: Boolean,
     durationMillis: Int = 500,
     dismissOverlay: () -> Unit,
-    onFilter: (State) -> Unit,
+    onConfirm: () -> Unit,
     contentAlignment: Alignment = Alignment.TopStart,
-    content: @Composable ColumnScope.(State, (State.() -> State) -> Unit) -> Unit
+    content: @Composable ColumnScope.() -> Unit
 ) {
     Overlay(
-        defaultState = filterState,
         visible = visible,
         durationMillis = durationMillis,
         onDismiss = dismissOverlay,
         contentAlignment = contentAlignment
-    ) { state, updateState ->
+    ) {
         Form(
             title = "Filter",
             abortButton = {
@@ -108,37 +102,33 @@ fun <State> BoxScope.FilterFormOverlay(
                     contentDescription = "Filter"
                 ) {
                     dismissOverlay()
-                    onFilter(state)
+                    onConfirm()
                 }
-            }
-        ) {
-            content(state, updateState)
-        }
+            },
+            content = content
+        )
     }
 }
 
 @Composable
-fun <State> BoxScope.AddOrUpdateFormOverlay(
-    defaultItemState: State,
-    itemState: State? = defaultItemState,
+fun AddOrUpdateFormOverlay(
+    title: String,
     visible: Boolean,
     durationMillis: Int = 500,
     dismissOverlay: () -> Unit,
-    canConfirm: (State) -> Boolean,
-    onConfirm: (State) -> Unit,
+    canConfirm: Boolean,
+    onConfirm: () -> Unit,
     contentAlignment: Alignment = Alignment.TopStart,
-    content: @Composable ColumnScope.(State, (State.() -> State) -> Unit) -> Unit
+    content: @Composable ColumnScope.() -> Unit
 ) {
     Overlay(
-        defaultState = defaultItemState,
-        state = itemState,
         visible = visible,
         durationMillis = durationMillis,
         onDismiss = dismissOverlay,
         contentAlignment = contentAlignment
-    ) { state, updateState ->
+    ) {
         Form(
-            title = if (itemState == null) "Add" else "Update",
+            title = title,
             abortButton = {
                 FormButton(
                     text = "Close",
@@ -150,14 +140,13 @@ fun <State> BoxScope.AddOrUpdateFormOverlay(
             confirmButton = {
                 FormButton(
                     text = "Save",
-                    enabled = canConfirm(state)
+                    enabled = canConfirm
                 ) {
                     dismissOverlay()
-                    onConfirm(state)
+                    onConfirm()
                 }
-            }
-        ) {
-            content(state, updateState)
-        }
+            },
+            content = content
+        )
     }
 }

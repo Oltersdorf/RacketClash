@@ -6,6 +6,7 @@ import com.olt.racketclash.state.list.ListModel
 class RuleTableModel(
     private val database: RuleDatabase
 ) : ListModel<Rule, RuleFilter, RuleSorting>(
+    emptyItem = Rule(),
     initialFilter = RuleFilter(),
     initialSorting = RuleSorting.NameAsc
 ) {

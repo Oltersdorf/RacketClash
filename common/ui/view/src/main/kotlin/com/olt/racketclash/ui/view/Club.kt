@@ -1,31 +1,22 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import com.olt.racketclash.database.api.Club
 import com.olt.racketclash.database.api.ClubFilter
 import com.olt.racketclash.database.api.ClubSorting
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.state.club.ClubModel
 import com.olt.racketclash.state.club.ClubTableModel
-import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.base.layout.AddOrUpdateFormOverlay
-import com.olt.racketclash.ui.base.layout.FilterFormOverlay
 import com.olt.racketclash.ui.base.layout.FormTextField
 import com.olt.racketclash.ui.base.material.FilterChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.material.SimpleIconButton
 import com.olt.racketclash.ui.base.material.TableSortDirection
 import com.olt.racketclash.ui.layout.*
 
@@ -44,38 +35,36 @@ internal fun Club(
         )
     }
     val state by model.state.collectAsState()
-    var showEditOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScaffold(
+    RacketClashDetailScaffold(
         title = "Club",
-        headerContent = { ClubInfo(isLoading = state.isLoading, club = state.club) },
-        actions = {
-            SimpleIconButton(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit"
-            ) { showEditOverlay = !showEditOverlay }
+        model = model,
+        headerContent = {
+            DetailSectionRow(title = state.item.name) {
+                Column {
+                    DetailText(title = "id", text = state.item.id.toString())
+                    DetailText(title = "players", text = state.item.players.toString())
+                }
+            }
         },
-        overlay = {
+        editOverlayContent = {
             AddOrUpdateClubOverlay(
-                visible = showEditOverlay,
-                club = state.club,
-                onConfirm = model::updateClub
-            ) { showEditOverlay = false }
-        }
+                state = state.updatedItem,
+                update = model::setUpdatedItem
+            )
+        },
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-            PlayerPreview(
-                isLoading = state.isLoading,
-                players = state.players,
-                navigateTo = navigateTo
-            )
+        PlayerPreview(
+            isLoading = state.isLoading,
+            players = state.data.players,
+            navigateTo = navigateTo
+        )
 
-            TournamentPreview(
-                isLoading = state.isLoading,
-                tournaments = state.tournaments,
-                navigateTo = navigateTo
-            )
-        }
+        TournamentPreview(
+            isLoading = state.isLoading,
+            tournaments = state.data.tournaments,
+            navigateTo = navigateTo
+        )
     }
 }
 
@@ -86,114 +75,57 @@ internal fun Clubs(
 ) {
     val model = remember { ClubTableModel(database = database.clubs) }
     val state by model.state.collectAsState()
-    var showFilterOverlay by remember { mutableStateOf(false) }
-    var showAddOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScaffold(
+    RacketClashTableScaffold(
         title = "Clubs",
-        actions = {
-            SimpleIconButton(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Filter"
-            ) {
-                showAddOverlay = false
-                showFilterOverlay = !showFilterOverlay
-            }
-
-            SimpleIconButton(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add"
-            ) {
-                showFilterOverlay = false
-                showAddOverlay = !showAddOverlay
-            }
-        },
-        overlay = {
+        model = model,
+        filterOverlayContent = {
             FilterClubOverlay(
-                filter = state.filter,
-                applyFilter = model::filter,
-                visible = showFilterOverlay
-            ) { showFilterOverlay = false }
-
+                state = state.filterUpdate,
+                update = model::setFilter
+            )
+        },
+        addOverlayContent = {
             AddOrUpdateClubOverlay(
-                visible = showAddOverlay,
-                onConfirm = model::add
-            ) { showAddOverlay = false }
+                state = state.addItem,
+                update = model::setNewItem
+            )
         }
     ) {
-        ClubTable(
+        FilteredTable(
             state = state,
-            onSort = model::sort,
-            onDelete = model::delete,
-            onSelectPage = model::selectPage,
-            onNavigateTo = navigateTo,
-            onApplyFilter = model::filter
-        )
+            columns = columns(
+                navigateTo = navigateTo,
+                onSort = model::sort,
+                onDelete = model::delete
+            ),
+            onPageClicked = model::selectPage
+        ) {
+            if (it.name.isNotBlank())
+                FilterChip(name = "Name", text = it.name) { model.setAndApplyFilter(it.copy(name = "")) }
+        }
     }
 }
 
 @Composable
-private fun BoxScope.FilterClubOverlay(
-    filter: ClubFilter,
-    applyFilter: (ClubFilter) -> Unit,
-    visible: Boolean,
-    dismissOverlay: () -> Unit
+private fun FilterClubOverlay(
+    state: ClubFilter,
+    update: (ClubFilter) -> Unit
 ) {
-    FilterFormOverlay(
-        filterState = filter,
-        visible = visible,
-        dismissOverlay = dismissOverlay,
-        onFilter = applyFilter
-    ) { state, update ->
-        FormTextField(value = state.name, label = "Name") { update { copy(name = it) } }
-    }
+    FormTextField(value = state.name, label = "Name") { update(state.copy(name = it)) }
 }
 
 @Composable
-private fun BoxScope.AddOrUpdateClubOverlay(
-    visible: Boolean,
-    club: Club? = null,
-    onConfirm: (Club) -> Unit,
-    dismissOverlay: () -> Unit
+private fun AddOrUpdateClubOverlay(
+    state: Club,
+    update: (Club) -> Unit
 ) {
-    AddOrUpdateFormOverlay(
-        defaultItemState = Club(),
-        itemState = club,
-        visible = visible,
-        dismissOverlay = dismissOverlay,
-        canConfirm = { it.name.isNotBlank() },
-        onConfirm = onConfirm
-    ) { state, update ->
-        FormTextField(
-            value = state.name,
-            label = "Name",
-            isError = state.name.isBlank(),
-            onValueChange = { update { copy(name = it) } }
-        )
-    }
-}
-
-@Composable
-private fun ClubTable(
-    state: ListState<Club, ClubFilter, ClubSorting>,
-    onSort: (ClubSorting) -> Unit,
-    onDelete: (Club) -> Unit,
-    onSelectPage: (Int) -> Unit,
-    onNavigateTo: (View) -> Unit,
-    onApplyFilter: (ClubFilter) -> Unit
-) {
-    FilteredTable(
-        state = state,
-        columns = columns(
-            navigateTo = onNavigateTo,
-            onSort = onSort,
-            onDelete = onDelete
-        ),
-        onPageClicked = onSelectPage
-    ) {
-        if (it.name.isNotBlank())
-            FilterChip(name = "Name", text = it.name) { onApplyFilter(it.copy(name = "")) }
-    }
+    FormTextField(
+        value = state.name,
+        label = "Name",
+        isError = state.name.isBlank(),
+        onValueChange = { update(state.copy(name = it)) }
+    )
 }
 
 private fun columns(
@@ -220,21 +152,3 @@ private fun columns(
             contentDescription = "Delete"
         )
     )
-
-@Composable
-private fun ClubInfo(
-    isLoading: Boolean,
-    club: Club
-) {
-    Details(
-        isLoading = isLoading,
-        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
-    ) {
-        DetailSectionRow(title = club.name) {
-            Column {
-                DetailText(title = "id", text = club.id.toString())
-                DetailText(title = "players", text = club.players.toString())
-            }
-        }
-    }
-}

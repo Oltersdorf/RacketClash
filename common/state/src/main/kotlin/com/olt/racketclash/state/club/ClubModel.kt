@@ -4,36 +4,27 @@ import com.olt.racketclash.database.api.Club
 import com.olt.racketclash.database.api.ClubDatabase
 import com.olt.racketclash.database.api.PlayerDatabase
 import com.olt.racketclash.database.api.TournamentDatabase
-import com.olt.racketclash.state.ViewModelState
+import com.olt.racketclash.state.detail.DetailModel
 
 class ClubModel(
     private val clubDatabase: ClubDatabase,
-    playerDatabase: PlayerDatabase,
-    tournamentDatabase: TournamentDatabase,
-    clubId: Long
-) : ViewModelState<ClubState>(initialState = ClubState()) {
+    private val playerDatabase: PlayerDatabase,
+    private val tournamentDatabase: TournamentDatabase,
+    private val clubId: Long
+) : DetailModel<Club, ClubData>(
+    initialItem = Club(),
+    initialData = ClubData()
+) {
 
-    init {
-        onIO {
-            val club = clubDatabase.selectSingle(id = clubId)
-            val players = playerDatabase.selectLast(n = 5)
-            val tournaments = tournamentDatabase.selectLast(n = 5)
+    override suspend fun databaseSelectItem(): Club =
+        clubDatabase.selectSingle(id = clubId)
 
-            updateState {
-                copy(
-                    isLoading = false,
-                    club = club,
-                    players = players,
-                    tournaments = tournaments
-                )
-            }
-        }
-    }
+    override suspend fun databaseUpdate(item: Club) =
+        clubDatabase.update(club = item)
 
-    fun updateClub(club: Club) {
-        onIO {
-            updateState { copy(club = club) }
-            clubDatabase.update(club = club)
-        }
-    }
+    override suspend fun databaseSelectData(item: Club): ClubData =
+        ClubData(
+            players = playerDatabase.selectLast(n = 5),
+            tournaments = tournamentDatabase.selectLast(n = 5)
+        )
 }

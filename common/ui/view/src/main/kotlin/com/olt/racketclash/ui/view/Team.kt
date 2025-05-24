@@ -1,29 +1,24 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.database.api.Team
 import com.olt.racketclash.database.api.TeamFilter
 import com.olt.racketclash.database.api.TeamSorting
-import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.state.team.TeamModel
 import com.olt.racketclash.state.team.TeamTableModel
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.*
 import com.olt.racketclash.ui.base.material.FilterChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.material.SimpleIconButton
 import com.olt.racketclash.ui.base.material.TableSortDirection
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.material.RatioBar
@@ -42,32 +37,28 @@ internal fun Team(
         )
     }
     val state by model.state.collectAsState()
-    var showEditOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScaffold(
+    RacketClashDetailScaffold(
         title = "Team",
-        headerContent = { TeamInfo(isLoading = state.isLoading, team = state.team) },
-        actions = {
-            SimpleIconButton(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit"
-            ) { showEditOverlay = !showEditOverlay }
+        model = model,
+        headerContent = {
+            DetailSectionRow(title = state.item.name) {
+                DetailText(title = "id", text = state.item.id.toString())
+                DetailText(title = "Size", text = state.item.size.toString())
+            }
         },
-        overlay = {
+        editOverlayContent = {
             AddOrUpdateTeamOverlay(
-                visible = showEditOverlay,
-                team = state.team,
-                onConfirm = model::updateTeam
-            ) { showEditOverlay = false }
-        }
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-            PlayerPreview(
-                isLoading = state.isLoading,
-                players = state.players,
-                navigateTo = navigateTo
+                state = state.updatedItem,
+                update = model::setUpdatedItem
             )
         }
+    ) {
+        PlayerPreview(
+            isLoading = state.isLoading,
+            players = state.data.players,
+            navigateTo = navigateTo
+        )
     }
 }
 
@@ -79,123 +70,66 @@ internal fun Teams(
 ) {
     val model = remember { TeamTableModel(database = database.teams, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
-    var showFilterOverlay by remember { mutableStateOf(false) }
-    var showAddOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScaffold(
+    RacketClashTableScaffold(
         title = "Teams",
-        actions = {
-            SimpleIconButton(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Filter"
-            ) {
-                showAddOverlay = false
-                showFilterOverlay = !showFilterOverlay
-            }
-
-            SimpleIconButton(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add"
-            ) {
-                showFilterOverlay = false
-                showAddOverlay = !showAddOverlay
-            }
-        },
-        overlay = {
+        model = model,
+        filterOverlayContent = {
             FilterTeamOverlay(
-                visible = showFilterOverlay,
-                filter = state.filter,
-                applyFilter = model::filter
-            ) { showFilterOverlay = false }
-
+                state = state.filterUpdate,
+                update = model::setFilter
+            )
+        },
+        addOverlayContent = {
             AddOrUpdateTeamOverlay(
-                visible = showAddOverlay,
-                onConfirm = model::add
-            ) { showAddOverlay = false }
+                state = state.addItem,
+                update = model::setNewItem
+            )
         }
     ) {
-        TeamTable(
+        FilteredTable(
             state = state,
-            onSort = model::sort,
-            onDelete = model::delete,
-            onSelectPage = model::selectPage,
-            onNavigateTo = navigateTo,
-            onApplyFilter = model::filter
-        )
-    }
-}
-
-@Composable
-private fun BoxScope.FilterTeamOverlay(
-    filter: TeamFilter,
-    applyFilter: (TeamFilter) -> Unit,
-    visible: Boolean,
-    dismissOverlay: () -> Unit
-) {
-    FilterFormOverlay(
-        filterState = filter,
-        visible = visible,
-        dismissOverlay = dismissOverlay,
-        onFilter = applyFilter
-    ) { state, update ->
-        FormTextField(value = state.name, label = "Name") { update { copy(name = it) } }
-    }
-}
-
-@Composable
-private fun BoxScope.AddOrUpdateTeamOverlay(
-    visible: Boolean,
-    team: Team? = null,
-    onConfirm: (Team) -> Unit,
-    dismissOverlay: () -> Unit
-) {
-    AddOrUpdateFormOverlay(
-        defaultItemState = Team(),
-        itemState = team,
-        visible = visible,
-        dismissOverlay = dismissOverlay,
-        canConfirm = { it.name.isNotBlank() },
-        onConfirm = onConfirm
-    ) { state, update ->
-        FormRow {
-            FormTextField(
-                value = state.name,
-                label = "Name",
-                isError = state.name.isBlank(),
-                onValueChange = { update { copy(name = it) } }
-            )
-
-            FormNumberSelector(
-                value = state.rank,
-                label = "Rank",
-                range = 1..Int.MAX_VALUE,
-                onUp = { update { copy(rank = it) } },
-                onDown = { update { copy(rank = it) } }
-            )
+            columns = columns(
+                navigateTo = navigateTo,
+                onSort = model::sort,
+                onDelete = model::delete
+            ),
+            onPageClicked = model::selectPage
+        ) {
+            if (it.name.isNotBlank())
+                FilterChip(name = "Name", text = it.name) { model.setAndApplyFilter(it.copy(name = "")) }
         }
     }
 }
 
 @Composable
-private fun TeamTable(
-    state: ListState<Team, TeamFilter, TeamSorting>,
-    onSort: (TeamSorting) -> Unit,
-    onDelete: (Team) -> Unit,
-    onSelectPage: (Int) -> Unit,
-    onNavigateTo: (View) -> Unit,
-    onApplyFilter: (TeamFilter) -> Unit
+private fun FilterTeamOverlay(
+    state: TeamFilter,
+    update: (TeamFilter) -> Unit
 ) {
-    FilteredTable(
-        state = state,
-        columns = columns(
-            navigateTo = onNavigateTo,
-            onSort = onSort,
-            onDelete = onDelete
-        ),
-        onPageClicked = onSelectPage
-    ) {
-        if (it.name.isNotBlank())
-            FilterChip(name = "Name", text = it.name) { onApplyFilter(it.copy(name = "")) }
+    FormTextField(value = state.name, label = "Name") { update(state.copy(name = it)) }
+}
+
+@Composable
+private fun AddOrUpdateTeamOverlay(
+    state: Team,
+    update: (Team) -> Unit
+) {
+    FormRow {
+        FormTextField(
+            value = state.name,
+            label = "Name",
+            isError = state.name.isBlank(),
+            onValueChange = { update(state.copy(name = it)) }
+        )
+
+        FormNumberSelector(
+            value = state.rank,
+            label = "Rank",
+            range = 1..Int.MAX_VALUE,
+            onUp = { update(state.copy(rank = it)) },
+            onDown = { update(state.copy(rank = it)) }
+        )
     }
 }
 
@@ -258,22 +192,6 @@ private fun columns(
             contentDescription = "Delete"
         )
     )
-
-@Composable
-private fun TeamInfo(
-    isLoading: Boolean,
-    team: Team
-) {
-    Details(
-        isLoading = isLoading,
-        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
-    ) {
-        DetailSectionRow(title = team.name) {
-            DetailText(title = "id", text = team.id.toString())
-            DetailText(title = "Size", text = team.size.toString())
-        }
-    }
-}
 
 @Composable
 internal fun TeamPreview(

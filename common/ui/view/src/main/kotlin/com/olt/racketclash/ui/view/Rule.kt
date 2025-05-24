@@ -1,29 +1,24 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.database.api.Rule
 import com.olt.racketclash.database.api.RuleFilter
 import com.olt.racketclash.database.api.RuleSorting
-import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.state.rule.RuleModel
 import com.olt.racketclash.state.rule.RuleTableModel
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.base.layout.*
+import com.olt.racketclash.ui.base.layout.FormNumberSelector
+import com.olt.racketclash.ui.base.layout.FormRow
+import com.olt.racketclash.ui.base.layout.FormTextField
 import com.olt.racketclash.ui.base.material.FilterChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.material.SimpleIconButton
 import com.olt.racketclash.ui.base.material.TableSortDirection
 import com.olt.racketclash.ui.layout.*
 import kotlin.math.ceil
@@ -47,38 +42,42 @@ internal fun Rule(
         )
     }
     val state by model.state.collectAsState()
-    var showEditOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScaffold(
+    RacketClashDetailScaffold(
         title = "Rule",
-        headerContent = { RuleInfo(isLoading = state.isLoading, rule = state.rule) },
-        actions = {
-            SimpleIconButton(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit"
-            ) { showEditOverlay = !showEditOverlay }
+        model = model,
+        headerContent = {
+            DetailSectionRow(title = state.item.name) {
+                Column {
+                    DetailText(title = "id", text = state.item.id.toString())
+                    DetailText(title = "Sets", text = "${state.item.winSets}/${state.item.maxSets}")
+                    DetailText(title = "Rating", text = "W:${state.item.gamePointsForWin} / D:${state.item.gamePointsForDraw} / L:${state.item.gamePointsForLose}")
+                }
+                Column {
+                    DetailText(title = "Used", text = state.item.used.toString())
+                    DetailText(title = "Points", text = "${state.item.winPoints}/${state.item.maxPoints} +/- ${state.item.pointsDifference}")
+                    DetailText(title = "Rest", text = "G:${state.item.gamePointsForRest} / S:${state.item.setPointsForRest} / P:${state.item.pointPointsForRest}")
+                }
+            }
         },
-        overlay = {
+        editOverlayContent = {
             AddOrUpdateRuleOverlay(
-                visible = showEditOverlay,
-                rule = state.rule,
-                onConfirm = model::updateRule
-            ) { showEditOverlay = false }
+                state = state.updatedItem,
+                update = model::setUpdatedItem
+            )
         }
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-            TournamentPreview(
-                isLoading = state.isLoading,
-                tournaments = state.tournaments,
-                navigateTo = navigateTo
-            )
+        TournamentPreview(
+            isLoading = state.isLoading,
+            tournaments = state.data.tournaments,
+            navigateTo = navigateTo
+        )
 
-            CategoryPreview(
-                isLoading = state.isLoading,
-                categories = state.categories,
-                navigateTo = navigateTo
-            )
-        }
+        CategoryPreview(
+            isLoading = state.isLoading,
+            categories = state.data.categories,
+            navigateTo = navigateTo
+        )
     }
 }
 
@@ -89,278 +88,210 @@ internal fun Rules(
 ) {
     val model = remember { RuleTableModel(database = database.rules) }
     val state by model.state.collectAsState()
-    var showFilterOverlay by remember { mutableStateOf(false) }
-    var showAddOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScaffold(
+    RacketClashTableScaffold(
         title = "Rules",
-        actions = {
-            SimpleIconButton(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Filter"
-            ) {
-                showAddOverlay = false
-                showFilterOverlay = !showFilterOverlay
-            }
-
-            SimpleIconButton(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add"
-            ) {
-                showFilterOverlay = false
-                showAddOverlay = !showAddOverlay
-            }
-        },
-        overlay = {
+        model = model,
+        filterOverlayContent = {
             FilterRuleOverlay(
-                filter = state.filter,
-                applyFilter = model::filter,
-                visible = showFilterOverlay
-            ) { showFilterOverlay = false }
-
+                state = state.filterUpdate,
+                update = model::setFilter
+            )
+        },
+        addOverlayContent = {
             AddOrUpdateRuleOverlay(
-                visible = showAddOverlay,
-                onConfirm = model::add
-            ) { showAddOverlay = false }
+                state = state.addItem,
+                update = model::setNewItem
+            )
         }
     ) {
-        RuleTable(
+        FilteredTable(
             state = state,
-            onSort = model::sort,
-            onDelete = model::delete,
-            onSelectPage = model::selectPage,
-            onNavigateTo = navigateTo,
-            onApplyFilter = model::filter
+            columns = columns(
+                navigateTo = navigateTo,
+                onSort = model::sort,
+                onDelete = model::delete
+            ),
+            onPageClicked = model::selectPage
+        ) {
+            if (it.name.isNotBlank())
+                FilterChip(name = "Name", text = it.name) { model.setAndApplyFilter(it.copy(name = "")) }
+        }
+    }
+}
+
+@Composable
+private fun FilterRuleOverlay(
+    state: RuleFilter,
+    update: (RuleFilter) -> Unit
+) {
+    FormTextField(value = state.name, label = "Name") { update(state.copy(name = it)) }
+}
+
+@Composable
+private fun AddOrUpdateRuleOverlay(
+    state: Rule,
+    update: (Rule) -> Unit
+) {
+    FormTextField(
+        value = state.name,
+        label = "Name",
+        isError = state.name.isBlank(),
+        onValueChange = { update(state.copy(name = it)) }
+    )
+
+    FormRow {
+        FormNumberSelector(
+            value = state.maxSets,
+            label = "Max sets",
+            range = 1..Int.MAX_VALUE,
+            onUp = {
+                update(
+                    state.copy(
+                        maxSets = it,
+                        winSets = max(state.winSets, ceil(it.toDouble() / 2).roundToInt())
+                    )
+                )
+            },
+            onDown = {
+                update(
+                    state.copy(
+                        maxSets = it,
+                        winSets = min(it, state.winSets)
+                    )
+                )
+            }
+        )
+
+        FormNumberSelector(
+            value = state.winSets,
+            label = "Win sets",
+            range = 1..Int.MAX_VALUE,
+            onUp = {
+                update(
+                    state.copy(
+                        winSets = it,
+                        maxSets = max(state.maxSets, it)
+                    )
+                )
+            },
+            onDown = {
+                update(
+                    state.copy(
+                        winSets = it,
+                        maxSets = min(state.maxSets, it * 2)
+                    )
+                )
+            }
         )
     }
-}
 
-@Composable
-private fun BoxScope.FilterRuleOverlay(
-    filter: RuleFilter,
-    applyFilter: (RuleFilter) -> Unit,
-    visible: Boolean,
-    dismissOverlay: () -> Unit
-) {
-    FilterFormOverlay(
-        filterState = filter,
-        visible = visible,
-        dismissOverlay = dismissOverlay,
-        onFilter = applyFilter
-    ) { state, update ->
-        FormTextField(value = state.name, label = "Name") { update { copy(name = it) } }
-    }
-}
-
-@Composable
-private fun BoxScope.AddOrUpdateRuleOverlay(
-    visible: Boolean,
-    rule: Rule? = null,
-    onConfirm: (Rule) -> Unit,
-    dismissOverlay: () -> Unit
-) {
-    AddOrUpdateFormOverlay(
-        defaultItemState = Rule(),
-        itemState = rule,
-        visible = visible,
-        dismissOverlay = dismissOverlay,
-        canConfirm = { it.name.isNotBlank() },
-        onConfirm = onConfirm
-    ) { state, update ->
-        FormTextField(
-            value = state.name,
-            label = "Name",
-            isError = state.name.isBlank(),
-            onValueChange = { update { copy(name = it) } }
+    FormRow {
+        FormNumberSelector(
+            value = state.maxPoints,
+            label = "Max points",
+            range = 1..Int.MAX_VALUE,
+            onUp = { update(state.copy(maxPoints = it)) },
+            onDown = {
+                update(
+                    state.copy(
+                        maxPoints = it,
+                        winPoints = min(state.winPoints, it),
+                        pointsDifference = min(state.pointsDifference, it)
+                    )
+                )
+            }
         )
 
-        FormRow {
-            FormNumberSelector(
-                enabled = rule == null,
-                value = state.maxSets,
-                label = "Max sets",
-                range = 1..Int.MAX_VALUE,
-                onUp = {
-                    update {
-                        copy(
-                            maxSets = it,
-                            winSets = max(winSets, ceil(it.toDouble() / 2).roundToInt())
-                        )
-                    }
-                },
-                onDown = {
-                    update {
-                        copy(
-                            maxSets = it,
-                            winSets = min(it, winSets)
-                        )
-                    }
-                }
-            )
+        FormNumberSelector(
+            value = state.winPoints,
+            label = "Win points",
+            range = 1..Int.MAX_VALUE,
+            onUp = {
+                update(
+                    state.copy(
+                        winPoints = it,
+                        maxPoints = max(state.maxPoints, it)
+                    )
+                )
+            },
+            onDown = {
+                update(
+                    state.copy(
+                        winPoints = it,
+                        pointsDifference = min(state.pointsDifference, it)
+                    )
+                )
+            }
+        )
 
-            FormNumberSelector(
-                enabled = rule == null,
-                value = state.winSets,
-                label = "Win sets",
-                range = 1..Int.MAX_VALUE,
-                onUp = {
-                    update {
-                        copy(
-                            winSets = it,
-                            maxSets = max(maxSets, it)
-                        )
-                    }
-                },
-                onDown = {
-                    update {
-                        copy(
-                            winSets = it,
-                            maxSets = min(maxSets, it * 2)
-                        )
-                    }
-                }
-            )
-        }
-
-        FormRow {
-            FormNumberSelector(
-                enabled = rule == null,
-                value = state.maxPoints,
-                label = "Max points",
-                range = 1..Int.MAX_VALUE,
-                onUp = { update { copy(maxPoints = it) } },
-                onDown = {
-                    update {
-                        copy(
-                            maxPoints = it,
-                            winPoints = min(winPoints, it),
-                            pointsDifference = min(pointsDifference, it)
-                        )
-                    }
-                }
-            )
-
-            FormNumberSelector(
-                enabled = rule == null,
-                value = state.winPoints,
-                label = "Win points",
-                range = 1..Int.MAX_VALUE,
-                onUp = {
-                    update {
-                        copy(
-                            winPoints = it,
-                            maxPoints = max(maxPoints, it)
-                        )
-                    }
-                },
-                onDown = {
-                    update {
-                        copy(
-                            winPoints = it,
-                            pointsDifference = min(pointsDifference, it)
-                        )
-                    }
-                }
-            )
-
-            FormNumberSelector(
-                enabled = rule == null,
-                value = state.pointsDifference,
-                label = "Points difference",
-                range = 0..Int.MAX_VALUE,
-                onUp = {
-                    update {
-                        copy(
-                            pointsDifference = it,
-                            winPoints = max(winPoints, it),
-                            maxPoints = max(maxPoints, it)
-                        )
-                    }
-                },
-                onDown = { update { copy(pointsDifference = it) } }
-            )
-        }
-
-        FormRow {
-            FormNumberSelector(
-                enabled = rule == null,
-                value = state.gamePointsForWin,
-                label = "Game points for win",
-                range = 0..Int.MAX_VALUE,
-                onUp = { update { copy(gamePointsForWin = it) } },
-                onDown = { update { copy(gamePointsForWin = it) } }
-            )
-
-            FormNumberSelector(
-                enabled = rule == null,
-                value = state.gamePointsForLose,
-                label = "Game points for lose",
-                range = 0..Int.MAX_VALUE,
-                onUp = { update { copy(gamePointsForLose = it) } },
-                onDown = { update { copy(gamePointsForLose = it) } }
-            )
-
-            FormNumberSelector(
-                enabled = rule == null,
-                value = state.gamePointsForDraw,
-                label = "Game points for draw",
-                range = 0..Int.MAX_VALUE,
-                onUp = { update { copy(gamePointsForDraw = it) } },
-                onDown = { update { copy(gamePointsForDraw = it) } }
-            )
-        }
-
-        FormRow {
-            FormNumberSelector(
-                enabled = rule == null,
-                value = state.gamePointsForRest,
-                label = "Game points for rest",
-                range = 0..Int.MAX_VALUE,
-                onUp = { update { copy(gamePointsForRest = it) } },
-                onDown = { update { copy(gamePointsForRest = it) } }
-            )
-
-            FormNumberSelector(
-                enabled = rule == null,
-                value = state.setPointsForRest,
-                label = "Set points for rest",
-                range = 0..Int.MAX_VALUE,
-                onUp = { update { copy(setPointsForRest = it) } },
-                onDown = { update { copy(setPointsForRest = it) } }
-            )
-
-            FormNumberSelector(
-                enabled = rule == null,
-                value = state.pointPointsForRest,
-                label = "Point points for rest",
-                range = 0..Int.MAX_VALUE,
-                onUp = { update { copy(pointPointsForRest = it) } },
-                onDown = { update { copy(pointPointsForRest = it) } }
-            )
-        }
+        FormNumberSelector(
+            value = state.pointsDifference,
+            label = "Points difference",
+            range = 0..Int.MAX_VALUE,
+            onUp = {
+                update(
+                    state.copy(
+                        pointsDifference = it,
+                        winPoints = max(state.winPoints, it),
+                        maxPoints = max(state.maxPoints, it)
+                    )
+                )
+            },
+            onDown = { update(state.copy(pointsDifference = it)) }
+        )
     }
-}
 
-@Composable
-private fun RuleTable(
-    state: ListState<Rule, RuleFilter, RuleSorting>,
-    onSort: (RuleSorting) -> Unit,
-    onDelete: (Rule) -> Unit,
-    onSelectPage: (Int) -> Unit,
-    onNavigateTo: (View) -> Unit,
-    onApplyFilter: (RuleFilter) -> Unit
-) {
-    FilteredTable(
-        state = state,
-        columns = columns(
-            navigateTo = onNavigateTo,
-            onSort = onSort,
-            onDelete = onDelete
-        ),
-        onPageClicked = onSelectPage
-    ) {
-        if (it.name.isNotBlank())
-            FilterChip(name = "Name", text = it.name) { onApplyFilter(it.copy(name = "")) }
+    FormRow {
+        FormNumberSelector(
+            value = state.gamePointsForWin,
+            label = "Game points for win",
+            range = 0..Int.MAX_VALUE,
+            onUp = { update(state.copy(gamePointsForWin = it)) },
+            onDown = { update(state.copy(gamePointsForWin = it)) }
+        )
+
+        FormNumberSelector(
+            value = state.gamePointsForLose,
+            label = "Game points for lose",
+            range = 0..Int.MAX_VALUE,
+            onUp = { update(state.copy(gamePointsForLose = it)) },
+            onDown = { update(state.copy(gamePointsForLose = it)) }
+        )
+
+        FormNumberSelector(
+            value = state.gamePointsForDraw,
+            label = "Game points for draw",
+            range = 0..Int.MAX_VALUE,
+            onUp = { update(state.copy(gamePointsForDraw = it)) },
+            onDown = { update(state.copy(gamePointsForDraw = it)) }
+        )
+    }
+
+    FormRow {
+        FormNumberSelector(
+            value = state.gamePointsForRest,
+            label = "Game points for rest",
+            range = 0..Int.MAX_VALUE,
+            onUp = { update(state.copy(gamePointsForRest = it)) },
+            onDown = { update(state.copy(gamePointsForRest = it)) }
+        )
+
+        FormNumberSelector(
+            value = state.setPointsForRest,
+            label = "Set points for rest",
+            range = 0..Int.MAX_VALUE,
+            onUp = { update(state.copy(setPointsForRest = it)) },
+            onDown = { update(state.copy(setPointsForRest = it)) }
+        )
+
+        FormNumberSelector(
+            value = state.pointPointsForRest,
+            label = "Point points for rest",
+            range = 0..Int.MAX_VALUE,
+            onUp = { update(state.copy(pointPointsForRest = it)) },
+            onDown = { update(state.copy(pointPointsForRest = it)) }
+        )
     }
 }
 
@@ -399,27 +330,3 @@ private fun columns(
             contentDescription = "Delete"
         )
     )
-
-@Composable
-private fun RuleInfo(
-    isLoading: Boolean,
-    rule: Rule
-) {
-    Details(
-        isLoading = isLoading,
-        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
-    ) {
-        DetailSectionRow(title = rule.name) {
-            Column {
-                DetailText(title = "id", text = rule.id.toString())
-                DetailText(title = "Sets", text = "${rule.winSets}/${rule.maxSets}")
-                DetailText(title = "Rating", text = "W:${rule.gamePointsForWin} / D:${rule.gamePointsForDraw} / L:${rule.gamePointsForLose}")
-            }
-            Column {
-                DetailText(title = "Used", text = rule.used.toString())
-                DetailText(title = "Points", text = "${rule.winPoints}/${rule.maxPoints} +/- ${rule.pointsDifference}")
-                DetailText(title = "Rest", text = "G:${rule.gamePointsForRest} / S:${rule.setPointsForRest} / P:${rule.pointPointsForRest}")
-            }
-        }
-    }
-}

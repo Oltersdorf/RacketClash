@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 class TournamentTableModel(
     private val database: TournamentDatabase
 ) : ListModel<Tournament, TournamentFilter, TournamentSorting>(
+    emptyItem = Tournament(),
     initialFilter = TournamentFilter(),
     initialSorting = TournamentSorting.NameAsc
 ) {

@@ -1,27 +1,23 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.*
 import com.olt.racketclash.state.category.CategoryModel
 import com.olt.racketclash.state.category.CategoryTableModel
-import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.ui.View
-import com.olt.racketclash.ui.base.layout.*
+import com.olt.racketclash.ui.base.layout.FormDropDownTextField
+import com.olt.racketclash.ui.base.layout.FormTextField
+import com.olt.racketclash.ui.base.layout.ListPreviewBox
+import com.olt.racketclash.ui.base.layout.ListPreviewBoxLink
 import com.olt.racketclash.ui.base.material.FilterChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.material.SimpleIconButton
 import com.olt.racketclash.ui.base.material.TableSortDirection
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.material.Status
@@ -39,29 +35,22 @@ internal fun Category(
         )
     }
     val state by model.state.collectAsState()
-    var showEditOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScaffold(
+    RacketClashDetailScaffold(
         title = "Categories",
-        headerContent = { CategoryInfo(isLoading = state.isLoading, category = state.category) },
-        actions = {
-            SimpleIconButton(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit"
-            ) { showEditOverlay = !showEditOverlay }
+        model = model,
+        headerContent = {
+            DetailSectionRow(title = state.item.name) {
+                DetailText(title = "id", text = state.item.id.toString())
+            }
         },
-        overlay = {
+        editOverlayContent = {
             AddOrUpdateCategoryOverlay(
-                visible = showEditOverlay,
-                category = state.category,
-                onConfirm = model::updatePlayer
-            ) { showEditOverlay = false }
+                state = state.updatedItem,
+                update = model::setUpdatedItem
+            )
         }
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-
-        }
-    }
+    ) {}
 }
 
 @Composable
@@ -72,123 +61,66 @@ internal fun Categories(
 ) {
     val model = remember { CategoryTableModel(database = database.categories, tournamentId = tournamentId) }
     val state by model.state.collectAsState()
-    var showFilterOverlay by remember { mutableStateOf(false) }
-    var showAddOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScaffold(
+    RacketClashTableScaffold(
         title = "Categories",
-        actions = {
-            SimpleIconButton(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Filter"
-            ) {
-                showAddOverlay = false
-                showFilterOverlay = !showFilterOverlay
-            }
-
-            SimpleIconButton(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add"
-            ) {
-                showFilterOverlay = false
-                showAddOverlay = !showAddOverlay
-            }
-        },
-        overlay = {
+        model = model,
+        filterOverlayContent = {
             FilterCategoryOverlay(
-                visible = showFilterOverlay,
-                filter = state.filter,
-                applyFilter = model::filter
-            ) { showFilterOverlay = false }
-
+                state = state.filterUpdate,
+                update = model::setFilter
+            )
+        },
+        addOverlayContent = {
             AddOrUpdateCategoryOverlay(
-                visible = showAddOverlay,
-                onConfirm = model::add
-            ) { showAddOverlay = false }
+                state = state.addItem,
+                update = model::setNewItem
+            )
         }
     ) {
-        CategoryTable(
+        FilteredTable(
             state = state,
-            onSort = model::sort,
-            onDelete = model::delete,
-            onSelectPage = model::selectPage,
-            onNavigateTo = navigateTo,
-            onApplyFilter = model::filter
-        )
+            columns = columns(
+                navigateTo = navigateTo,
+                onSort = model::sort,
+                onDelete = model::delete
+            ),
+            onPageClicked = model::selectPage
+        ) {
+            if (it.name.isNotBlank())
+                FilterChip(name = "Name", text = it.name) { model.setAndApplyFilter(it.copy(name = "")) }
+        }
     }
 }
 
 @Composable
-private fun BoxScope.FilterCategoryOverlay(
-    filter: CategoryFilter,
-    applyFilter: (CategoryFilter) -> Unit,
-    visible: Boolean,
-    dismissOverlay: () -> Unit
+private fun FilterCategoryOverlay(
+    state: CategoryFilter,
+    update: (CategoryFilter) -> Unit
 ) {
-    FilterFormOverlay(
-        filterState = filter,
-        visible = visible,
-        dismissOverlay = dismissOverlay,
-        onFilter = applyFilter
-    ) { state, update ->
-        FormTextField(value = state.name, label = "Name") { update { copy(name = it) } }
-    }
+    FormTextField(value = state.name, label = "Name") { update(state.copy(name = it)) }
 }
 
 @Composable
-private fun BoxScope.AddOrUpdateCategoryOverlay(
-    visible: Boolean,
-    category: Category? = null,
-    onConfirm: (Category) -> Unit,
-    dismissOverlay: () -> Unit
+private fun AddOrUpdateCategoryOverlay(
+    state: Category,
+    update: (Category) -> Unit
 ) {
-    AddOrUpdateFormOverlay(
-        defaultItemState = Category(),
-        itemState = category,
-        visible = visible,
-        dismissOverlay = dismissOverlay,
-        canConfirm = { it.name.isNotBlank() },
-        onConfirm = onConfirm
-    ) { state, update ->
-        FormTextField(
-            value = state.name,
-            label = "Name",
-            isError = state.name.isBlank(),
-            onValueChange = { update { copy(name = it) } }
-        )
+    FormTextField(
+        value = state.name,
+        label = "Name",
+        isError = state.name.isBlank(),
+        onValueChange = { update(state.copy(name = it)) }
+    )
 
-        FormDropDownTextField(
-            text = state.type.text(),
-            label = "Type",
-            readOnly = true,
-            dropDownItems = listOf(CategoryType.Custom, CategoryType.Table, CategoryType.Tree),
-            dropDownItemText = { Text(it.text()) },
-            onItemClicked = { update { copy(type = it) } }
-        )
-    }
-}
-
-@Composable
-private fun CategoryTable(
-    state: ListState<Category, CategoryFilter, CategorySorting>,
-    onSort: (CategorySorting) -> Unit,
-    onDelete: (Category) -> Unit,
-    onSelectPage: (Int) -> Unit,
-    onNavigateTo: (View) -> Unit,
-    onApplyFilter: (CategoryFilter) -> Unit
-) {
-    FilteredTable(
-        state = state,
-        columns = columns(
-            navigateTo = onNavigateTo,
-            onSort = onSort,
-            onDelete = onDelete
-        ),
-        onPageClicked = onSelectPage
-    ) {
-        if (it.name.isNotBlank())
-            FilterChip(name = "Name", text = it.name) { onApplyFilter(it.copy(name = "")) }
-    }
+    FormDropDownTextField(
+        text = state.type.text(),
+        label = "Type",
+        readOnly = true,
+        dropDownItems = listOf(CategoryType.Custom, CategoryType.Table, CategoryType.Tree),
+        dropDownItemText = { Text(it.text()) },
+        onItemClicked = { update(state.copy(type = it)) }
+    )
 }
 
 private fun columns(
@@ -232,21 +164,6 @@ private fun columns(
             contentDescription = "Delete"
         )
     )
-
-@Composable
-private fun CategoryInfo(
-    isLoading: Boolean,
-    category: Category
-) {
-    Details(
-        isLoading = isLoading,
-        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
-    ) {
-        DetailSectionRow(title = category.name) {
-            DetailText(title = "id", text = category.id.toString())
-        }
-    }
-}
 
 @Composable
 internal fun CategoryPreview(

@@ -24,7 +24,12 @@ data class Rule(
     val setPointsForRest: Int = 0,
     val pointPointsForRest: Int = 0,
     val used: Long = 0L
-)
+): Validateable {
+
+    override fun validate(): Boolean {
+        return name.isNotBlank()
+    }
+}
 
 interface RuleDatabase {
     suspend fun selectList(

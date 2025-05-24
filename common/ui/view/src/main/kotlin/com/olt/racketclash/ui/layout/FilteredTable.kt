@@ -4,13 +4,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.olt.racketclash.database.api.Validateable
 import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.ui.base.material.LazyTableColumn
 import com.olt.racketclash.ui.base.material.PageSelector
 import com.olt.racketclash.ui.base.material.Table
 
 @Composable
-fun <Item, Filter> FilteredTable(
+fun <Item: Validateable, Filter> FilteredTable(
     state: ListState<Item, Filter, *>,
     columns: List<LazyTableColumn<Item>>,
     onPageClicked: (Int) -> Unit,

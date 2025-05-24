@@ -1,48 +1,37 @@
 package com.olt.racketclash.state.player
 
 import com.olt.racketclash.database.api.*
-import com.olt.racketclash.state.ViewModelState
+import com.olt.racketclash.state.detail.DetailModel
 
 class PlayerModel(
     private val playerDatabase: PlayerDatabase,
-    tournamentDatabase: TournamentDatabase,
-    categoryDatabase: CategoryDatabase,
-    gameDatabase: GameDatabase,
-    playerId: Long
-) : ViewModelState<PlayerState>(initialState = PlayerState()) {
+    private val tournamentDatabase: TournamentDatabase,
+    private val categoryDatabase: CategoryDatabase,
+    private val gameDatabase: GameDatabase,
+    private val playerId: Long
+) : DetailModel<Player, PlayerData>(
+    initialItem = Player(),
+    initialData = PlayerData()
+) {
 
-    init {
-        onIO {
-            val player = playerDatabase.selectSingle(id = playerId)
-            val tournaments = tournamentDatabase.selectLast(n = 5)
-            val categories = categoryDatabase.selectLast(n = 5)
-            val games = gameDatabase.selectLast(n = 5)
-            val clubSuggestions = playerDatabase.clubs(filter = player.club)
+    override suspend fun databaseUpdate(item: Player) =
+        playerDatabase.update(player = item)
 
-            updateState {
-                copy(
-                    isLoading = false,
-                    player = player,
-                    tournaments = tournaments,
-                    categories = categories,
-                    games = games,
-                    clubSuggestions = clubSuggestions
-                )
-            }
-        }
-    }
+    override suspend fun databaseSelectItem(): Player =
+        playerDatabase.selectSingle(id = playerId)
 
-    fun updatePlayer(player: Player) {
-        onIO {
-            updateState { copy(player = player) }
-            playerDatabase.update(player = player)
-        }
-    }
+    override suspend fun databaseSelectData(item: Player): PlayerData =
+        PlayerData(
+            tournaments = tournamentDatabase.selectLast(n = 5),
+            categories = categoryDatabase.selectLast(n = 5),
+            games = gameDatabase.selectLast(n = 5),
+            clubSuggestions = playerDatabase.clubs(filter = item.club)
+        )
 
     fun clubSuggestions(filter: String) {
         onIO {
             val clubSuggestions = playerDatabase.clubs(filter = filter)
-            updateState { copy(clubSuggestions = clubSuggestions) }
+            updateData { copy(clubSuggestions = clubSuggestions) }
         }
     }
 }

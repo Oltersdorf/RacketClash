@@ -2,30 +2,21 @@ package com.olt.racketclash.state.category
 
 import com.olt.racketclash.database.api.Category
 import com.olt.racketclash.database.api.CategoryDatabase
-import com.olt.racketclash.state.ViewModelState
+import com.olt.racketclash.state.detail.DetailModel
 
 class CategoryModel(
     private val categoryDatabase: CategoryDatabase,
-    categoryId: Long
-) : ViewModelState<CategoryState>(initialState = CategoryState()) {
+    private val categoryId: Long
+) : DetailModel<Category, CategoryData>(
+    initialItem = Category(),
+    initialData = CategoryData()
+) {
 
-    init {
-        onIO {
-            val category = categoryDatabase.selectSingle(id = categoryId)
+    override suspend fun databaseUpdate(item: Category) =
+        categoryDatabase.update(category = item)
 
-            updateState {
-                copy(
-                    isLoading = false,
-                    category = category
-                )
-            }
-        }
-    }
+    override suspend fun databaseSelectItem(): Category =
+        categoryDatabase.selectSingle(id = categoryId)
 
-    fun updatePlayer(category: Category) {
-        onIO {
-            updateState { copy(category = category) }
-            categoryDatabase.update(category = category)
-        }
-    }
+    override suspend fun databaseSelectData(item: Category): CategoryData = CategoryData()
 }

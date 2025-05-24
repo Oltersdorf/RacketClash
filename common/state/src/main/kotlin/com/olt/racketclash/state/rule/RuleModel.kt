@@ -1,39 +1,29 @@
 package com.olt.racketclash.state.rule
 
 import com.olt.racketclash.database.api.*
-import com.olt.racketclash.state.ViewModelState
+import com.olt.racketclash.state.detail.DetailModel
 
 class RuleModel(
     private val ruleDatabase: RuleDatabase,
-    tournamentDatabase: TournamentDatabase,
-    categoryDatabase: CategoryDatabase,
-    gameDatabase: GameDatabase,
-    ruleId: Long
-) : ViewModelState<RuleState>(initialState = RuleState()) {
+    private val tournamentDatabase: TournamentDatabase,
+    private val categoryDatabase: CategoryDatabase,
+    private val gameDatabase: GameDatabase,
+    private val ruleId: Long
+) : DetailModel<Rule, RuleData>(
+    initialItem = Rule(),
+    initialData = RuleData()
+) {
 
-    init {
-        onIO {
-            val rule = ruleDatabase.selectSingle(id = ruleId)
-            val tournaments = tournamentDatabase.selectLast(n = 5)
-            val categories = categoryDatabase.selectLast(n = 5)
-            val games = gameDatabase.selectLast(n = 5)
+    override suspend fun databaseUpdate(item: Rule) =
+        ruleDatabase.update(rule = item)
 
-            updateState {
-                copy(
-                    isLoading = false,
-                    rule = rule,
-                    tournaments = tournaments,
-                    categories = categories,
-                    games = games
-                )
-            }
-        }
-    }
+    override suspend fun databaseSelectItem(): Rule =
+        ruleDatabase.selectSingle(id = ruleId)
 
-    fun updateRule(rule: Rule) {
-        onIO {
-            updateState { copy(rule = rule) }
-            ruleDatabase.update(rule = rule)
-        }
-    }
+    override suspend fun databaseSelectData(item: Rule): RuleData =
+        RuleData(
+            tournaments = tournamentDatabase.selectLast(n = 5),
+            categories = categoryDatabase.selectLast(n = 5),
+            games = gameDatabase.selectLast(n = 5)
+        )
 }

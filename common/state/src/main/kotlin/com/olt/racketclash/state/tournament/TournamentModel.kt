@@ -1,54 +1,41 @@
 package com.olt.racketclash.state.tournament
 
 import com.olt.racketclash.database.api.*
-import com.olt.racketclash.state.ViewModelState
+import com.olt.racketclash.state.detail.DetailModel
 
 class TournamentModel(
     private val tournamentDatabase: TournamentDatabase,
-    playerDatabase: PlayerDatabase,
-    teamDatabase: TeamDatabase,
-    categoryDatabase: CategoryDatabase,
-    gameDatabase: GameDatabase,
-    scheduleDatabase: ScheduleDatabase,
-    tournamentId: Long
-) : ViewModelState<TournamentState>(initialState = TournamentState()) {
+    private val playerDatabase: PlayerDatabase,
+    private val teamDatabase: TeamDatabase,
+    private val categoryDatabase: CategoryDatabase,
+    private val gameDatabase: GameDatabase,
+    private val scheduleDatabase: ScheduleDatabase,
+    private val tournamentId: Long
+) : DetailModel<Tournament, TournamentData>(
+    initialItem = Tournament(),
+    initialData = TournamentData()
+) {
 
-    init {
-        onIO {
-            val tournament = tournamentDatabase.selectSingle(id = tournamentId)
-            val players = playerDatabase.selectLast(n = 5)
-            val teams = teamDatabase.selectLast(n = 5)
-            val categories = categoryDatabase.selectLast(n = 5)
-            val games = gameDatabase.selectLast(n = 5)
-            val scheduledGames = scheduleDatabase.selectFirst(n = 5)
-            val locationSuggestions = tournamentDatabase.locations(filter = tournament.location)
+    override suspend fun databaseUpdate(item: Tournament) =
+        tournamentDatabase.update(tournament = item)
 
-            updateState {
-                copy(
-                    isLoading = false,
-                    tournament = tournament,
-                    players = players,
-                    teams = teams,
-                    categories = categories,
-                    games = games,
-                    scheduledGames = scheduledGames,
-                    locationSuggestions = locationSuggestions
-                )
-            }
-        }
-    }
+    override suspend fun databaseSelectItem(): Tournament =
+        tournamentDatabase.selectSingle(id = tournamentId)
 
-    fun updateTournament(tournament: Tournament) {
-        onIO {
-            updateState { copy(tournament = tournament) }
-            tournamentDatabase.update(tournament = tournament)
-        }
-    }
+    override suspend fun databaseSelectData(item: Tournament): TournamentData =
+        TournamentData(
+            players = playerDatabase.selectLast(n = 5),
+            teams = teamDatabase.selectLast(n = 5),
+            categories = categoryDatabase.selectLast(n = 5),
+            games = gameDatabase.selectLast(n = 5),
+            scheduledGames = scheduleDatabase.selectFirst(n = 5),
+            locationSuggestions = tournamentDatabase.locations(filter = item.location)
+        )
 
     fun locationSuggestions(filter: String) {
         onIO {
             val locationSuggestions = tournamentDatabase.locations(filter = filter)
-            updateState { copy(locationSuggestions = locationSuggestions) }
+            updateData { copy(locationSuggestions = locationSuggestions) }
         }
     }
 }

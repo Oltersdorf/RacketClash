@@ -7,6 +7,7 @@ class TeamTableModel(
     private val database: TeamDatabase,
     private val tournamentId: Long
 ) : ListModel<Team, TeamFilter, TeamSorting>(
+    emptyItem = Team(),
     initialFilter = TeamFilter(tournamentId = tournamentId),
     initialSorting = TeamSorting.NameAsc
 ) {

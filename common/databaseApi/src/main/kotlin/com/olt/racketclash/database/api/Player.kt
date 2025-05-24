@@ -39,7 +39,12 @@ data class Player(
     val gamesScheduled: Long = 0,
     val firstGameDate: Instant? = null,
     val lastGameDate: Instant? = null
-)
+): Validateable {
+
+    override fun validate(): Boolean {
+        return name.isNotBlank()
+    }
+}
 
 interface PlayerDatabase {
     suspend fun selectList(

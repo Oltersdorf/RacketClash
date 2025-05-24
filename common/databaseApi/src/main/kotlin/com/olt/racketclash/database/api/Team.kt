@@ -11,7 +11,12 @@ data class Team(
     val gamesLost: Long = 0L,
     val gamePointsWon: Long = 0L,
     val gamePointsLost: Long = 0L
-)
+): Validateable {
+
+    override fun validate(): Boolean {
+        return name.isNotBlank()
+    }
+}
 
 data class TeamFilter(
     val tournamentId: Long = -1,

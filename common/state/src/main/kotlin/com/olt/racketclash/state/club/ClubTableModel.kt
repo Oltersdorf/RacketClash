@@ -1,15 +1,12 @@
 package com.olt.racketclash.state.club
 
-import com.olt.racketclash.database.api.Club
-import com.olt.racketclash.database.api.ClubDatabase
-import com.olt.racketclash.database.api.ClubFilter
-import com.olt.racketclash.database.api.ClubSorting
-import com.olt.racketclash.database.api.FilteredSortedList
+import com.olt.racketclash.database.api.*
 import com.olt.racketclash.state.list.ListModel
 
 class ClubTableModel(
     private val database: ClubDatabase
 ) : ListModel<Club, ClubFilter, ClubSorting>(
+    emptyItem = Club(),
     initialFilter = ClubFilter(),
     initialSorting = ClubSorting.NameAsc
 ) {

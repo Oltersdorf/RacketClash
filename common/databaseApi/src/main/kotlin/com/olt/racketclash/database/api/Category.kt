@@ -8,7 +8,11 @@ data class Category(
     val tournamentName: String = "",
     val players: Int = 0,
     val finished: Boolean = false
-)
+): Validateable {
+    override fun validate(): Boolean {
+        return name.isNotBlank()
+    }
+}
 
 sealed interface CategoryType {
     data object Custom : CategoryType

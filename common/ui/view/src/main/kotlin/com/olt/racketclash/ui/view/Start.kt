@@ -1,20 +1,16 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.state.datetime.toFormattedString
 import com.olt.racketclash.state.start.StartModel
-import com.olt.racketclash.state.start.StartState
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.ListPreviewBox
 import com.olt.racketclash.ui.base.layout.ListPreviewBoxLink
-import com.olt.racketclash.ui.layout.RacketClashScaffold
+import com.olt.racketclash.ui.layout.SimpleRacketClashDetailScaffold
 
 @Composable
 internal fun Start(
@@ -30,20 +26,7 @@ internal fun Start(
     }
     val state by model.state.collectAsState()
 
-    RacketClashScaffold(title = "Start") {
-        StartBody(
-            state = state,
-            navigateTo = navigateTo
-        )
-    }
-}
-
-@Composable
-private fun StartBody(
-    state: StartState,
-    navigateTo: (View) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
+    SimpleRacketClashDetailScaffold(title = "Start") {
         ListPreviewBox(
             name = "Tournaments",
             isLoading = state.isLoading,
@@ -81,4 +64,3 @@ private fun StartBody(
         }
     }
 }
-

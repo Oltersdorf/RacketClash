@@ -1,14 +1,16 @@
 package com.olt.racketclash.ui.view
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
@@ -16,14 +18,12 @@ import com.olt.racketclash.database.api.Player
 import com.olt.racketclash.database.api.PlayerFilter
 import com.olt.racketclash.database.api.PlayerSorting
 import com.olt.racketclash.state.datetime.toFormattedString
-import com.olt.racketclash.state.list.ListState
 import com.olt.racketclash.state.player.PlayerModel
 import com.olt.racketclash.state.player.PlayerTableModel
 import com.olt.racketclash.ui.View
 import com.olt.racketclash.ui.base.layout.*
 import com.olt.racketclash.ui.base.material.FilterChip
 import com.olt.racketclash.ui.base.material.LazyTableColumn
-import com.olt.racketclash.ui.base.material.SimpleIconButton
 import com.olt.racketclash.ui.base.material.TableSortDirection
 import com.olt.racketclash.ui.layout.*
 import com.olt.racketclash.ui.theme.AdditionalMaterialTheme
@@ -49,40 +49,43 @@ internal fun Player(
         )
     }
     val state by model.state.collectAsState()
-    var showEditOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScaffold(
+    RacketClashDetailScaffold(
         title = "Player",
-        headerContent = { PlayerInfo(isLoading = state.isLoading, player = state.player) },
-        actions = {
-            SimpleIconButton(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit"
-            ) { showEditOverlay = !showEditOverlay }
+        model = model,
+        headerContent = {
+            DetailSectionRow(title = state.item.name) {
+                DetailText(title = "Birth year", text = state.item.birthYear.toString())
+                DetailText(title = "Club", text = state.item.club)
+            }
+
+            DetailSectionColumn(title = "Statistics") {
+                Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                    DetailText(title = "First game", text = state.item.firstGameDate?.toFormattedString() ?: "N/A")
+                    DetailText(title = "Last game", text = state.item.lastGameDate?.toFormattedString() ?: "N/A")
+                }
+            }
         },
-        overlay = {
+        editOverlayContent = {
             AddOrUpdatePlayerOverlay(
-                visible = showEditOverlay,
-                player = state.player,
-                clubSuggestions = state.clubSuggestions,
-                onGetClubSuggestions = model::clubSuggestions,
-                onConfirm = model::updatePlayer
-            ) { showEditOverlay = false }
+                state = state.updatedItem,
+                update = model::setUpdatedItem,
+                clubSuggestions = state.data.clubSuggestions,
+                onGetClubSuggestions = model::clubSuggestions
+            )
         }
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-            TournamentPreview(
-                isLoading = state.isLoading,
-                tournaments = state.tournaments,
-                navigateTo = navigateTo
-            )
+        TournamentPreview(
+            isLoading = state.isLoading,
+            tournaments = state.data.tournaments,
+            navigateTo = navigateTo
+        )
 
-            CategoryPreview(
-                isLoading = state.isLoading,
-                categories = state.categories,
-                navigateTo = navigateTo
-            )
-        }
+        CategoryPreview(
+            isLoading = state.isLoading,
+            categories = state.data.categories,
+            navigateTo = navigateTo
+        )
     }
 }
 
@@ -94,172 +97,120 @@ internal fun Players(
     val model = remember { PlayerTableModel(database = database.players) }
     val state by model.state.collectAsState()
     val clubSuggestions by model.clubSuggestionsState.collectAsState()
-    var showFilterOverlay by remember { mutableStateOf(false) }
-    var showAddOverlay by remember { mutableStateOf(false) }
 
-    RacketClashScaffold(
+    RacketClashTableScaffold(
         title = "Players",
-        actions = {
-            SimpleIconButton(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Filter"
-            ) {
-                showAddOverlay = false
-                showFilterOverlay = !showFilterOverlay
-            }
-
-            SimpleIconButton(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add"
-            ) {
-                showFilterOverlay = false
-                showAddOverlay = !showAddOverlay
-            }
-        },
-        overlay = {
+        model = model,
+        filterOverlayContent = {
             FilterPlayerOverlay(
-                visible = showFilterOverlay,
-                filter = state.filter,
-                applyFilter = model::filter
-            ) { showFilterOverlay = false }
-
+                state = state.filterUpdate,
+                update = model::setFilter
+            )
+        },
+        addOverlayContent = {
             AddOrUpdatePlayerOverlay(
-                visible = showAddOverlay,
+                state = state.addItem,
+                update = model::setNewItem,
                 clubSuggestions = clubSuggestions,
-                onGetClubSuggestions = model::clubSuggestions,
-                onConfirm = model::add
-            ) { showAddOverlay = false }
+                onGetClubSuggestions = model::clubSuggestions
+            )
         }
     ) {
-        PlayerTable(
+        FilteredTable(
             state = state,
-            onSort = model::sort,
-            onDelete = model::delete,
-            onSelectPage = model::selectPage,
-            onNavigateTo = navigateTo,
-            onApplyFilter = model::filter
+            columns = columns(
+                navigateTo = navigateTo,
+                onSort = model::sort,
+                onDelete = model::delete
+            ),
+            onPageClicked = model::selectPage
+        ) {
+            if (it.name.isNotBlank())
+                FilterChip(name = "Name", text = it.name) { model.setAndApplyFilter(it.copy(name = "")) }
+        }
+    }
+}
+
+@Composable
+private fun FilterPlayerOverlay(
+    state: PlayerFilter,
+    update: (PlayerFilter) -> Unit
+) {
+    FormTextField(value = state.name, label = "Name") { update(state.copy(name = it)) }
+
+    FormRow {
+        FormNumberSelector(
+            value = state.birthYear.first,
+            label = "Min birth year",
+            range = state.birthYear,
+            onUp = { update(state.copy(birthYear = it..max(it, state.birthYear.last))) },
+            onDown = { update(state.copy(birthYear = it..state.birthYear.last)) }
+        )
+
+        FormNumberSelector(
+            value = state.birthYear.last,
+            label = "Max birth year",
+            range = state.birthYear,
+            onUp = { update(state.copy(birthYear = state.birthYear.first..it)) },
+            onDown = { update(state.copy(birthYear = min(it, state.birthYear.first)..it)) }
+        )
+    }
+
+    FormTextField(value = state.club, label = "Club") { update(state.copy(club = it)) }
+
+    FormRow {
+        FormNumberSelector(
+            value = state.medals.first,
+            label = "Min medals",
+            range = state.medals,
+            onUp = { update(state.copy(medals = it..max(it, state.medals.last))) },
+            onDown = { update(state.copy(medals = it..state.medals.last)) }
+        )
+
+        FormNumberSelector(
+            value = state.medals.last,
+            label = "Max medals",
+            range = state.medals,
+            onUp = { update(state.copy(medals = state.medals.first..it)) },
+            onDown = { update(state.copy(medals = min(it, state.medals.first)..it)) }
         )
     }
 }
 
 @Composable
-private fun BoxScope.FilterPlayerOverlay(
-    filter: PlayerFilter,
-    applyFilter: (PlayerFilter) -> Unit,
-    visible: Boolean,
-    dismissOverlay: () -> Unit
-) {
-    FilterFormOverlay(
-        filterState = filter,
-        visible = visible,
-        dismissOverlay = dismissOverlay,
-        onFilter = applyFilter
-    ) { state, update ->
-        FormTextField(value = state.name, label = "Name") { update { copy(name = it) } }
-        FormRow {
-            FormNumberSelector(
-                value = state.birthYear.first,
-                label = "Min birth year",
-                range = filter.birthYear,
-                onUp = { update { copy(birthYear = it..max(it, birthYear.last)) } },
-                onDown = { update { copy(birthYear = it..birthYear.last) } }
-            )
-            FormNumberSelector(
-                value = state.birthYear.last,
-                label = "Max birth year",
-                range = filter.birthYear,
-                onUp = { update { copy(birthYear = birthYear.first..it) } },
-                onDown = { update { copy(birthYear = min(it, birthYear.first)..it) } }
-            )
-        }
-        FormTextField(value = state.club, label = "Club") { update { copy(club = it) } }
-        FormRow {
-            FormNumberSelector(
-                value = state.medals.first,
-                label = "Min medals",
-                range = filter.medals,
-                onUp = { update { copy(medals = it..max(it, medals.last)) } },
-                onDown = { update { copy(medals = it..medals.last) } }
-            )
-            FormNumberSelector(
-                value = state.medals.last,
-                label = "Max medals",
-                range = filter.medals,
-                onUp = { update { copy(medals = medals.first..it) } },
-                onDown = { update { copy(medals = min(it, medals.first)..it) } }
-            )
-        }
-    }
-}
-
-@Composable
-private fun BoxScope.AddOrUpdatePlayerOverlay(
-    visible: Boolean,
-    player: Player? = null,
+private fun AddOrUpdatePlayerOverlay(
+    state: Player,
+    update: (Player) -> Unit,
     clubSuggestions: List<String>,
-    onGetClubSuggestions: (String) -> Unit,
-    onConfirm: (Player) -> Unit,
-    dismissOverlay: () -> Unit
+    onGetClubSuggestions: (String) -> Unit
 ) {
-    AddOrUpdateFormOverlay(
-       defaultItemState = Player(),
-       itemState = player,
-       visible = visible,
-       dismissOverlay = dismissOverlay,
-       canConfirm = { it.name.isNotBlank() },
-       onConfirm = onConfirm
-    ) { state, update ->
-        FormTextField(
-            value = state.name,
-            label = "Name",
-            isError = state.name.isBlank(),
-            onValueChange = { update { copy(name = it) } }
-        )
+    FormTextField(
+        value = state.name,
+        label = "Name",
+        isError = state.name.isBlank(),
+        onValueChange = { update(state.copy(name = it)) }
+    )
 
-        FormDropDownTextField(
-            text = state.birthYear.toString(),
-            label = "Birth year",
-            readOnly = true,
-            dropDownItems = (1900..2050).toList(),
-            dropDownItemText = { Text(it.toString()) },
-            onItemClicked = { update { copy(birthYear = it) } }
-        )
+    FormDropDownTextField(
+        text = state.birthYear.toString(),
+        label = "Birth year",
+        readOnly = true,
+        dropDownItems = (1900..2050).toList(),
+        dropDownItemText = { Text(it.toString()) },
+        onItemClicked = { update(state.copy(birthYear = it)) }
+    )
 
-        FormDropDownTextField(
-            text = state.club,
-            label = "Club",
-            onTextChange = {
-                update { copy(club = it) }
-                onGetClubSuggestions(it)
-            },
-            dropDownItems = clubSuggestions,
-            dropDownItemText = { Text(it) },
-            onItemClicked = { update { copy(club = it) } }
-        )
-    }
-}
-
-@Composable
-private fun PlayerTable(
-    state: ListState<Player, PlayerFilter, PlayerSorting>,
-    onSort: (PlayerSorting) -> Unit,
-    onDelete: (Player) -> Unit,
-    onSelectPage: (Int) -> Unit,
-    onNavigateTo: (View) -> Unit,
-    onApplyFilter: (PlayerFilter) -> Unit
-) {
-    FilteredTable(
-        state = state,
-        columns = columns(
-            navigateTo = onNavigateTo,
-            onSort = onSort,
-            onDelete = onDelete
-        ),
-        onPageClicked = onSelectPage
-    ) {
-        if (it.name.isNotBlank())
-            FilterChip(name = "Name", text = it.name) { onApplyFilter(it.copy(name = "")) }
-    }
+    FormDropDownTextField(
+        text = state.club,
+        label = "Club",
+        onTextChange = {
+            update(state.copy(club = it))
+            onGetClubSuggestions(it)
+        },
+        dropDownItems = clubSuggestions,
+        dropDownItemText = { Text(it) },
+        onItemClicked = { update(state.copy(club = it)) }
+    )
 }
 
 private fun columns(
@@ -370,29 +321,6 @@ private fun columns(
             contentDescription = "Delete"
         )
     )
-
-@Composable
-private fun PlayerInfo(
-    isLoading: Boolean,
-    player: Player
-) {
-    Details(
-        isLoading = isLoading,
-        modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
-    ) {
-        DetailSectionRow(title = player.name) {
-            DetailText(title = "Birth year", text = player.birthYear.toString())
-            DetailText(title = "Club", text = player.club)
-        }
-
-        DetailSectionColumn(title = "Statistics") {
-            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                DetailText(title = "First game", text = player.firstGameDate?.toFormattedString() ?: "N/A")
-                DetailText(title = "Last game", text = player.lastGameDate?.toFormattedString() ?: "N/A")
-            }
-        }
-    }
-}
 
 @Composable
 internal fun PlayerPreview(

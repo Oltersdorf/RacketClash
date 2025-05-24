@@ -13,7 +13,12 @@ data class Club(
     val id: Long = -1,
     val name: String = "",
     val players: Long = 0
-)
+): Validateable {
+
+    override fun validate(): Boolean {
+        return name.isNotBlank()
+    }
+}
 
 interface ClubDatabase {
     suspend fun selectList(
