@@ -14,19 +14,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.olt.racketclash.database.api.Database
 import com.olt.racketclash.ui.base.material.SimpleIconButton
-import com.olt.racketclash.ui.view.Categories
-import com.olt.racketclash.ui.view.Category
-import com.olt.racketclash.ui.view.Club
-import com.olt.racketclash.ui.view.Clubs
-import com.olt.racketclash.ui.view.Player
-import com.olt.racketclash.ui.view.Players
-import com.olt.racketclash.ui.view.Rule
-import com.olt.racketclash.ui.view.Rules
-import com.olt.racketclash.ui.view.Start
-import com.olt.racketclash.ui.view.Team
-import com.olt.racketclash.ui.view.Teams
-import com.olt.racketclash.ui.view.Tournament
-import com.olt.racketclash.ui.view.Tournaments
+import com.olt.racketclash.ui.view.*
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import racketclash.common.ui.view.generated.resources.*
@@ -111,6 +99,8 @@ fun RacketClashUI(
                     View.Tournaments -> Tournaments(database = database) { viewHistory += it }
                     View.Clubs -> Clubs(database = database) { viewHistory += it }
                     is View.Club -> Club(database = database, clubId = cv.clubId) { viewHistory += it }
+                    View.Locations -> Locations(database = database) { viewHistory += it }
+                    is View.Location -> Location(database = database, locationId = cv.locationId) { viewHistory += it }
                 }
             }
         }

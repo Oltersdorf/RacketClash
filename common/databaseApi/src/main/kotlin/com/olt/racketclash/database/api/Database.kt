@@ -10,4 +10,5 @@ interface Database {
     val schedules: ScheduleDatabase
     val teams: TeamDatabase
     val clubs: ClubDatabase
+    val locations: LocationDatabase
 }

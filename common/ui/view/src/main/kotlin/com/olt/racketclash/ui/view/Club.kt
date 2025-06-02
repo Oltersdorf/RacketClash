@@ -52,7 +52,7 @@ internal fun Club(
                 state = state.updatedItem,
                 update = model::setUpdatedItem
             )
-        },
+        }
     ) {
         PlayerPreview(
             isLoading = state.isLoading,

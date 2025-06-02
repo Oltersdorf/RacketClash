@@ -28,4 +28,8 @@ internal sealed interface View {
     data object Clubs : View
 
     data class Club(val clubId: Long) : View
+
+    data object Locations : View
+
+    data class Location(val locationId: Long) : View
 }

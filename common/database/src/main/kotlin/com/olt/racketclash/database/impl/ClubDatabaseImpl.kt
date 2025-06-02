@@ -1,13 +1,9 @@
 package com.olt.racketclash.database.impl
 
-import com.olt.racketclash.database.api.Club
-import com.olt.racketclash.database.api.ClubDatabase
-import com.olt.racketclash.database.api.ClubFilter
-import com.olt.racketclash.database.api.ClubSorting
-import com.olt.racketclash.database.api.FilteredSortedList
+import com.olt.racketclash.database.api.*
 import kotlin.math.min
 
-class ClubDatabaseImpl : ClubDatabase {
+internal class ClubDatabaseImpl : ClubDatabase {
     private val clubs = mutableListOf<Club>()
 
     override suspend fun selectList(
