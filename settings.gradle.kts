@@ -1,4 +1,5 @@
 rootProject.name = "RacketClash"
 include(
-    "common:databaseApi"
+    "common:databaseApi",
+    "common:database"
 )
