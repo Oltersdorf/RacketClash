@@ -1,6 +1,6 @@
 package dev.oltersdorf.racketclash.database.api
 
-interface TableBase<Item, Filter, Sorting> {
+interface TableBase<Item: IdItem, Filter, Sorting> {
     suspend fun insert(data: Item)
 
     suspend fun delete(id: Long)

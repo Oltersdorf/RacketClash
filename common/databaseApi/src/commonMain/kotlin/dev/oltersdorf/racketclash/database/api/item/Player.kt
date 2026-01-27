@@ -1,14 +1,15 @@
 package dev.oltersdorf.racketclash.database.api.item
 
+import dev.oltersdorf.racketclash.database.api.IdItem
 import dev.oltersdorf.racketclash.database.api.TableBase
 
 data class Player(
-    val id: Long = -1,
+    override val id: Long = -1,
     val name: String = "",
     val birthYear: Int = 1900,
     val clubId: Long = -1,
     val clubName: String = ""
-)
+) : IdItem
 
 data class PlayerFilter(
     val name: String = "",
