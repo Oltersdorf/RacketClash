@@ -1,10 +1,18 @@
 [versions]
 kotlin = "2.3.0"
+logback = "1.5.20"
 exposed = "1.0.0"
+postgresql = "42.7.8"
+testcontainer = "1.21.4"
 
 [libraries]
+logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer" }
+testcontainer-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
