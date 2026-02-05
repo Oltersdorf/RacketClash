@@ -5,8 +5,8 @@ import org.jetbrains.exposed.v1.core.Expression
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
-import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.batchInsert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.testcontainers.containers.PostgreSQLContainer
@@ -28,7 +28,11 @@ object TestDatabase {
         )
     }
 
-    data class TestData(override val id: Long, val name: String) : IdItem
+    data class TestData(
+        override val id: Long,
+        val name: String,
+        val unchangeable: String = "unchangeable"
+    ) : IdItem
 
     fun generateTestData(prefixName: String, count: Int = 2): List<TestData> =
         List(count) { index ->
@@ -43,14 +47,11 @@ object TestDatabase {
     }
 
     internal object TestTable : TableBaseImpl<TestData, TestFilter, TestSorting>("test") {
-        val name = varchar("name", 50)
-
-        override fun updateMapper(builder: UpdateBuilder<Int>, data: TestData) {
-            builder[name] = data.name
-        }
+        val name = linkedVarchar("name", 50) { it.name }
+        val unchangeable = linkedVarchar("unchangeable", 50, false) { it.unchangeable }
 
         override fun itemMapper(row: ResultRow): TestData =
-            TestData(id = row[id], name = row[name])
+            TestData(id = row[id], name = row[name], unchangeable = row[unchangeable])
 
         override fun filterItems(filter: TestFilter): Op<Boolean> =
             name contains filter.name
@@ -62,7 +63,24 @@ object TestDatabase {
             }
 
         fun selectAllTestDataOrderedById(): List<TestData> =
-            transaction { selectAll().map { TestData(id = it[this@TestTable.id], name = it[name]) } }.sortedBy { it.id }
+            transaction {
+                selectAll().map {
+                    TestData(
+                        id = it[this@TestTable.id],
+                        name = it[name],
+                        unchangeable = it[unchangeable]
+                    )
+                }
+            }.sortedBy { it.id }
 
+        fun batchInsertTestData(testData: List<TestData>) {
+            transaction {
+                batchInsert(testData) { (dataId, name, unchangeable) ->
+                    this[TestTable.id] = dataId
+                    this[TestTable.name] = name
+                    this[TestTable.unchangeable] = unchangeable
+                }
+            }
+        }
     }
 }

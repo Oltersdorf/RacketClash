@@ -3,8 +3,6 @@ package dev.oltersdorf.racketclash.database
 import dev.oltersdorf.racketclash.database.TestDatabase.generateTestData
 import dev.oltersdorf.racketclash.database.api.FilteredSortedList
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.exposed.v1.jdbc.batchInsert
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -29,12 +27,7 @@ class TableBaseImplTest : BaseDataTest() {
     fun `delete test`() {
         val testData = generateTestData(prefixName = "delete")
 
-        transaction {
-            TestDatabase.TestTable.batchInsert(testData) { (dataId, name) ->
-                this[TestDatabase.TestTable.id] = dataId
-                this[TestDatabase.TestTable.name] = name
-            }
-        }
+        TestDatabase.TestTable.batchInsertTestData(testData)
 
         val deleteWasSuccess = runBlocking { TestDatabase.TestTable.delete(testData[0].id) }
 
@@ -49,16 +42,11 @@ class TableBaseImplTest : BaseDataTest() {
     fun `update test`() {
         val testData = generateTestData(prefixName = "update").toMutableList()
 
-        transaction {
-            TestDatabase.TestTable.batchInsert(testData) { (dataId, name) ->
-                this[TestDatabase.TestTable.id] = dataId
-                this[TestDatabase.TestTable.name] = name
-            }
-        }
+        TestDatabase.TestTable.batchInsertTestData(testData)
 
         testData[0] = testData[0].copy(name = "${testData[0].name} updated")
 
-        val updateWasSuccess = runBlocking { TestDatabase.TestTable.update(testData[0]) }
+        val updateWasSuccess = runBlocking { TestDatabase.TestTable.update(testData[0].copy(unchangeable = "changed")) }
 
         val databaseContent = TestDatabase.TestTable.selectAllTestDataOrderedById()
 
@@ -70,12 +58,7 @@ class TableBaseImplTest : BaseDataTest() {
     fun `select single test`() {
         val testData = generateTestData(prefixName = "selectSingle")
 
-        transaction {
-            TestDatabase.TestTable.batchInsert(testData) { (dataId, name) ->
-                this[TestDatabase.TestTable.id] = dataId
-                this[TestDatabase.TestTable.name] = name
-            }
-        }
+        TestDatabase.TestTable.batchInsertTestData(testData)
 
         val selectedData = runBlocking { TestDatabase.TestTable.selectSingle(testData[0].id) }
 
@@ -89,12 +72,7 @@ class TableBaseImplTest : BaseDataTest() {
     fun `select last n tests`() {
         val testData = generateTestData(prefixName = "selectLastN", count = 5)
 
-        transaction {
-            TestDatabase.TestTable.batchInsert(testData) { (dataId, name) ->
-                this[TestDatabase.TestTable.id] = dataId
-                this[TestDatabase.TestTable.name] = name
-            }
-        }
+        TestDatabase.TestTable.batchInsertTestData(testData)
 
         val selectedData = runBlocking { TestDatabase.TestTable.selectLast(3) }
 
@@ -125,12 +103,7 @@ class TableBaseImplTest : BaseDataTest() {
             items = listOf(testData[5], testData[3])
         )
 
-        transaction {
-            TestDatabase.TestTable.batchInsert(testData) { (dataId, name) ->
-                this[TestDatabase.TestTable.id] = dataId
-                this[TestDatabase.TestTable.name] = name
-            }
-        }
+        TestDatabase.TestTable.batchInsertTestData(testData)
 
         val selectedData = runBlocking {
             TestDatabase.TestTable.selectSortedAndFiltered(

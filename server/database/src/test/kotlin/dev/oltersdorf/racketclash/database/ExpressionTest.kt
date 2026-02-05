@@ -23,10 +23,16 @@ class ExpressionTest : BaseDataTest() {
             )
 
             namesWithPattern.forEach { testName ->
-                TestDatabase.TestTable.insert { it[TestDatabase.TestTable.name] = testName }
+                TestDatabase.TestTable.insert {
+                    it[TestDatabase.TestTable.name] = testName
+                    it[TestDatabase.TestTable.unchangeable] = ""
+                }
             }
             namesWithoutPattern.forEach { testName ->
-                TestDatabase.TestTable.insert { it[TestDatabase.TestTable.name] = testName }
+                TestDatabase.TestTable.insert {
+                    it[TestDatabase.TestTable.name] = testName
+                    it[TestDatabase.TestTable.unchangeable] = ""
+                }
             }
 
             val selectResult = TestDatabase.TestTable

@@ -8,7 +8,6 @@ import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.jdbc.Query
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertReturning
@@ -17,10 +16,10 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 
-internal abstract class TableBaseImpl<Item: IdItem, Filter, Sorting>(name: String) : TableBase<Item, Filter, Sorting>, LongIdTable(name = name) {
-
-    internal abstract fun updateMapper(builder: UpdateBuilder<Int>, data: Item)
-
+internal abstract class TableBaseImpl<Item: IdItem, Filter, Sorting>(name: String) :
+    TableBase<Item, Filter, Sorting>,
+    LongIdTable<Item>(name = name)
+{
     internal open fun select(): Query = selectAll()
 
     internal abstract fun itemMapper(row: ResultRow): Item
@@ -31,10 +30,10 @@ internal abstract class TableBaseImpl<Item: IdItem, Filter, Sorting>(name: Strin
 
     override suspend fun insert(data: Item): Long =
         transaction {
-            insertReturning(listOf(this@TableBaseImpl.id)) { updateMapper(builder = it, data = data) }
-                .single()[this@TableBaseImpl.id]
+            insertReturning(listOf(this@TableBaseImpl.id)) { builder ->
+                linkedColumns.forEach { it.link(builder, data) }
+            }.single()[this@TableBaseImpl.id]
         }
-
 
     override suspend fun delete(id: Long): Boolean =
         transaction {
@@ -43,8 +42,8 @@ internal abstract class TableBaseImpl<Item: IdItem, Filter, Sorting>(name: Strin
 
     override suspend fun update(data: Item): Boolean =
         transaction {
-            update(where = { this@TableBaseImpl.id eq data.id }) {
-                updateMapper(builder = it, data = data)
+            update(where = { this@TableBaseImpl.id eq data.id }) { builder ->
+                linkedColumns.forEach { it.link(builder, data) }
             }
         } == 1
 
