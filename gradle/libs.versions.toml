@@ -4,6 +4,7 @@ logback = "1.5.20"
 exposed = "1.0.0"
 postgresql = "42.7.8"
 testcontainer = "1.21.4"
+ktor = "3.4.0"
 
 [libraries]
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
@@ -12,7 +13,9 @@ exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "e
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer" }
 testcontainer-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer" }
+ktor-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
