@@ -1,18 +1,13 @@
 package dev.oltersdorf.racketclash.server
 
-import io.ktor.http.ContentType
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.get
-import io.ktor.server.routing.routing
+import dev.oltersdorf.racketclash.server.routing.configureRouting
+import io.ktor.server.application.Application
 
-fun main() {
-    embeddedServer(Netty, port = 8080) {
-        routing {
-            get("/") {
-                call.respondText("Hello World!", ContentType.Text.Html)
-            }
-        }
-    }.start(wait = true)
+fun main(args: Array<String>) {
+    io.ktor.server.netty.EngineMain.main(args)
+}
+
+internal fun Application.module() {
+    configureRouting()
+    configureContentNegotiation()
 }

@@ -3,12 +3,22 @@ import io.ktor.plugin.features.DockerImageRegistry
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
     implementation(project(":common:databaseApi"))
-    implementation(libs.ktor.netty)
+    implementation(project(":server:database"))
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.config.yaml)
+    implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.logback)
+
+    testImplementation(kotlin("test"))
+    testImplementation(libs.ktor.server.test.host)
+    testImplementation(libs.ktor.client.content.negotiation)
 }
 
 kotlin {
