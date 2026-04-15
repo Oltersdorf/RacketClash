@@ -1,5 +1,8 @@
 package dev.oltersdorf.racketclash.database.api
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class FilteredSortedList<out Item, Filter, Sorting>(
     val totalItemsInDatabase: Long,
     val fromIndex: Long,

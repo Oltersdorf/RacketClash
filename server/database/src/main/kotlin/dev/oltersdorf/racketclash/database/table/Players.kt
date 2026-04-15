@@ -39,8 +39,8 @@ internal object Players : TableBaseImpl<Player, PlayerFilter, PlayerSorting>("pl
 
     override fun filterItems(filter: PlayerFilter): Op<Boolean> =
         (name contains filter.name) and
-        (birthYear greaterEq filter.birthYear.first) and
-        (birthYear lessEq filter.birthYear.last) and
+        (birthYear greaterEq filter.birthYearStart) and
+        (birthYear lessEq filter.birthYearEnd) and
         (Clubs.name contains filter.club)
 
     override fun sortItems(sorting: PlayerSorting): Pair<Expression<*>, SortOrder> =
