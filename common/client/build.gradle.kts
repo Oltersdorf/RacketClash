@@ -11,6 +11,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(project(":common:databaseApi"))
+                implementation(project(":common:serverApi"))
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.cio)
                 implementation(libs.ktor.client.content.negotiation)
