@@ -2,6 +2,7 @@ package dev.oltersdorf.racketclash.server.routing
 
 import dev.oltersdorf.racketclash.database.api.IdItem
 import dev.oltersdorf.racketclash.database.api.TableBase
+import dev.oltersdorf.racketclash.server.api.SortedAndFilteredQuery
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -11,15 +12,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import kotlinx.serialization.Serializable
-
-@Serializable
-internal data class SortedAndFilteredQuery<Filter, Sorting>(
-    val filter: Filter,
-    val sorting: Sorting,
-    val fromIndex: Long,
-    val limit: Int
-)
 
 internal inline fun <reified Item : IdItem, reified Filter, reified Sorting> Route.tableBaseRoutes(
     path: String,

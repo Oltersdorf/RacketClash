@@ -8,6 +8,7 @@ plugins {
 
 dependencies {
     implementation(project(":common:databaseApi"))
+    implementation(project(":common:serverApi"))
     implementation(project(":server:database"))
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
