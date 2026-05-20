@@ -35,7 +35,7 @@ class PlayerRequest internal constructor(
     host = host
 ) {
     override suspend fun clubs(filter: String): List<String> {
-        val response = client.get(urlString = "$host/clubs/$filter")
+        val response = client.get(urlString = "$host/players/clubs/$filter")
 
         return if (response.status == HttpStatusCode.OK)
             response.body<List<String>>()
